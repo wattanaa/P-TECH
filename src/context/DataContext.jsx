@@ -193,21 +193,39 @@ export const DataProvider = ({ children }) => {
     const unsubNews = onSnapshot(collection(db, "news"), (snap) => {
       const items = [];
       snap.forEach((doc) => items.push({ ...doc.data(), id: doc.id }));
-      items.sort((a, b) => new Date(b.date || b.submittedAt) - new Date(a.date || a.submittedAt));
+      items.sort((a, b) => {
+        const timeA = new Date(a.date || a.submittedAt || 0).getTime();
+        const timeB = new Date(b.date || b.submittedAt || 0).getTime();
+        const valA = isNaN(timeA) ? 0 : timeA;
+        const valB = isNaN(timeB) ? 0 : timeB;
+        return valB - valA;
+      });
       setNewsData(items);
     });
 
     const unsubStudents = onSnapshot(collection(db, "enrolled_students"), (snap) => {
       const items = [];
       snap.forEach((doc) => items.push({ ...doc.data(), id: doc.id }));
-      items.sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt));
+      items.sort((a, b) => {
+        const timeA = new Date(a.submittedAt || 0).getTime();
+        const timeB = new Date(b.submittedAt || 0).getTime();
+        const valA = isNaN(timeA) ? 0 : timeA;
+        const valB = isNaN(timeB) ? 0 : timeB;
+        return valB - valA;
+      });
       setEnrolledStudents(items);
     });
 
     const unsubContacts = onSnapshot(collection(db, "contact_messages"), (snap) => {
       const items = [];
       snap.forEach((doc) => items.push({ ...doc.data(), id: doc.id }));
-      items.sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt));
+      items.sort((a, b) => {
+        const timeA = new Date(a.submittedAt || 0).getTime();
+        const timeB = new Date(b.submittedAt || 0).getTime();
+        const valA = isNaN(timeA) ? 0 : timeA;
+        const valB = isNaN(timeB) ? 0 : timeB;
+        return valB - valA;
+      });
       setContactMessages(items);
     });
 
@@ -445,11 +463,19 @@ export const DataProvider = ({ children }) => {
   };
 
   const updateAdminUser = async (username, updated) => {
-    await updateDoc(doc(db, "admin_users", username), updated);
+    const key = String(username).trim().toLowerCase();
+    await setDoc(doc(db, "admin_users", key), {
+      username: key,
+      password: updated.password,
+      name: updated.name
+    }, { merge: true });
   };
 
-  const deleteAdminUser = async (username) => {
-    await deleteDoc(doc(db, "admin_users", username));
+  const deleteAdminUser = async (userKey) => {
+    const key = typeof userKey === "string" ? userKey : (userKey?.username || userKey?.id);
+    if (key) {
+      await deleteDoc(doc(db, "admin_users", String(key).trim().toLowerCase()));
+    }
   };
 
   const addNavbarMenu = async (menu) => {

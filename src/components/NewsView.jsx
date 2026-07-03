@@ -24,9 +24,14 @@ export default function NewsView({ selectedNews, setSelectedNews }) {
     setLocalNewsList(newsData);
   }, [newsData]);
   const filteredNews = useMemo(() => {
-    return localNewsList.filter((news) => {
+    return (localNewsList || []).filter((news) => {
+      if (!news) return false;
       const matchesCategory = activeCategoryFilter === "\u0E17\u0E31\u0E49\u0E07\u0E2B\u0E21\u0E14" || news.category === activeCategoryFilter;
-      const matchesSearch = news.title.toLowerCase().includes(searchQuery.toLowerCase()) || news.excerpt.toLowerCase().includes(searchQuery.toLowerCase()) || news.content.toLowerCase().includes(searchQuery.toLowerCase());
+      const titleText = String(news.title || "").toLowerCase();
+      const excerptText = String(news.excerpt || "").toLowerCase();
+      const contentText = String(news.content || "").toLowerCase();
+      const query = String(searchQuery || "").toLowerCase();
+      const matchesSearch = titleText.includes(query) || excerptText.includes(query) || contentText.includes(query);
       return matchesCategory && matchesSearch;
     });
   }, [activeCategoryFilter, searchQuery, localNewsList]);

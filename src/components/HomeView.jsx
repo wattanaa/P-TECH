@@ -571,7 +571,7 @@ export default function HomeView({ setActiveTab, setSelectedNews }) {
     /* 3 latest news posts */
   }
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {newsData.slice(0, 3).map((news) => <article
+          {(newsData || []).slice(0, 3).map((news) => <article
     key={news.id}
     className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer flex flex-col h-full group"
     onClick={() => handleNewsClick(news)}
