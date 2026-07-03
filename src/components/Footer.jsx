@@ -2,28 +2,19 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
-
-import React from "react";
 import { GraduationCap, Phone, Mail, MapPin, Facebook, Globe, Award, ShieldCheck } from "lucide-react";
 import { useData } from "../context/DataContext";
-
-interface FooterProps {
-  setActiveTab: (tab: string) => void;
-}
-
-export default function Footer({ setActiveTab }: FooterProps) {
+export default function Footer({ setActiveTab }) {
   const { collegeInfo } = useData();
-  const currentYear = new Date().getFullYear();
-
-
-  const handleLinkClick = (tabId: string) => {
+  const currentYear = (/* @__PURE__ */ new Date()).getFullYear();
+  const handleLinkClick = (tabId) => {
     setActiveTab(tabId);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
-
-  return (
-    <footer className="bg-slate-900 text-slate-300 border-t border-slate-800" id="main-footer">
-      {/* Top badges bar */}
+  return <footer className="bg-slate-900 text-slate-300 border-t border-slate-800" id="main-footer">
+      {
+    /* Top badges bar */
+  }
       <div className="border-b border-slate-800 bg-slate-950/50 py-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="flex items-center space-x-3">
@@ -45,7 +36,9 @@ export default function Footer({ setActiveTab }: FooterProps) {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {/* Col 1: About college */}
+          {
+    /* Col 1: About college */
+  }
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
               <div className="w-10 h-10 rounded-lg bg-brand-primary flex items-center justify-center text-white">
@@ -64,56 +57,60 @@ export default function Footer({ setActiveTab }: FooterProps) {
             </p>
           </div>
 
-          {/* Col 2: Useful Links */}
+          {
+    /* Col 2: Useful Links */
+  }
           <div>
             <h4 className="text-white font-bold text-sm uppercase tracking-wider mb-4 border-l-4 border-brand-primary pl-3">
               ลิงก์ที่เป็นประโยชน์
             </h4>
             <ul className="space-y-2 text-sm">
               <li>
-                <button 
-                  onClick={() => handleLinkClick("home")}
-                  className="hover:text-cyan-400 transition-colors duration-150 text-left"
-                >
+                <button
+    onClick={() => handleLinkClick("home")}
+    className="hover:text-cyan-400 transition-colors duration-150 text-left"
+  >
                   หน้าแรกวิทยาลัย
                 </button>
               </li>
               <li>
-                <button 
-                  onClick={() => handleLinkClick("curriculum")}
-                  className="hover:text-cyan-400 transition-colors duration-150 text-left"
-                >
+                <button
+    onClick={() => handleLinkClick("curriculum")}
+    className="hover:text-cyan-400 transition-colors duration-150 text-left"
+  >
                   หลักสูตรประกาศนียบัตร (ปวช.)
                 </button>
               </li>
               <li>
-                <button 
-                  onClick={() => handleLinkClick("curriculum")}
-                  className="hover:text-cyan-400 transition-colors duration-150 text-left"
-                >
+                <button
+    onClick={() => handleLinkClick("curriculum")}
+    className="hover:text-cyan-400 transition-colors duration-150 text-left"
+  >
                   หลักสูตรประกาศนียบัตรชั้นสูง (ปวส.)
                 </button>
               </li>
               <li>
-                <button 
-                  onClick={() => handleLinkClick("news")}
-                  className="hover:text-cyan-400 transition-colors duration-150 text-left"
-                >
+                <button
+    onClick={() => handleLinkClick("news")}
+    className="hover:text-cyan-400 transition-colors duration-150 text-left"
+  >
                   ข่าวสารและประกาศจัดซื้อจัดจ้าง
                 </button>
               </li>
               <li>
-                <button 
-                  onClick={() => handleLinkClick("admission")}
-                  className="hover:text-cyan-400 transition-colors duration-150 text-left"
-                >
+                <button
+    onClick={() => handleLinkClick("admission")}
+    className="hover:text-cyan-400 transition-colors duration-150 text-left"
+  >
                   แบบฟอร์มสมัครเรียนออนไลน์
                 </button>
               </li>
             </ul>
           </div>
 
-          {/* Col 3: Academic levels info */}
+          {
+    /* Col 3: Academic levels info */
+  }
           <div>
             <h4 className="text-white font-bold text-sm uppercase tracking-wider mb-4 border-l-4 border-brand-primary pl-3">
               หลักสูตรหลักของเรา
@@ -129,7 +126,9 @@ export default function Footer({ setActiveTab }: FooterProps) {
             </ul>
           </div>
 
-          {/* Col 4: Contact details */}
+          {
+    /* Col 4: Contact details */
+  }
           <div className="space-y-3">
             <h4 className="text-white font-bold text-sm uppercase tracking-wider mb-4 border-l-4 border-brand-primary pl-3">
               ติดต่อสอบถาม
@@ -149,37 +148,41 @@ export default function Footer({ setActiveTab }: FooterProps) {
               <span className="text-slate-400 text-xs">{collegeInfo.email}</span>
             </div>
 
-            {/* Social icons */}
+            {
+    /* Social icons */
+  }
             <div className="pt-4 flex items-center space-x-4">
-              <a 
-                href="https://facebook.com" 
-                target="_blank" 
-                rel="noreferrer" 
-                className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 hover:text-white hover:bg-blue-600 transition-all duration-200"
-                id="footer-fb-link"
-              >
+              <a
+    href="https://facebook.com"
+    target="_blank"
+    rel="noreferrer"
+    className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 hover:text-white hover:bg-blue-600 transition-all duration-200"
+    id="footer-fb-link"
+  >
                 <Facebook className="w-4 h-4" />
               </a>
-              <a 
-                href="https://google.com" 
-                target="_blank" 
-                rel="noreferrer" 
-                className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-700 transition-all duration-200"
-              >
+              <a
+    href="https://google.com"
+    target="_blank"
+    rel="noreferrer"
+    className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-700 transition-all duration-200"
+  >
                 <Globe className="w-4 h-4" />
               </a>
             </div>
           </div>
         </div>
 
-        {/* Bottom copyright area */}
+        {
+    /* Bottom copyright area */
+  }
         <div className="mt-12 pt-8 border-t border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-slate-500">
-          <p 
-            onClick={() => handleLinkClick("admin")}
-            className="cursor-pointer hover:text-slate-400 select-none transition-colors duration-200"
-            title="ระบบบริหารจัดการสำหรับเจ้าหน้าที่"
-            id="footer-admin-gate"
-          >
+          <p
+    onClick={() => handleLinkClick("admin")}
+    className="cursor-pointer hover:text-slate-400 select-none transition-colors duration-200"
+    title="ระบบบริหารจัดการสำหรับเจ้าหน้าที่"
+    id="footer-admin-gate"
+  >
             © {currentYear} {collegeInfo.name}. สงวนลิขสิทธิ์ทั้งหมด
           </p>
           <div className="flex space-x-4">
@@ -189,6 +192,5 @@ export default function Footer({ setActiveTab }: FooterProps) {
           </div>
         </div>
       </div>
-    </footer>
-  );
+    </footer>;
 }

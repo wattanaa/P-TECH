@@ -2,21 +2,34 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
-
-import React, { useState } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { 
-  useData 
+import {
+  useData
 } from "../context/DataContext";
-import { 
-  Building2, Users, FileText, Newspaper, HelpCircle, 
-  Settings, Trash2, Edit, Plus, CheckCircle, AlertTriangle, 
-  Mail, Phone, Clock, Search, Printer, RefreshCw, X, ChevronRight,
-  Bookmark, ShieldAlert, Award, ArrowLeft, Eye, GraduationCap
+import {
+  Building2,
+  Users,
+  Newspaper,
+  Settings,
+  Trash2,
+  Edit,
+  Plus,
+  CheckCircle,
+  Mail,
+  Phone,
+  Clock,
+  Search,
+  Printer,
+  RefreshCw,
+  X,
+  ChevronRight,
+  ShieldAlert,
+  Award,
+  Eye,
+  GraduationCap
 } from "lucide-react";
-import { Major, NewsItem, EnrolledStudent, AdminContactMessage } from "../types";
 import CollegeLogo from "./CollegeLogo";
-
 export default function AdminView() {
   const {
     collegeInfo,
@@ -37,97 +50,79 @@ export default function AdminView() {
     deleteContactMessage,
     resetToDefaultData
   } = useData();
-
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     return sessionStorage.getItem("ptc_admin_authenticated") === "true";
   });
   const [passwordInput, setPasswordInput] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-
-  const [activeSubTab, setActiveSubTab] = useState<"overview" | "college" | "majors" | "news" | "admissions" | "contacts">("overview");
-
-  const handleLoginSubmit = (e: React.FormEvent) => {
+  const [activeSubTab, setActiveSubTab] = useState("overview");
+  const handleLoginSubmit = (e) => {
     e.preventDefault();
     if (passwordInput === "admin") {
       sessionStorage.setItem("ptc_admin_authenticated", "true");
       setIsAuthenticated(true);
       setPasswordError("");
     } else {
-      setPasswordError("รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง");
+      setPasswordError("\u0E23\u0E2B\u0E31\u0E2A\u0E1C\u0E48\u0E32\u0E19\u0E44\u0E21\u0E48\u0E16\u0E39\u0E01\u0E15\u0E49\u0E2D\u0E07 \u0E01\u0E23\u0E38\u0E13\u0E32\u0E25\u0E2D\u0E07\u0E43\u0E2B\u0E21\u0E48\u0E2D\u0E35\u0E01\u0E04\u0E23\u0E31\u0E49\u0E07");
     }
   };
-
-  // States for search and filters
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-
-  // State for modals
+  const [statusFilter, setStatusFilter] = useState("all");
   const [isEditingCollege, setIsEditingCollege] = useState(false);
   const [tempCollege, setTempCollege] = useState(collegeInfo);
-
-  const [editingMajor, setEditingMajor] = useState<Major | null>(null);
+  const [editingMajor, setEditingMajor] = useState(null);
   const [isMajorModalOpen, setIsMajorModalOpen] = useState(false);
-  const [tempMajor, setTempMajor] = useState<Omit<Major, "id">>({
+  const [tempMajor, setTempMajor] = useState({
     name: "",
     englishName: "",
-    level: "ปวช.",
-    duration: "3 ปี",
+    level: "\u0E1B\u0E27\u0E0A.",
+    duration: "3 \u0E1B\u0E35",
     description: "",
     features: [""],
     careerPaths: [""],
     icon: "Wrench"
   });
-
-  const [editingNews, setEditingNews] = useState<NewsItem | null>(null);
+  const [editingNews, setEditingNews] = useState(null);
   const [isNewsModalOpen, setIsNewsModalOpen] = useState(false);
-  const [tempNews, setTempNews] = useState<Omit<NewsItem, "id" | "views" | "date">>({
+  const [tempNews, setTempNews] = useState({
     title: "",
     excerpt: "",
     content: "",
-    category: "ข่าวประชาสัมพันธ์",
+    category: "\u0E02\u0E48\u0E32\u0E27\u0E1B\u0E23\u0E30\u0E0A\u0E32\u0E2A\u0E31\u0E21\u0E1E\u0E31\u0E19\u0E18\u0E4C",
     imageUrl: ""
   });
-
-  const [selectedStudent, setSelectedStudent] = useState<EnrolledStudent | null>(null);
-
-  // Notifications or toast message
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
-
-  const triggerToast = (msg: string) => {
+  const [selectedStudent, setSelectedStudent] = useState(null);
+  const [toastMessage, setToastMessage] = useState(null);
+  const triggerToast = (msg) => {
     setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 3000);
+    setTimeout(() => setToastMessage(null), 3e3);
   };
-
-  // Handler for College Info Save
-  const handleSaveCollege = (e: React.FormEvent) => {
+  const handleSaveCollege = (e) => {
     e.preventDefault();
     updateCollegeInfo(tempCollege);
     setIsEditingCollege(false);
-    triggerToast("บันทึกข้อมูลวิทยาลัยเรียบร้อยแล้ว!");
+    triggerToast("\u0E1A\u0E31\u0E19\u0E17\u0E36\u0E01\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25\u0E27\u0E34\u0E17\u0E22\u0E32\u0E25\u0E31\u0E22\u0E40\u0E23\u0E35\u0E22\u0E1A\u0E23\u0E49\u0E2D\u0E22\u0E41\u0E25\u0E49\u0E27!");
   };
-
-  // Handler for Majors Edit/Add
-  const handleSaveMajor = (e: React.FormEvent) => {
+  const handleSaveMajor = (e) => {
     e.preventDefault();
     if (editingMajor) {
       updateMajor(editingMajor.id, tempMajor);
-      triggerToast("แก้ไขสาขาวิชาสำเร็จ!");
+      triggerToast("\u0E41\u0E01\u0E49\u0E44\u0E02\u0E2A\u0E32\u0E02\u0E32\u0E27\u0E34\u0E0A\u0E32\u0E2A\u0E33\u0E40\u0E23\u0E47\u0E08!");
     } else {
       addMajor(tempMajor);
-      triggerToast("เพิ่มสาขาวิชาใหม่สำเร็จ!");
+      triggerToast("\u0E40\u0E1E\u0E34\u0E48\u0E21\u0E2A\u0E32\u0E02\u0E32\u0E27\u0E34\u0E0A\u0E32\u0E43\u0E2B\u0E21\u0E48\u0E2A\u0E33\u0E40\u0E23\u0E47\u0E08!");
     }
     setIsMajorModalOpen(false);
     setEditingMajor(null);
   };
-
   const handleOpenAddMajor = () => {
     setEditingMajor(null);
     setTempMajor({
       name: "",
       englishName: "",
-      level: "ปวช.",
-      duration: "3 ปี",
+      level: "\u0E1B\u0E27\u0E0A.",
+      duration: "3 \u0E1B\u0E35",
       description: "",
       features: [""],
       careerPaths: [""],
@@ -135,8 +130,7 @@ export default function AdminView() {
     });
     setIsMajorModalOpen(true);
   };
-
-  const handleOpenEditMajor = (major: Major) => {
+  const handleOpenEditMajor = (major) => {
     setEditingMajor(major);
     setTempMajor({
       name: major.name,
@@ -150,37 +144,33 @@ export default function AdminView() {
     });
     setIsMajorModalOpen(true);
   };
-
-  // Handler for News Edit/Add
-  const handleSaveNews = (e: React.FormEvent) => {
+  const handleSaveNews = (e) => {
     e.preventDefault();
     if (!tempNews.imageUrl) {
       tempNews.imageUrl = "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800&auto=format&fit=crop";
     }
     if (editingNews) {
       updateNews(editingNews.id, tempNews);
-      triggerToast("แก้ไขหัวข้อข่าวสารสำเร็จ!");
+      triggerToast("\u0E41\u0E01\u0E49\u0E44\u0E02\u0E2B\u0E31\u0E27\u0E02\u0E49\u0E2D\u0E02\u0E48\u0E32\u0E27\u0E2A\u0E32\u0E23\u0E2A\u0E33\u0E40\u0E23\u0E47\u0E08!");
     } else {
       addNews(tempNews);
-      triggerToast("เขียนข่าวสารใหม่สำเร็จ!");
+      triggerToast("\u0E40\u0E02\u0E35\u0E22\u0E19\u0E02\u0E48\u0E32\u0E27\u0E2A\u0E32\u0E23\u0E43\u0E2B\u0E21\u0E48\u0E2A\u0E33\u0E40\u0E23\u0E47\u0E08!");
     }
     setIsNewsModalOpen(false);
     setEditingNews(null);
   };
-
   const handleOpenAddNews = () => {
     setEditingNews(null);
     setTempNews({
       title: "",
       excerpt: "",
       content: "",
-      category: "ข่าวประชาสัมพันธ์",
+      category: "\u0E02\u0E48\u0E32\u0E27\u0E1B\u0E23\u0E30\u0E0A\u0E32\u0E2A\u0E31\u0E21\u0E1E\u0E31\u0E19\u0E18\u0E4C",
       imageUrl: ""
     });
     setIsNewsModalOpen(true);
   };
-
-  const handleOpenEditNews = (news: NewsItem) => {
+  const handleOpenEditNews = (news) => {
     setEditingNews(news);
     setTempNews({
       title: news.title,
@@ -191,21 +181,21 @@ export default function AdminView() {
     });
     setIsNewsModalOpen(true);
   };
-
-  // Dynamic values
-  const pendingAdmissions = enrolledStudents.filter(s => s.status === "pending").length;
-  const approvedAdmissions = enrolledStudents.filter(s => s.status === "approved").length;
-  const unreadMessages = contactMessages.filter(m => !m.isRead).length;
-
+  const pendingAdmissions = enrolledStudents.filter((s) => s.status === "pending").length;
+  const approvedAdmissions = enrolledStudents.filter((s) => s.status === "approved").length;
+  const unreadMessages = contactMessages.filter((m) => !m.isRead).length;
   if (!isAuthenticated) {
-    return (
-      <div className="bg-slate-50 min-h-[80vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 font-sans" id="admin-login-screen">
+    return <div className="bg-slate-50 min-h-[80vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 font-sans" id="admin-login-screen">
         <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-3xl border border-slate-200 shadow-xl relative overflow-hidden">
-          {/* Subtle design accents */}
+          {
+      /* Subtle design accents */
+    }
           <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-brand-primary via-amber-400 to-blue-800" />
           
           <div className="flex flex-col items-center text-center space-y-4">
-            {/* Handcrafted Official College Seal */}
+            {
+      /* Handcrafted Official College Seal */
+    }
             <CollegeLogo size={110} className="filter drop-shadow-md" />
             
             <div className="space-y-1.5">
@@ -228,45 +218,43 @@ export default function AdminView() {
               </label>
               <div className="relative">
                 <input
-                  type={showPassword ? "text" : "password"}
-                  required
-                  value={passwordInput}
-                  onChange={(e) => {
-                    setPasswordInput(e.target.value);
-                    if (passwordError) setPasswordError("");
-                  }}
-                  placeholder="กรอกรหัสผ่านเพื่อเข้าใช้งาน..."
-                  className="w-full text-sm pl-4 pr-10 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-all duration-150 font-medium"
-                  id="admin-password-input"
-                  autoFocus
-                />
+      type={showPassword ? "text" : "password"}
+      required
+      value={passwordInput}
+      onChange={(e) => {
+        setPasswordInput(e.target.value);
+        if (passwordError) setPasswordError("");
+      }}
+      placeholder="กรอกรหัสผ่านเพื่อเข้าใช้งาน..."
+      className="w-full text-sm pl-4 pr-10 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-all duration-150 font-medium"
+      id="admin-password-input"
+      autoFocus
+    />
                 <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 transition-colors"
-                >
+      type="button"
+      onClick={() => setShowPassword(!showPassword)}
+      className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 transition-colors"
+    >
                   {showPassword ? <Eye className="w-5 h-5" /> : <Eye className="w-5 h-5 opacity-60" />}
                 </button>
               </div>
             </div>
 
-            {passwordError && (
-              <motion.div
-                initial={{ opacity: 0, y: -5 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="flex items-center space-x-2 text-rose-600 bg-rose-50 border border-rose-100 p-3 rounded-xl text-xs font-bold"
-                id="login-error-message"
-              >
+            {passwordError && <motion.div
+      initial={{ opacity: 0, y: -5 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="flex items-center space-x-2 text-rose-600 bg-rose-50 border border-rose-100 p-3 rounded-xl text-xs font-bold"
+      id="login-error-message"
+    >
                 <ShieldAlert className="w-4 h-4 shrink-0" />
                 <span>{passwordError}</span>
-              </motion.div>
-            )}
+              </motion.div>}
 
             <button
-              type="submit"
-              className="w-full bg-brand-primary hover:bg-blue-800 text-white py-3 px-4 rounded-xl text-xs font-extrabold shadow-md shadow-blue-500/10 hover:shadow-lg transition-all duration-200 flex items-center justify-center space-x-2 cursor-pointer"
-              id="admin-login-submit"
-            >
+      type="submit"
+      className="w-full bg-brand-primary hover:bg-blue-800 text-white py-3 px-4 rounded-xl text-xs font-extrabold shadow-md shadow-blue-500/10 hover:shadow-lg transition-all duration-200 flex items-center justify-center space-x-2 cursor-pointer"
+      id="admin-login-submit"
+    >
               <span>ยืนยันการเข้าระบบ</span>
               <ChevronRight className="w-4 h-4" />
             </button>
@@ -278,29 +266,28 @@ export default function AdminView() {
             </p>
           </div>
         </div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="bg-slate-100 min-h-screen pb-16 pt-6 font-sans">
-      {/* Toast Alert */}
+  return <div className="bg-slate-100 min-h-screen pb-16 pt-6 font-sans">
+      {
+    /* Toast Alert */
+  }
       <AnimatePresence>
-        {toastMessage && (
-          <motion.div 
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="fixed top-5 left-1/2 transform -translate-x-1/2 bg-slate-900 text-white font-extrabold text-sm px-6 py-3.5 rounded-full shadow-2xl z-50 flex items-center space-x-2 border border-slate-700"
-          >
+        {toastMessage && <motion.div
+    initial={{ opacity: 0, y: -20 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: -20 }}
+    className="fixed top-5 left-1/2 transform -translate-x-1/2 bg-slate-900 text-white font-extrabold text-sm px-6 py-3.5 rounded-full shadow-2xl z-50 flex items-center space-x-2 border border-slate-700"
+  >
             <CheckCircle className="w-4 h-4 text-emerald-400" />
             <span>{toastMessage}</span>
-          </motion.div>
-        )}
+          </motion.div>}
       </AnimatePresence>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-        {/* Header Block with System Badges */}
+        {
+    /* Header Block with System Badges */
+  }
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white rounded-3xl p-6 md:p-8 border border-slate-200 shadow-sm gap-4">
           <div className="flex items-center space-x-3.5">
             <div className="w-12 h-12 bg-gradient-to-tr from-brand-primary to-blue-700 rounded-2xl flex items-center justify-center text-white shadow-md">
@@ -323,35 +310,37 @@ export default function AdminView() {
           
           <div className="flex flex-col sm:flex-row gap-2.5 w-full md:w-auto">
             <button
-              onClick={() => {
-                if (confirm("คุณแน่ใจหรือไม่ว่าต้องการคืนค่าเริ่มต้นข้อมูลทดสอบของระบบวิทยาลัย? ข้อมูลที่คุณแก้ไขจะหายไปทั้งหมด")) {
-                  resetToDefaultData();
-                  setTempCollege(collegeInfo);
-                  triggerToast("คืนค่าเริ่มต้นเสร็จสิ้น!");
-                }
-              }}
-              className="flex items-center justify-center space-x-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all shadow-sm cursor-pointer"
-            >
+    onClick={() => {
+      if (confirm("\u0E04\u0E38\u0E13\u0E41\u0E19\u0E48\u0E43\u0E08\u0E2B\u0E23\u0E37\u0E2D\u0E44\u0E21\u0E48\u0E27\u0E48\u0E32\u0E15\u0E49\u0E2D\u0E07\u0E01\u0E32\u0E23\u0E04\u0E37\u0E19\u0E04\u0E48\u0E32\u0E40\u0E23\u0E34\u0E48\u0E21\u0E15\u0E49\u0E19\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25\u0E17\u0E14\u0E2A\u0E2D\u0E1A\u0E02\u0E2D\u0E07\u0E23\u0E30\u0E1A\u0E1A\u0E27\u0E34\u0E17\u0E22\u0E32\u0E25\u0E31\u0E22? \u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25\u0E17\u0E35\u0E48\u0E04\u0E38\u0E13\u0E41\u0E01\u0E49\u0E44\u0E02\u0E08\u0E30\u0E2B\u0E32\u0E22\u0E44\u0E1B\u0E17\u0E31\u0E49\u0E07\u0E2B\u0E21\u0E14")) {
+        resetToDefaultData();
+        setTempCollege(collegeInfo);
+        triggerToast("\u0E04\u0E37\u0E19\u0E04\u0E48\u0E32\u0E40\u0E23\u0E34\u0E48\u0E21\u0E15\u0E49\u0E19\u0E40\u0E2A\u0E23\u0E47\u0E08\u0E2A\u0E34\u0E49\u0E19!");
+      }
+    }}
+    className="flex items-center justify-center space-x-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all shadow-sm cursor-pointer"
+  >
               <RefreshCw className="w-3.5 h-3.5" />
               <span>คืนค่าข้อมูลเริ่มต้นของระบบ</span>
             </button>
 
             <button
-              onClick={() => {
-                sessionStorage.removeItem("ptc_admin_authenticated");
-                setIsAuthenticated(false);
-                setPasswordInput("");
-                setPasswordError("");
-              }}
-              className="flex items-center justify-center space-x-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all shadow-sm cursor-pointer"
-            >
+    onClick={() => {
+      sessionStorage.removeItem("ptc_admin_authenticated");
+      setIsAuthenticated(false);
+      setPasswordInput("");
+      setPasswordError("");
+    }}
+    className="flex items-center justify-center space-x-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all shadow-sm cursor-pointer"
+  >
               <ShieldAlert className="w-3.5 h-3.5" />
               <span>ออกจากระบบ</span>
             </button>
           </div>
         </div>
 
-        {/* Dashboard Grid */}
+        {
+    /* Dashboard Grid */
+  }
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex items-center justify-between">
             <div className="space-y-1">
@@ -394,56 +383,53 @@ export default function AdminView() {
           </div>
         </div>
 
-        {/* Administration Core Navigation Layout */}
+        {
+    /* Administration Core Navigation Layout */
+  }
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          {/* Left Side Sidebar - Menu Sub-tabs */}
+          {
+    /* Left Side Sidebar - Menu Sub-tabs */
+  }
           <div className="lg:col-span-3 bg-white border border-slate-200 rounded-3xl p-4 space-y-1.5 shadow-sm">
             <p className="text-slate-400 text-[10px] font-extrabold uppercase px-3 pb-2 border-b border-slate-100 tracking-wider">
               ส่วนงานบริหารระบบ
             </p>
             {[
-              { id: "overview", label: "หน้าแรกสารสนเทศ", icon: Building2 },
-              { id: "college", label: "ข้อมูลวิทยาลัย & สาส์น", icon: Settings },
-              { id: "majors", label: "จัดการสาขาวิชาหลักสูตร", icon: Award },
-              { id: "news", label: "จัดการข่าวสารกิจกรรม", icon: Newspaper },
-              { id: "admissions", label: "ระบบผู้สมัครเรียนออนไลน์", icon: Users, count: pendingAdmissions },
-              { id: "contacts", label: "กล่องข้อความติดต่อ", icon: Mail, count: unreadMessages }
-            ].map((subTab) => {
-              const IconComp = subTab.icon;
-              return (
-                <button
-                  key={subTab.id}
-                  onClick={() => {
-                    setActiveSubTab(subTab.id as any);
-                    setSearchQuery("");
-                  }}
-                  className={`w-full text-left flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-bold transition-all duration-150 ${
-                    activeSubTab === subTab.id
-                      ? "bg-brand-primary text-white shadow-md shadow-blue-500/15"
-                      : "text-slate-600 hover:text-brand-primary hover:bg-slate-50"
-                  }`}
-                >
+    { id: "overview", label: "\u0E2B\u0E19\u0E49\u0E32\u0E41\u0E23\u0E01\u0E2A\u0E32\u0E23\u0E2A\u0E19\u0E40\u0E17\u0E28", icon: Building2 },
+    { id: "college", label: "\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25\u0E27\u0E34\u0E17\u0E22\u0E32\u0E25\u0E31\u0E22 & \u0E2A\u0E32\u0E2A\u0E4C\u0E19", icon: Settings },
+    { id: "majors", label: "\u0E08\u0E31\u0E14\u0E01\u0E32\u0E23\u0E2A\u0E32\u0E02\u0E32\u0E27\u0E34\u0E0A\u0E32\u0E2B\u0E25\u0E31\u0E01\u0E2A\u0E39\u0E15\u0E23", icon: Award },
+    { id: "news", label: "\u0E08\u0E31\u0E14\u0E01\u0E32\u0E23\u0E02\u0E48\u0E32\u0E27\u0E2A\u0E32\u0E23\u0E01\u0E34\u0E08\u0E01\u0E23\u0E23\u0E21", icon: Newspaper },
+    { id: "admissions", label: "\u0E23\u0E30\u0E1A\u0E1A\u0E1C\u0E39\u0E49\u0E2A\u0E21\u0E31\u0E04\u0E23\u0E40\u0E23\u0E35\u0E22\u0E19\u0E2D\u0E2D\u0E19\u0E44\u0E25\u0E19\u0E4C", icon: Users, count: pendingAdmissions },
+    { id: "contacts", label: "\u0E01\u0E25\u0E48\u0E2D\u0E07\u0E02\u0E49\u0E2D\u0E04\u0E27\u0E32\u0E21\u0E15\u0E34\u0E14\u0E15\u0E48\u0E2D", icon: Mail, count: unreadMessages }
+  ].map((subTab) => {
+    const IconComp = subTab.icon;
+    return <button
+      key={subTab.id}
+      onClick={() => {
+        setActiveSubTab(subTab.id);
+        setSearchQuery("");
+      }}
+      className={`w-full text-left flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-bold transition-all duration-150 ${activeSubTab === subTab.id ? "bg-brand-primary text-white shadow-md shadow-blue-500/15" : "text-slate-600 hover:text-brand-primary hover:bg-slate-50"}`}
+    >
                   <div className="flex items-center space-x-2.5">
                     <IconComp className="w-4 h-4 shrink-0" />
                     <span>{subTab.label}</span>
                   </div>
-                  {subTab.count !== undefined && subTab.count > 0 && (
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-extrabold ${
-                      activeSubTab === subTab.id ? "bg-white text-brand-primary" : "bg-rose-500 text-white"
-                    }`}>
+                  {subTab.count !== void 0 && subTab.count > 0 && <span className={`text-[10px] px-2 py-0.5 rounded-full font-extrabold ${activeSubTab === subTab.id ? "bg-white text-brand-primary" : "bg-rose-500 text-white"}`}>
                       {subTab.count}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
+                    </span>}
+                </button>;
+  })}
           </div>
 
-          {/* Right Side Working stage */}
+          {
+    /* Right Side Working stage */
+  }
           <div className="lg:col-span-9 bg-white border border-slate-200 rounded-3xl p-6 md:p-8 shadow-sm min-h-[500px]">
-            {/* SUB-TAB 1: Overview and Statistics */}
-            {activeSubTab === "overview" && (
-              <div className="space-y-6">
+            {
+    /* SUB-TAB 1: Overview and Statistics */
+  }
+            {activeSubTab === "overview" && <div className="space-y-6">
                 <div>
                   <h2 className="text-lg font-extrabold text-slate-800 font-display">
                     หน้าแรกสารสนเทศภาพรวมวิทยาลัย
@@ -454,93 +440,77 @@ export default function AdminView() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Recent registrations box */}
+                  {
+    /* Recent registrations box */
+  }
                   <div className="border border-slate-200 rounded-2xl p-5 space-y-4">
                     <div className="flex justify-between items-center pb-3 border-b border-slate-100">
                       <h3 className="text-xs font-bold text-slate-700 flex items-center space-x-1.5">
                         <Users className="w-4 h-4 text-blue-500" />
                         <span>ใบสมัครล่าสุดเข้ามาใหม่</span>
                       </h3>
-                      <button 
-                        onClick={() => setActiveSubTab("admissions")} 
-                        className="text-brand-primary hover:underline text-[10px] font-bold"
-                      >
+                      <button
+    onClick={() => setActiveSubTab("admissions")}
+    className="text-brand-primary hover:underline text-[10px] font-bold"
+  >
                         ดูทั้งหมด
                       </button>
                     </div>
 
                     <div className="space-y-3">
-                      {enrolledStudents.slice(0, 3).map((student) => (
-                        <div key={student.id} className="flex justify-between items-center text-xs p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+                      {enrolledStudents.slice(0, 3).map((student) => <div key={student.id} className="flex justify-between items-center text-xs p-2.5 rounded-xl bg-slate-50 border border-slate-100">
                           <div>
                             <p className="font-bold text-slate-800">{student.fullName}</p>
-                            <p className="text-[10px] text-slate-400">สนใจ: {student.levelInterest} {majors.find(m => m.id === student.majorInterest)?.name || student.majorInterest}</p>
+                            <p className="text-[10px] text-slate-400">สนใจ: {student.levelInterest} {majors.find((m) => m.id === student.majorInterest)?.name || student.majorInterest}</p>
                           </div>
-                          <span className={`text-[10px] font-extrabold px-2.5 py-0.5 rounded-full ${
-                            student.status === "approved" ? "bg-emerald-100 text-emerald-800" :
-                            student.status === "verified" ? "bg-blue-100 text-blue-800" :
-                            student.status === "rejected" ? "bg-rose-100 text-rose-800" :
-                            "bg-amber-100 text-amber-800"
-                          }`}>
-                            {student.status === "approved" ? "อนุมัติแล้ว" :
-                             student.status === "verified" ? "ตรวจสอบแล้ว" :
-                             student.status === "rejected" ? "เอกสารไม่ผ่าน" :
-                             "รอตรวจสอบ"}
+                          <span className={`text-[10px] font-extrabold px-2.5 py-0.5 rounded-full ${student.status === "approved" ? "bg-emerald-100 text-emerald-800" : student.status === "verified" ? "bg-blue-100 text-blue-800" : student.status === "rejected" ? "bg-rose-100 text-rose-800" : "bg-amber-100 text-amber-800"}`}>
+                            {student.status === "approved" ? "\u0E2D\u0E19\u0E38\u0E21\u0E31\u0E15\u0E34\u0E41\u0E25\u0E49\u0E27" : student.status === "verified" ? "\u0E15\u0E23\u0E27\u0E08\u0E2A\u0E2D\u0E1A\u0E41\u0E25\u0E49\u0E27" : student.status === "rejected" ? "\u0E40\u0E2D\u0E01\u0E2A\u0E32\u0E23\u0E44\u0E21\u0E48\u0E1C\u0E48\u0E32\u0E19" : "\u0E23\u0E2D\u0E15\u0E23\u0E27\u0E08\u0E2A\u0E2D\u0E1A"}
                           </span>
-                        </div>
-                      ))}
-                      {enrolledStudents.length === 0 && (
-                        <p className="text-xs text-slate-400 text-center py-4">ไม่มีประวัติการสมัครในขณะนี้</p>
-                      )}
+                        </div>)}
+                      {enrolledStudents.length === 0 && <p className="text-xs text-slate-400 text-center py-4">ไม่มีประวัติการสมัครในขณะนี้</p>}
                     </div>
                   </div>
 
-                  {/* Recent messages box */}
+                  {
+    /* Recent messages box */
+  }
                   <div className="border border-slate-200 rounded-2xl p-5 space-y-4">
                     <div className="flex justify-between items-center pb-3 border-b border-slate-100">
                       <h3 className="text-xs font-bold text-slate-700 flex items-center space-x-1.5">
                         <Mail className="w-4 h-4 text-rose-500" />
                         <span>คำถามล่าสุดจากหน้าติดต่อเรา</span>
                       </h3>
-                      <button 
-                        onClick={() => setActiveSubTab("contacts")} 
-                        className="text-brand-primary hover:underline text-[10px] font-bold"
-                      >
+                      <button
+    onClick={() => setActiveSubTab("contacts")}
+    className="text-brand-primary hover:underline text-[10px] font-bold"
+  >
                         ดูทั้งหมด
                       </button>
                     </div>
 
                     <div className="space-y-3">
-                      {contactMessages.slice(0, 3).map((msg) => (
-                        <div 
-                          key={msg.id} 
-                          onClick={() => {
-                            markContactMessageRead(msg.id);
-                            setActiveSubTab("contacts");
-                          }}
-                          className={`p-2.5 rounded-xl border cursor-pointer transition-all duration-150 flex justify-between items-start text-xs ${
-                            msg.isRead 
-                              ? "bg-slate-50/50 border-slate-100" 
-                              : "bg-rose-50/40 border-rose-100 font-semibold"
-                          }`}
-                        >
+                      {contactMessages.slice(0, 3).map((msg) => <div
+    key={msg.id}
+    onClick={() => {
+      markContactMessageRead(msg.id);
+      setActiveSubTab("contacts");
+    }}
+    className={`p-2.5 rounded-xl border cursor-pointer transition-all duration-150 flex justify-between items-start text-xs ${msg.isRead ? "bg-slate-50/50 border-slate-100" : "bg-rose-50/40 border-rose-100 font-semibold"}`}
+  >
                           <div className="space-y-0.5 max-w-[80%]">
                             <p className="text-slate-800 truncate">{msg.subject}</p>
                             <p className="text-[10px] text-slate-400 truncate">โดย: {msg.name}</p>
                           </div>
-                          {!msg.isRead && (
-                            <span className="w-2 h-2 rounded-full bg-rose-500 mt-1.5 shrink-0" />
-                          )}
-                        </div>
-                      ))}
-                      {contactMessages.length === 0 && (
-                        <p className="text-xs text-slate-400 text-center py-4">ไม่มีข้อความใหม่</p>
-                      )}
+                          {!msg.isRead && <span className="w-2 h-2 rounded-full bg-rose-500 mt-1.5 shrink-0" />}
+                        </div>)}
+                      {contactMessages.length === 0 && <p className="text-xs text-slate-400 text-center py-4">ไม่มีข้อความใหม่</p>}
                     </div>
                   </div>
                 </div>
 
-                {/* Developer / Admin Instructions card */}
+                {
+    /* Developer / Admin Instructions card */
+  }
                 <div className="bg-gradient-to-r from-blue-900 to-indigo-950 text-white rounded-2xl p-6 space-y-3 shadow-md">
                   <h3 className="text-sm font-bold flex items-center space-x-2">
                     <ShieldAlert className="w-4 h-4 text-amber-400" />
@@ -555,12 +525,12 @@ export default function AdminView() {
                     *หากต้องการรีเซ็ตข้อมูลทั้งหมดเพื่อเริ่มทำสอบโปรแกรมใหม่ ให้ใช้ปุ่ม "คืนค่าข้อมูลเริ่มต้นของระบบ" ด้านบน
                   </p>
                 </div>
-              </div>
-            )}
+              </div>}
 
-            {/* SUB-TAB 2: Manage College Info */}
-            {activeSubTab === "college" && (
-              <div className="space-y-6">
+            {
+    /* SUB-TAB 2: Manage College Info */
+  }
+            {activeSubTab === "college" && <div className="space-y-6">
                 <div className="flex justify-between items-center">
                   <div>
                     <h2 className="text-lg font-extrabold text-slate-800 font-display">
@@ -570,159 +540,154 @@ export default function AdminView() {
                       ปรับเปลี่ยนที่อยู่, เบอร์โทรศัพท์ติดต่อ, ค่านิยม และสาส์นต้อนรับหน้าแรก
                     </p>
                   </div>
-                  {!isEditingCollege && (
-                    <button
-                      onClick={() => {
-                        setTempCollege({ ...collegeInfo });
-                        setIsEditingCollege(true);
-                      }}
-                      className="flex items-center space-x-1 bg-brand-primary text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-blue-700 transition-all shadow-sm"
-                    >
+                  {!isEditingCollege && <button
+    onClick={() => {
+      setTempCollege({ ...collegeInfo });
+      setIsEditingCollege(true);
+    }}
+    className="flex items-center space-x-1 bg-brand-primary text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-blue-700 transition-all shadow-sm"
+  >
                       <Edit className="w-3.5 h-3.5" />
                       <span>แก้ไขข้อมูลทั่วไป</span>
-                    </button>
-                  )}
+                    </button>}
                 </div>
 
-                {isEditingCollege ? (
-                  <form onSubmit={handleSaveCollege} className="space-y-6">
+                {isEditingCollege ? <form onSubmit={handleSaveCollege} className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-1">
                         <label className="text-[11px] font-bold text-slate-500">ชื่อวิทยาลัย (ภาษาไทย)</label>
-                        <input 
-                          type="text" 
-                          required
-                          value={tempCollege.name}
-                          onChange={(e) => setTempCollege({ ...tempCollege, name: e.target.value })}
-                          className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                        />
+                        <input
+    type="text"
+    required
+    value={tempCollege.name}
+    onChange={(e) => setTempCollege({ ...tempCollege, name: e.target.value })}
+    className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
+  />
                       </div>
 
                       <div className="space-y-1">
                         <label className="text-[11px] font-bold text-slate-500">ชื่อวิทยาลัย (ภาษาอังกฤษ)</label>
-                        <input 
-                          type="text" 
-                          required
-                          value={tempCollege.englishName}
-                          onChange={(e) => setTempCollege({ ...tempCollege, englishName: e.target.value })}
-                          className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                        />
+                        <input
+    type="text"
+    required
+    value={tempCollege.englishName}
+    onChange={(e) => setTempCollege({ ...tempCollege, englishName: e.target.value })}
+    className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
+  />
                       </div>
 
                       <div className="space-y-1 md:col-span-2">
                         <label className="text-[11px] font-bold text-slate-500">ปรัชญาสถานศึกษา</label>
-                        <input 
-                          type="text" 
-                          required
-                          value={tempCollege.philosophy}
-                          onChange={(e) => setTempCollege({ ...tempCollege, philosophy: e.target.value })}
-                          className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                        />
+                        <input
+    type="text"
+    required
+    value={tempCollege.philosophy}
+    onChange={(e) => setTempCollege({ ...tempCollege, philosophy: e.target.value })}
+    className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
+  />
                       </div>
 
                       <div className="space-y-1 md:col-span-2">
                         <label className="text-[11px] font-bold text-slate-500">วิสัยทัศน์</label>
-                        <textarea 
-                          rows={3}
-                          required
-                          value={tempCollege.vision}
-                          onChange={(e) => setTempCollege({ ...tempCollege, vision: e.target.value })}
-                          className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                        />
+                        <textarea
+    rows={3}
+    required
+    value={tempCollege.vision}
+    onChange={(e) => setTempCollege({ ...tempCollege, vision: e.target.value })}
+    className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
+  />
                       </div>
 
                       <div className="space-y-1">
                         <label className="text-[11px] font-bold text-slate-500">อัตลักษณ์</label>
-                        <input 
-                          type="text" 
-                          required
-                          value={tempCollege.identity}
-                          onChange={(e) => setTempCollege({ ...tempCollege, identity: e.target.value })}
-                          className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                        />
+                        <input
+    type="text"
+    required
+    value={tempCollege.identity}
+    onChange={(e) => setTempCollege({ ...tempCollege, identity: e.target.value })}
+    className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
+  />
                       </div>
 
                       <div className="space-y-1">
                         <label className="text-[11px] font-bold text-slate-500">เอกลักษณ์</label>
-                        <input 
-                          type="text" 
-                          required
-                          value={tempCollege.uniqueness}
-                          onChange={(e) => setTempCollege({ ...tempCollege, uniqueness: e.target.value })}
-                          className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                        />
+                        <input
+    type="text"
+    required
+    value={tempCollege.uniqueness}
+    onChange={(e) => setTempCollege({ ...tempCollege, uniqueness: e.target.value })}
+    className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
+  />
                       </div>
 
                       <div className="space-y-1 md:col-span-2">
                         <label className="text-[11px] font-bold text-slate-500">ที่ตั้ง / ที่อยู่ติดต่อ</label>
-                        <input 
-                          type="text" 
-                          required
-                          value={tempCollege.address}
-                          onChange={(e) => setTempCollege({ ...tempCollege, address: e.target.value })}
-                          className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                        />
+                        <input
+    type="text"
+    required
+    value={tempCollege.address}
+    onChange={(e) => setTempCollege({ ...tempCollege, address: e.target.value })}
+    className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
+  />
                       </div>
 
                       <div className="space-y-1">
                         <label className="text-[11px] font-bold text-slate-500">เบอร์โทรสาร</label>
-                        <input 
-                          type="text" 
-                          value={tempCollege.phone}
-                          onChange={(e) => setTempCollege({ ...tempCollege, phone: e.target.value })}
-                          className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                        />
+                        <input
+    type="text"
+    value={tempCollege.phone}
+    onChange={(e) => setTempCollege({ ...tempCollege, phone: e.target.value })}
+    className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
+  />
                       </div>
 
                       <div className="space-y-1">
                         <label className="text-[11px] font-bold text-slate-500">เบอร์มือถือรับสายหลัก</label>
-                        <input 
-                          type="text" 
-                          value={tempCollege.mobile}
-                          onChange={(e) => setTempCollege({ ...tempCollege, mobile: e.target.value })}
-                          className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                        />
+                        <input
+    type="text"
+    value={tempCollege.mobile}
+    onChange={(e) => setTempCollege({ ...tempCollege, mobile: e.target.value })}
+    className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
+  />
                       </div>
 
                       <div className="space-y-1">
                         <label className="text-[11px] font-bold text-slate-500">อีเมลทางการ</label>
-                        <input 
-                          type="email" 
-                          value={tempCollege.email}
-                          onChange={(e) => setTempCollege({ ...tempCollege, email: e.target.value })}
-                          className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                        />
+                        <input
+    type="email"
+    value={tempCollege.email}
+    onChange={(e) => setTempCollege({ ...tempCollege, email: e.target.value })}
+    className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
+  />
                       </div>
 
                       <div className="space-y-1">
                         <label className="text-[11px] font-bold text-slate-500">Facebook URL</label>
-                        <input 
-                          type="text" 
-                          value={tempCollege.facebook}
-                          onChange={(e) => setTempCollege({ ...tempCollege, facebook: e.target.value })}
-                          className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                        />
+                        <input
+    type="text"
+    value={tempCollege.facebook}
+    onChange={(e) => setTempCollege({ ...tempCollege, facebook: e.target.value })}
+    className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
+  />
                       </div>
                     </div>
 
                     <div className="flex space-x-3 justify-end pt-4 border-t border-slate-100">
                       <button
-                        type="button"
-                        onClick={() => setIsEditingCollege(false)}
-                        className="bg-slate-100 hover:bg-slate-200 text-slate-600 px-5 py-2.5 rounded-xl text-xs font-bold transition-all"
-                      >
+    type="button"
+    onClick={() => setIsEditingCollege(false)}
+    className="bg-slate-100 hover:bg-slate-200 text-slate-600 px-5 py-2.5 rounded-xl text-xs font-bold transition-all"
+  >
                         ยกเลิก
                       </button>
                       <button
-                        type="submit"
-                        className="bg-brand-primary hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl text-xs font-bold transition-all shadow-md"
-                      >
+    type="submit"
+    className="bg-brand-primary hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl text-xs font-bold transition-all shadow-md"
+  >
                         บันทึกการแก้ไข
                       </button>
                     </div>
-                  </form>
-                ) : (
-                  <div className="space-y-6">
+                  </form> : <div className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50 p-6 rounded-2xl border border-slate-100">
                       <div className="space-y-3">
                         <div>
@@ -783,14 +748,13 @@ export default function AdminView() {
                         </div>
                       </div>
                     </div>
-                  </div>
-                )}
-              </div>
-            )}
+                  </div>}
+              </div>}
 
-            {/* SUB-TAB 3: Manage Majors / Curriculums */}
-            {activeSubTab === "majors" && (
-              <div className="space-y-6">
+            {
+    /* SUB-TAB 3: Manage Majors / Curriculums */
+  }
+            {activeSubTab === "majors" && <div className="space-y-6">
                 <div className="flex justify-between items-center">
                   <div>
                     <h2 className="text-lg font-extrabold text-slate-800 font-display">
@@ -801,15 +765,17 @@ export default function AdminView() {
                     </p>
                   </div>
                   <button
-                    onClick={handleOpenAddMajor}
-                    className="flex items-center space-x-1 bg-brand-primary hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition-all shadow-md"
-                  >
+    onClick={handleOpenAddMajor}
+    className="flex items-center space-x-1 bg-brand-primary hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition-all shadow-md"
+  >
                     <Plus className="w-3.5 h-3.5" />
                     <span>เพิ่มสาขาวิชาใหม่</span>
                   </button>
                 </div>
 
-                {/* Majors list table */}
+                {
+    /* Majors list table */
+  }
                 <div className="border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
                   <table className="w-full text-left border-collapse">
                     <thead>
@@ -821,12 +787,9 @@ export default function AdminView() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 text-xs text-slate-700">
-                      {majors.map((major) => (
-                        <tr key={major.id} className="hover:bg-slate-50/50 transition-colors">
+                      {majors.map((major) => <tr key={major.id} className="hover:bg-slate-50/50 transition-colors">
                           <td className="p-4 font-bold">
-                            <span className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold ${
-                              major.level === "ปวส." ? "bg-amber-100 text-amber-800" : "bg-blue-100 text-blue-800"
-                            }`}>
+                            <span className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold ${major.level === "\u0E1B\u0E27\u0E2A." ? "bg-amber-100 text-amber-800" : "bg-blue-100 text-blue-800"}`}>
                               {major.level}
                             </span>
                           </td>
@@ -837,38 +800,37 @@ export default function AdminView() {
                           <td className="p-4 text-slate-500">{major.duration}</td>
                           <td className="p-4 text-right">
                             <div className="flex justify-end space-x-2">
-                              <button 
-                                onClick={() => handleOpenEditMajor(major)}
-                                className="p-1.5 hover:bg-blue-50 text-blue-600 rounded-lg transition-colors"
-                                title="แก้ไขสาขาวิชา"
-                              >
+                              <button
+    onClick={() => handleOpenEditMajor(major)}
+    className="p-1.5 hover:bg-blue-50 text-blue-600 rounded-lg transition-colors"
+    title="แก้ไขสาขาวิชา"
+  >
                                 <Edit className="w-4 h-4" />
                               </button>
-                              <button 
-                                onClick={() => {
-                                  if (confirm(`คุณแน่ใจว่าต้องการลบหลักสูตร ${major.name} (${major.level}) ใช่หรือไม่?`)) {
-                                    deleteMajor(major.id);
-                                    triggerToast(`ลบสาขาวิชา ${major.name} สำเร็จ!`);
-                                  }
-                                }}
-                                className="p-1.5 hover:bg-rose-50 text-rose-600 rounded-lg transition-colors"
-                                title="ลบสาขาวิชา"
-                              >
+                              <button
+    onClick={() => {
+      if (confirm(`\u0E04\u0E38\u0E13\u0E41\u0E19\u0E48\u0E43\u0E08\u0E27\u0E48\u0E32\u0E15\u0E49\u0E2D\u0E07\u0E01\u0E32\u0E23\u0E25\u0E1A\u0E2B\u0E25\u0E31\u0E01\u0E2A\u0E39\u0E15\u0E23 ${major.name} (${major.level}) \u0E43\u0E0A\u0E48\u0E2B\u0E23\u0E37\u0E2D\u0E44\u0E21\u0E48?`)) {
+        deleteMajor(major.id);
+        triggerToast(`\u0E25\u0E1A\u0E2A\u0E32\u0E02\u0E32\u0E27\u0E34\u0E0A\u0E32 ${major.name} \u0E2A\u0E33\u0E40\u0E23\u0E47\u0E08!`);
+      }
+    }}
+    className="p-1.5 hover:bg-rose-50 text-rose-600 rounded-lg transition-colors"
+    title="ลบสาขาวิชา"
+  >
                                 <Trash2 className="w-4 h-4" />
                               </button>
                             </div>
                           </td>
-                        </tr>
-                      ))}
+                        </tr>)}
                     </tbody>
                   </table>
                 </div>
-              </div>
-            )}
+              </div>}
 
-            {/* SUB-TAB 4: Manage News */}
-            {activeSubTab === "news" && (
-              <div className="space-y-6">
+            {
+    /* SUB-TAB 4: Manage News */
+  }
+            {activeSubTab === "news" && <div className="space-y-6">
                 <div className="flex justify-between items-center">
                   <div>
                     <h2 className="text-lg font-extrabold text-slate-800 font-display">
@@ -879,15 +841,17 @@ export default function AdminView() {
                     </p>
                   </div>
                   <button
-                    onClick={handleOpenAddNews}
-                    className="flex items-center space-x-1 bg-brand-primary hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition-all shadow-md"
-                  >
+    onClick={handleOpenAddNews}
+    className="flex items-center space-x-1 bg-brand-primary hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition-all shadow-md"
+  >
                     <Plus className="w-3.5 h-3.5" />
                     <span>เขียนประกาศข่าวใหม่</span>
                   </button>
                 </div>
 
-                {/* News Table */}
+                {
+    /* News Table */
+  }
                 <div className="border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
                   <table className="w-full text-left border-collapse">
                     <thead>
@@ -900,8 +864,7 @@ export default function AdminView() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 text-xs text-slate-700">
-                      {newsData.map((news) => (
-                        <tr key={news.id} className="hover:bg-slate-50/50 transition-colors">
+                      {newsData.map((news) => <tr key={news.id} className="hover:bg-slate-50/50 transition-colors">
                           <td className="p-4">
                             <span className="bg-slate-100 border border-slate-200 text-slate-600 font-bold px-2 py-1 rounded-md text-[10px]">
                               {news.category}
@@ -915,36 +878,35 @@ export default function AdminView() {
                           <td className="p-4 text-slate-500">{news.views} ครั้ง</td>
                           <td className="p-4 text-right">
                             <div className="flex justify-end space-x-2">
-                              <button 
-                                onClick={() => handleOpenEditNews(news)}
-                                className="p-1.5 hover:bg-blue-50 text-blue-600 rounded-lg transition-colors"
-                              >
+                              <button
+    onClick={() => handleOpenEditNews(news)}
+    className="p-1.5 hover:bg-blue-50 text-blue-600 rounded-lg transition-colors"
+  >
                                 <Edit className="w-4 h-4" />
                               </button>
-                              <button 
-                                onClick={() => {
-                                  if (confirm(`ต้องการลบข่าวสารหัวข้อ "${news.title}" ใช่หรือไม่?`)) {
-                                    deleteNews(news.id);
-                                    triggerToast("ลบหัวข้อข่าวสารสำเร็จ!");
-                                  }
-                                }}
-                                className="p-1.5 hover:bg-rose-50 text-rose-600 rounded-lg transition-colors"
-                              >
+                              <button
+    onClick={() => {
+      if (confirm(`\u0E15\u0E49\u0E2D\u0E07\u0E01\u0E32\u0E23\u0E25\u0E1A\u0E02\u0E48\u0E32\u0E27\u0E2A\u0E32\u0E23\u0E2B\u0E31\u0E27\u0E02\u0E49\u0E2D "${news.title}" \u0E43\u0E0A\u0E48\u0E2B\u0E23\u0E37\u0E2D\u0E44\u0E21\u0E48?`)) {
+        deleteNews(news.id);
+        triggerToast("\u0E25\u0E1A\u0E2B\u0E31\u0E27\u0E02\u0E49\u0E2D\u0E02\u0E48\u0E32\u0E27\u0E2A\u0E32\u0E23\u0E2A\u0E33\u0E40\u0E23\u0E47\u0E08!");
+      }
+    }}
+    className="p-1.5 hover:bg-rose-50 text-rose-600 rounded-lg transition-colors"
+  >
                                 <Trash2 className="w-4 h-4" />
                               </button>
                             </div>
                           </td>
-                        </tr>
-                      ))}
+                        </tr>)}
                     </tbody>
                   </table>
                 </div>
-              </div>
-            )}
+              </div>}
 
-            {/* SUB-TAB 5: Online Admissions Applications Manager */}
-            {activeSubTab === "admissions" && (
-              <div className="space-y-6">
+            {
+    /* SUB-TAB 5: Online Admissions Applications Manager */
+  }
+            {activeSubTab === "admissions" && <div className="space-y-6">
                 <div>
                   <h2 className="text-lg font-extrabold text-slate-800 font-display">
                     ระบบจัดการใบสมัครเรียนออนไลน์
@@ -954,40 +916,35 @@ export default function AdminView() {
                   </p>
                 </div>
 
-                {/* Filter and Search controls */}
+                {
+    /* Filter and Search controls */
+  }
                 <div className="flex flex-col md:flex-row gap-3">
                   <div className="relative flex-grow">
                     <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 transform -translate-y-1/2" />
-                    <input 
-                      type="text" 
-                      placeholder="ค้นหาด้วยชื่อผู้สมัคร หรือรหัสใบสมัคร..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full text-xs pl-10 pr-4 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50"
-                    />
+                    <input
+    type="text"
+    placeholder="ค้นหาด้วยชื่อผู้สมัคร หรือรหัสใบสมัคร..."
+    value={searchQuery}
+    onChange={(e) => setSearchQuery(e.target.value)}
+    className="w-full text-xs pl-10 pr-4 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50"
+  />
                   </div>
 
                   <div className="flex space-x-2">
-                    {["all", "pending", "verified", "approved", "rejected"].map((stat) => (
-                      <button
-                        key={stat}
-                        onClick={() => setStatusFilter(stat)}
-                        className={`text-[10px] font-extrabold px-3 py-2 rounded-xl border transition-all ${
-                          statusFilter === stat
-                            ? "bg-slate-900 border-slate-900 text-white"
-                            : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
-                        }`}
-                      >
-                        {stat === "all" ? "ทั้งหมด" :
-                         stat === "pending" ? "รอตรวจ" :
-                         stat === "verified" ? "ตรวจแล้ว" :
-                         stat === "approved" ? "อนุมัติ" : "ไม่ผ่าน"}
-                      </button>
-                    ))}
+                    {["all", "pending", "verified", "approved", "rejected"].map((stat) => <button
+    key={stat}
+    onClick={() => setStatusFilter(stat)}
+    className={`text-[10px] font-extrabold px-3 py-2 rounded-xl border transition-all ${statusFilter === stat ? "bg-slate-900 border-slate-900 text-white" : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"}`}
+  >
+                        {stat === "all" ? "\u0E17\u0E31\u0E49\u0E07\u0E2B\u0E21\u0E14" : stat === "pending" ? "\u0E23\u0E2D\u0E15\u0E23\u0E27\u0E08" : stat === "verified" ? "\u0E15\u0E23\u0E27\u0E08\u0E41\u0E25\u0E49\u0E27" : stat === "approved" ? "\u0E2D\u0E19\u0E38\u0E21\u0E31\u0E15\u0E34" : "\u0E44\u0E21\u0E48\u0E1C\u0E48\u0E32\u0E19"}
+                      </button>)}
                   </div>
                 </div>
 
-                {/* Student list table */}
+                {
+    /* Student list table */
+  }
                 <div className="border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
                   <table className="w-full text-left border-collapse">
                     <thead>
@@ -1001,14 +958,11 @@ export default function AdminView() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 text-xs text-slate-700">
-                      {enrolledStudents
-                        .filter(s => {
-                          const matchesSearch = s.fullName.includes(searchQuery) || s.id.includes(searchQuery);
-                          const matchesFilter = statusFilter === "all" || s.status === statusFilter;
-                          return matchesSearch && matchesFilter;
-                        })
-                        .map((student) => (
-                          <tr key={student.id} className="hover:bg-slate-50/50 transition-colors">
+                      {enrolledStudents.filter((s) => {
+    const matchesSearch = s.fullName.includes(searchQuery) || s.id.includes(searchQuery);
+    const matchesFilter = statusFilter === "all" || s.status === statusFilter;
+    return matchesSearch && matchesFilter;
+  }).map((student) => <tr key={student.id} className="hover:bg-slate-50/50 transition-colors">
                             <td className="p-4 font-mono font-bold text-slate-600">{student.id}</td>
                             <td className="p-4">
                               <p className="font-extrabold text-slate-800">{student.fullName}</p>
@@ -1017,41 +971,33 @@ export default function AdminView() {
                             <td className="p-4">
                               <span className="font-semibold text-slate-800">{student.levelInterest} </span>
                               <span className="text-slate-500">
-                                {majors.find(m => m.id === student.majorInterest)?.name || student.majorInterest}
+                                {majors.find((m) => m.id === student.majorInterest)?.name || student.majorInterest}
                               </span>
                             </td>
                             <td className="p-4 font-mono font-bold text-blue-600">{student.prevGpa}</td>
                             <td className="p-4">
-                              <span className={`text-[10px] font-extrabold px-2.5 py-0.5 rounded-full ${
-                                student.status === "approved" ? "bg-emerald-100 text-emerald-800" :
-                                student.status === "verified" ? "bg-blue-100 text-blue-800" :
-                                student.status === "rejected" ? "bg-rose-100 text-rose-800" :
-                                "bg-amber-100 text-amber-800"
-                              }`}>
-                                {student.status === "approved" ? "อนุมัติแล้ว" :
-                                 student.status === "verified" ? "ตรวจสอบแล้ว" :
-                                 student.status === "rejected" ? "เอกสารไม่ผ่าน" :
-                                 "รอตรวจสอบ"}
+                              <span className={`text-[10px] font-extrabold px-2.5 py-0.5 rounded-full ${student.status === "approved" ? "bg-emerald-100 text-emerald-800" : student.status === "verified" ? "bg-blue-100 text-blue-800" : student.status === "rejected" ? "bg-rose-100 text-rose-800" : "bg-amber-100 text-amber-800"}`}>
+                                {student.status === "approved" ? "\u0E2D\u0E19\u0E38\u0E21\u0E31\u0E15\u0E34\u0E41\u0E25\u0E49\u0E27" : student.status === "verified" ? "\u0E15\u0E23\u0E27\u0E08\u0E2A\u0E2D\u0E1A\u0E41\u0E25\u0E49\u0E27" : student.status === "rejected" ? "\u0E40\u0E2D\u0E01\u0E2A\u0E32\u0E23\u0E44\u0E21\u0E48\u0E1C\u0E48\u0E32\u0E19" : "\u0E23\u0E2D\u0E15\u0E23\u0E27\u0E08\u0E2A\u0E2D\u0E1A"}
                               </span>
                             </td>
                             <td className="p-4 text-right">
                               <div className="flex justify-end space-x-2">
-                                <button 
-                                  onClick={() => setSelectedStudent(student)}
-                                  className="p-1.5 hover:bg-blue-50 text-blue-600 rounded-lg transition-colors flex items-center space-x-1"
-                                  title="ดูใบสมัครเต็มรูปแบบ"
-                                >
+                                <button
+    onClick={() => setSelectedStudent(student)}
+    className="p-1.5 hover:bg-blue-50 text-blue-600 rounded-lg transition-colors flex items-center space-x-1"
+    title="ดูใบสมัครเต็มรูปแบบ"
+  >
                                   <Eye className="w-3.5 h-3.5" />
                                   <span className="text-[10px] font-bold">เปิดดู</span>
                                 </button>
-                                <select 
-                                  value={student.status}
-                                  onChange={(e) => {
-                                    updateEnrollmentStatus(student.id, e.target.value as any);
-                                    triggerToast(`อัปเดตสถานะของ ${student.fullName} เป็น ${e.target.value}`);
-                                  }}
-                                  className="text-[10px] bg-slate-50 border border-slate-300 rounded-lg px-2 py-1 font-bold focus:outline-none"
-                                >
+                                <select
+    value={student.status}
+    onChange={(e) => {
+      updateEnrollmentStatus(student.id, e.target.value);
+      triggerToast(`\u0E2D\u0E31\u0E1B\u0E40\u0E14\u0E15\u0E2A\u0E16\u0E32\u0E19\u0E30\u0E02\u0E2D\u0E07 ${student.fullName} \u0E40\u0E1B\u0E47\u0E19 ${e.target.value}`);
+    }}
+    className="text-[10px] bg-slate-50 border border-slate-300 rounded-lg px-2 py-1 font-bold focus:outline-none"
+  >
                                   <option value="pending">รอตรวจสอบ</option>
                                   <option value="verified">ตรวจสอบแล้ว</option>
                                   <option value="approved">อนุมัติเรียน</option>
@@ -1059,24 +1005,21 @@ export default function AdminView() {
                                 </select>
                               </div>
                             </td>
-                          </tr>
-                        ))}
-                      {enrolledStudents.length === 0 && (
-                        <tr>
+                          </tr>)}
+                      {enrolledStudents.length === 0 && <tr>
                           <td colSpan={6} className="p-8 text-center text-slate-400">
                             ไม่มีใบสมัครในระดับ/เงื่อนไขนี้
                           </td>
-                        </tr>
-                      )}
+                        </tr>}
                     </tbody>
                   </table>
                 </div>
-              </div>
-            )}
+              </div>}
 
-            {/* SUB-TAB 6: Manage Contact us Questions / Feedbacks */}
-            {activeSubTab === "contacts" && (
-              <div className="space-y-6">
+            {
+    /* SUB-TAB 6: Manage Contact us Questions / Feedbacks */
+  }
+            {activeSubTab === "contacts" && <div className="space-y-6">
                 <div>
                   <h2 className="text-lg font-extrabold text-slate-800 font-display">
                     กล่องจดหมายข้อความติดต่อฝ่ายประชาสัมพันธ์
@@ -1087,20 +1030,13 @@ export default function AdminView() {
                 </div>
 
                 <div className="space-y-4">
-                  {contactMessages.map((msg) => (
-                    <div 
-                      key={msg.id} 
-                      className={`border rounded-2xl p-5 transition-all relative ${
-                        msg.isRead 
-                          ? "bg-slate-50/50 border-slate-200" 
-                          : "bg-rose-50/20 border-rose-200 shadow-sm"
-                      }`}
-                    >
-                      {!msg.isRead && (
-                        <span className="absolute top-4 right-4 bg-rose-500 text-white text-[9px] font-extrabold px-2 py-0.5 rounded-full animate-pulse">
+                  {contactMessages.map((msg) => <div
+    key={msg.id}
+    className={`border rounded-2xl p-5 transition-all relative ${msg.isRead ? "bg-slate-50/50 border-slate-200" : "bg-rose-50/20 border-rose-200 shadow-sm"}`}
+  >
+                      {!msg.isRead && <span className="absolute top-4 right-4 bg-rose-500 text-white text-[9px] font-extrabold px-2 py-0.5 rounded-full animate-pulse">
                           ใหม่
-                        </span>
-                      )}
+                        </span>}
                       
                       <div className="space-y-3">
                         <div className="flex flex-col md:flex-row justify-between items-start gap-1">
@@ -1126,62 +1062,59 @@ export default function AdminView() {
                             <span>อีเมล: <span className="text-slate-800 underline">{msg.email}</span></span>
                           </div>
                           <div className="flex space-x-2 w-full sm:w-auto justify-end">
-                            {!msg.isRead && (
-                              <button
-                                onClick={() => {
-                                  markContactMessageRead(msg.id);
-                                  triggerToast("ทำเครื่องหมายว่าอ่านแล้ว!");
-                                }}
-                                className="bg-blue-50 hover:bg-blue-100 text-blue-700 px-3 py-1.5 rounded-lg font-bold text-[10px] transition-all"
-                              >
+                            {!msg.isRead && <button
+    onClick={() => {
+      markContactMessageRead(msg.id);
+      triggerToast("\u0E17\u0E33\u0E40\u0E04\u0E23\u0E37\u0E48\u0E2D\u0E07\u0E2B\u0E21\u0E32\u0E22\u0E27\u0E48\u0E32\u0E2D\u0E48\u0E32\u0E19\u0E41\u0E25\u0E49\u0E27!");
+    }}
+    className="bg-blue-50 hover:bg-blue-100 text-blue-700 px-3 py-1.5 rounded-lg font-bold text-[10px] transition-all"
+  >
                                 อ่านแล้ว
-                              </button>
-                            )}
+                              </button>}
                             <button
-                              onClick={() => {
-                                if (confirm("คุณแน่ใจว่าต้องการลบข้อความนี้ทิ้งถาวร?")) {
-                                  deleteContactMessage(msg.id);
-                                  triggerToast("ลบข้อความเรียบร้อย!");
-                                }
-                              }}
-                              className="bg-rose-50 hover:bg-rose-100 text-rose-700 px-3 py-1.5 rounded-lg font-bold text-[10px] transition-all flex items-center space-x-1"
-                            >
+    onClick={() => {
+      if (confirm("\u0E04\u0E38\u0E13\u0E41\u0E19\u0E48\u0E43\u0E08\u0E27\u0E48\u0E32\u0E15\u0E49\u0E2D\u0E07\u0E01\u0E32\u0E23\u0E25\u0E1A\u0E02\u0E49\u0E2D\u0E04\u0E27\u0E32\u0E21\u0E19\u0E35\u0E49\u0E17\u0E34\u0E49\u0E07\u0E16\u0E32\u0E27\u0E23?")) {
+        deleteContactMessage(msg.id);
+        triggerToast("\u0E25\u0E1A\u0E02\u0E49\u0E2D\u0E04\u0E27\u0E32\u0E21\u0E40\u0E23\u0E35\u0E22\u0E1A\u0E23\u0E49\u0E2D\u0E22!");
+      }
+    }}
+    className="bg-rose-50 hover:bg-rose-100 text-rose-700 px-3 py-1.5 rounded-lg font-bold text-[10px] transition-all flex items-center space-x-1"
+  >
                               <Trash2 className="w-3 h-3" />
                               <span>ลบ</span>
                             </button>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    </div>)}
 
-                  {contactMessages.length === 0 && (
-                    <div className="text-center py-12 text-slate-400 text-xs">
+                  {contactMessages.length === 0 && <div className="text-center py-12 text-slate-400 text-xs">
                       กล่องข้อความว่างเปล่า ไม่มีจดหมายติดต่อในขณะนี้
-                    </div>
-                  )}
+                    </div>}
                 </div>
-              </div>
-            )}
+              </div>}
           </div>
         </div>
       </div>
 
-      {/* ==================== MODALS / OVERLAYS ==================== */}
+      {
+    /* ==================== MODALS / OVERLAYS ==================== */
+  }
 
-      {/* 1. Modal for Major edit/create */}
+      {
+    /* 1. Modal for Major edit/create */
+  }
       <AnimatePresence>
-        {isMajorModalOpen && (
-          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <motion.div 
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white rounded-3xl max-w-2xl w-full border border-slate-200 overflow-hidden shadow-2xl flex flex-col max-h-[90vh]"
-            >
+        {isMajorModalOpen && <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <motion.div
+    initial={{ scale: 0.95, opacity: 0 }}
+    animate={{ scale: 1, opacity: 1 }}
+    exit={{ scale: 0.95, opacity: 0 }}
+    className="bg-white rounded-3xl max-w-2xl w-full border border-slate-200 overflow-hidden shadow-2xl flex flex-col max-h-[90vh]"
+  >
               <div className="bg-brand-secondary text-white p-5 flex justify-between items-center">
                 <h3 className="font-extrabold text-sm md:text-base font-display">
-                  {editingMajor ? `แก้ไขข้อมูลหลักสูตร: ${editingMajor.name}` : "เพิ่มหลักสูตรสาขาวิชาใหม่"}
+                  {editingMajor ? `\u0E41\u0E01\u0E49\u0E44\u0E02\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25\u0E2B\u0E25\u0E31\u0E01\u0E2A\u0E39\u0E15\u0E23: ${editingMajor.name}` : "\u0E40\u0E1E\u0E34\u0E48\u0E21\u0E2B\u0E25\u0E31\u0E01\u0E2A\u0E39\u0E15\u0E23\u0E2A\u0E32\u0E02\u0E32\u0E27\u0E34\u0E0A\u0E32\u0E43\u0E2B\u0E21\u0E48"}
                 </h3>
                 <button onClick={() => setIsMajorModalOpen(false)} className="text-white hover:text-slate-300">
                   <X className="w-5 h-5" />
@@ -1193,10 +1126,10 @@ export default function AdminView() {
                   <div className="space-y-1">
                     <label className="font-bold text-slate-600">ระดับการศึกษา</label>
                     <select
-                      value={tempMajor.level}
-                      onChange={(e) => setTempMajor({ ...tempMajor, level: e.target.value as any })}
-                      className="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50 font-bold"
-                    >
+    value={tempMajor.level}
+    onChange={(e) => setTempMajor({ ...tempMajor, level: e.target.value })}
+    className="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50 font-bold"
+  >
                       <option value="ปวช.">ปวช. (ประกาศนียบัตรวิชาชีพ)</option>
                       <option value="ปวส.">ปวส. (ประกาศนียบัตรวิชาชีพชั้นสูง)</option>
                     </select>
@@ -1204,171 +1137,167 @@ export default function AdminView() {
 
                   <div className="space-y-1">
                     <label className="font-bold text-slate-600">ระยะเวลาเรียนตามหลักสูตร</label>
-                    <input 
-                      type="text"
-                      required
-                      value={tempMajor.duration}
-                      onChange={(e) => setTempMajor({ ...tempMajor, duration: e.target.value })}
-                      className="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50"
-                      placeholder="เช่น 3 ปี หรือ 2 ปี"
-                    />
+                    <input
+    type="text"
+    required
+    value={tempMajor.duration}
+    onChange={(e) => setTempMajor({ ...tempMajor, duration: e.target.value })}
+    className="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50"
+    placeholder="เช่น 3 ปี หรือ 2 ปี"
+  />
                   </div>
 
                   <div className="space-y-1">
                     <label className="font-bold text-slate-600">ชื่อสาขาวิชา (ภาษาไทย)</label>
-                    <input 
-                      type="text"
-                      required
-                      value={tempMajor.name}
-                      onChange={(e) => setTempMajor({ ...tempMajor, name: e.target.value })}
-                      className="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50"
-                      placeholder="เช่น สาขาวิชาช่างไฟฟ้ากำลัง"
-                    />
+                    <input
+    type="text"
+    required
+    value={tempMajor.name}
+    onChange={(e) => setTempMajor({ ...tempMajor, name: e.target.value })}
+    className="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50"
+    placeholder="เช่น สาขาวิชาช่างไฟฟ้ากำลัง"
+  />
                   </div>
 
                   <div className="space-y-1">
                     <label className="font-bold text-slate-600">ชื่อสาขาวิชา (ภาษาอังกฤษ)</label>
-                    <input 
-                      type="text"
-                      required
-                      value={tempMajor.englishName}
-                      onChange={(e) => setTempMajor({ ...tempMajor, englishName: e.target.value })}
-                      className="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50"
-                      placeholder="เช่น Electrical Power"
-                    />
+                    <input
+    type="text"
+    required
+    value={tempMajor.englishName}
+    onChange={(e) => setTempMajor({ ...tempMajor, englishName: e.target.value })}
+    className="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50"
+    placeholder="เช่น Electrical Power"
+  />
                   </div>
 
                   <div className="space-y-1 md:col-span-2">
                     <label className="font-bold text-slate-600">คำอธิบายหลักสูตรย่อ</label>
-                    <textarea 
-                      required
-                      rows={3}
-                      value={tempMajor.description}
-                      onChange={(e) => setTempMajor({ ...tempMajor, description: e.target.value })}
-                      className="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50"
-                      placeholder="อธิบายว่าเรียนอะไรบ้าง และมุ่งเน้นเสริมสร้างคุณสมบัติไหนแก่ผู้เรียน..."
-                    />
+                    <textarea
+    required
+    rows={3}
+    value={tempMajor.description}
+    onChange={(e) => setTempMajor({ ...tempMajor, description: e.target.value })}
+    className="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50"
+    placeholder="อธิบายว่าเรียนอะไรบ้าง และมุ่งเน้นเสริมสร้างคุณสมบัติไหนแก่ผู้เรียน..."
+  />
                   </div>
 
-                  {/* Features inputs list */}
+                  {
+    /* Features inputs list */
+  }
                   <div className="space-y-2.5 md:col-span-2 border-t border-slate-100 pt-3">
                     <label className="font-bold text-slate-700 flex justify-between items-center">
                       <span>จุดเด่นทักษะเด่นของสาขา (ข้อดี)</span>
-                      <button 
-                        type="button" 
-                        onClick={() => setTempMajor({ ...tempMajor, features: [...tempMajor.features, ""] })}
-                        className="text-brand-primary text-[10px] font-bold border border-blue-200 px-2.5 py-1 rounded-lg hover:bg-blue-50"
-                      >
+                      <button
+    type="button"
+    onClick={() => setTempMajor({ ...tempMajor, features: [...tempMajor.features, ""] })}
+    className="text-brand-primary text-[10px] font-bold border border-blue-200 px-2.5 py-1 rounded-lg hover:bg-blue-50"
+  >
                         + เพิ่มจุดเด่น
                       </button>
                     </label>
-                    {tempMajor.features.map((feature, idx) => (
-                      <div key={idx} className="flex items-center space-x-2">
-                        <input 
-                          type="text"
-                          required
-                          value={feature}
-                          onChange={(e) => {
-                            const copy = [...tempMajor.features];
-                            copy[idx] = e.target.value;
-                            setTempMajor({ ...tempMajor, features: copy });
-                          }}
-                          className="w-full p-2 border border-slate-300 rounded-xl text-xs"
-                          placeholder={`จุดเด่นข้อที่ ${idx + 1}`}
-                        />
-                        {tempMajor.features.length > 1 && (
-                          <button 
-                            type="button" 
-                            onClick={() => {
-                              const copy = tempMajor.features.filter((_, fIdx) => fIdx !== idx);
-                              setTempMajor({ ...tempMajor, features: copy });
-                            }}
-                            className="p-1.5 bg-rose-50 text-rose-500 hover:bg-rose-100 rounded-lg"
-                          >
+                    {tempMajor.features.map((feature, idx) => <div key={idx} className="flex items-center space-x-2">
+                        <input
+    type="text"
+    required
+    value={feature}
+    onChange={(e) => {
+      const copy = [...tempMajor.features];
+      copy[idx] = e.target.value;
+      setTempMajor({ ...tempMajor, features: copy });
+    }}
+    className="w-full p-2 border border-slate-300 rounded-xl text-xs"
+    placeholder={`\u0E08\u0E38\u0E14\u0E40\u0E14\u0E48\u0E19\u0E02\u0E49\u0E2D\u0E17\u0E35\u0E48 ${idx + 1}`}
+  />
+                        {tempMajor.features.length > 1 && <button
+    type="button"
+    onClick={() => {
+      const copy = tempMajor.features.filter((_, fIdx) => fIdx !== idx);
+      setTempMajor({ ...tempMajor, features: copy });
+    }}
+    className="p-1.5 bg-rose-50 text-rose-500 hover:bg-rose-100 rounded-lg"
+  >
                             <Trash2 className="w-4 h-4" />
-                          </button>
-                        )}
-                      </div>
-                    ))}
+                          </button>}
+                      </div>)}
                   </div>
 
-                  {/* Career Paths inputs list */}
+                  {
+    /* Career Paths inputs list */
+  }
                   <div className="space-y-2.5 md:col-span-2 border-t border-slate-100 pt-3">
                     <label className="font-bold text-slate-700 flex justify-between items-center">
                       <span>สายงานอาชีพหลังเรียนจบ (Careers)</span>
-                      <button 
-                        type="button" 
-                        onClick={() => setTempMajor({ ...tempMajor, careerPaths: [...tempMajor.careerPaths, ""] })}
-                        className="text-brand-primary text-[10px] font-bold border border-blue-200 px-2.5 py-1 rounded-lg hover:bg-blue-50"
-                      >
+                      <button
+    type="button"
+    onClick={() => setTempMajor({ ...tempMajor, careerPaths: [...tempMajor.careerPaths, ""] })}
+    className="text-brand-primary text-[10px] font-bold border border-blue-200 px-2.5 py-1 rounded-lg hover:bg-blue-50"
+  >
                         + เพิ่มอาชีพ
                       </button>
                     </label>
-                    {tempMajor.careerPaths.map((path, idx) => (
-                      <div key={idx} className="flex items-center space-x-2">
-                        <input 
-                          type="text"
-                          required
-                          value={path}
-                          onChange={(e) => {
-                            const copy = [...tempMajor.careerPaths];
-                            copy[idx] = e.target.value;
-                            setTempMajor({ ...tempMajor, careerPaths: copy });
-                          }}
-                          className="w-full p-2 border border-slate-300 rounded-xl text-xs"
-                          placeholder={`สายอาชีพที่ ${idx + 1}`}
-                        />
-                        {tempMajor.careerPaths.length > 1 && (
-                          <button 
-                            type="button" 
-                            onClick={() => {
-                              const copy = tempMajor.careerPaths.filter((_, pIdx) => pIdx !== idx);
-                              setTempMajor({ ...tempMajor, careerPaths: copy });
-                            }}
-                            className="p-1.5 bg-rose-50 text-rose-500 hover:bg-rose-100 rounded-lg"
-                          >
+                    {tempMajor.careerPaths.map((path, idx) => <div key={idx} className="flex items-center space-x-2">
+                        <input
+    type="text"
+    required
+    value={path}
+    onChange={(e) => {
+      const copy = [...tempMajor.careerPaths];
+      copy[idx] = e.target.value;
+      setTempMajor({ ...tempMajor, careerPaths: copy });
+    }}
+    className="w-full p-2 border border-slate-300 rounded-xl text-xs"
+    placeholder={`\u0E2A\u0E32\u0E22\u0E2D\u0E32\u0E0A\u0E35\u0E1E\u0E17\u0E35\u0E48 ${idx + 1}`}
+  />
+                        {tempMajor.careerPaths.length > 1 && <button
+    type="button"
+    onClick={() => {
+      const copy = tempMajor.careerPaths.filter((_, pIdx) => pIdx !== idx);
+      setTempMajor({ ...tempMajor, careerPaths: copy });
+    }}
+    className="p-1.5 bg-rose-50 text-rose-500 hover:bg-rose-100 rounded-lg"
+  >
                             <Trash2 className="w-4 h-4" />
-                          </button>
-                        )}
-                      </div>
-                    ))}
+                          </button>}
+                      </div>)}
                   </div>
                 </div>
 
                 <div className="flex justify-end space-x-3 pt-6 border-t border-slate-100">
                   <button
-                    type="button"
-                    onClick={() => setIsMajorModalOpen(false)}
-                    className="bg-slate-100 hover:bg-slate-200 text-slate-600 px-5 py-2 rounded-xl font-bold"
-                  >
+    type="button"
+    onClick={() => setIsMajorModalOpen(false)}
+    className="bg-slate-100 hover:bg-slate-200 text-slate-600 px-5 py-2 rounded-xl font-bold"
+  >
                     ยกเลิก
                   </button>
                   <button
-                    type="submit"
-                    className="bg-brand-primary hover:bg-blue-700 text-white px-6 py-2 rounded-xl font-bold shadow-md"
-                  >
+    type="submit"
+    className="bg-brand-primary hover:bg-blue-700 text-white px-6 py-2 rounded-xl font-bold shadow-md"
+  >
                     ยืนยันบันทึกข้อมูล
                   </button>
                 </div>
               </form>
             </motion.div>
-          </div>
-        )}
+          </div>}
       </AnimatePresence>
 
-      {/* 2. Modal for News edit/create */}
+      {
+    /* 2. Modal for News edit/create */
+  }
       <AnimatePresence>
-        {isNewsModalOpen && (
-          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <motion.div 
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white rounded-3xl max-w-2xl w-full border border-slate-200 overflow-hidden shadow-2xl flex flex-col max-h-[90vh]"
-            >
+        {isNewsModalOpen && <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <motion.div
+    initial={{ scale: 0.95, opacity: 0 }}
+    animate={{ scale: 1, opacity: 1 }}
+    exit={{ scale: 0.95, opacity: 0 }}
+    className="bg-white rounded-3xl max-w-2xl w-full border border-slate-200 overflow-hidden shadow-2xl flex flex-col max-h-[90vh]"
+  >
               <div className="bg-brand-secondary text-white p-5 flex justify-between items-center">
                 <h3 className="font-extrabold text-sm md:text-base font-display">
-                  {editingNews ? "แก้ไขรายละเอียดประกาศข่าวสาร" : "เขียนและลงข่าวสารใหม่"}
+                  {editingNews ? "\u0E41\u0E01\u0E49\u0E44\u0E02\u0E23\u0E32\u0E22\u0E25\u0E30\u0E40\u0E2D\u0E35\u0E22\u0E14\u0E1B\u0E23\u0E30\u0E01\u0E32\u0E28\u0E02\u0E48\u0E32\u0E27\u0E2A\u0E32\u0E23" : "\u0E40\u0E02\u0E35\u0E22\u0E19\u0E41\u0E25\u0E30\u0E25\u0E07\u0E02\u0E48\u0E32\u0E27\u0E2A\u0E32\u0E23\u0E43\u0E2B\u0E21\u0E48"}
                 </h3>
                 <button onClick={() => setIsNewsModalOpen(false)} className="text-white hover:text-slate-300">
                   <X className="w-5 h-5" />
@@ -1378,24 +1307,24 @@ export default function AdminView() {
               <form onSubmit={handleSaveNews} className="p-6 overflow-y-auto space-y-4 flex-grow text-xs">
                 <div className="space-y-1">
                   <label className="font-bold text-slate-600">หัวข้อข่าวสาร/ประกาศ (หัวข้อใหญ่)</label>
-                  <input 
-                    type="text"
-                    required
-                    value={tempNews.title}
-                    onChange={(e) => setTempNews({ ...tempNews, title: e.target.value })}
-                    className="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50 font-bold text-slate-800"
-                    placeholder="ใส่หัวข้อข่าวที่ชัดเจน ดึงดูดความสนใจ..."
-                  />
+                  <input
+    type="text"
+    required
+    value={tempNews.title}
+    onChange={(e) => setTempNews({ ...tempNews, title: e.target.value })}
+    className="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50 font-bold text-slate-800"
+    placeholder="ใส่หัวข้อข่าวที่ชัดเจน ดึงดูดความสนใจ..."
+  />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <label className="font-bold text-slate-600">หมวดหมู่ข่าว</label>
                     <select
-                      value={tempNews.category}
-                      onChange={(e) => setTempNews({ ...tempNews, category: e.target.value as any })}
-                      className="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50 font-bold text-slate-700"
-                    >
+    value={tempNews.category}
+    onChange={(e) => setTempNews({ ...tempNews, category: e.target.value })}
+    className="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50 font-bold text-slate-700"
+  >
                       <option value="ข่าวประชาสัมพันธ์">ข่าวประชาสัมพันธ์</option>
                       <option value="ข่าววิชาการ">ข่าววิชาการ</option>
                       <option value="ข่าวกิจกรรม">ข่าวกิจกรรม</option>
@@ -1405,72 +1334,72 @@ export default function AdminView() {
 
                   <div className="space-y-1">
                     <label className="font-bold text-slate-600">รูปภาพปกข่าวสาร (URL ลิงก์รูปภาพ)</label>
-                    <input 
-                      type="text"
-                      value={tempNews.imageUrl}
-                      onChange={(e) => setTempNews({ ...tempNews, imageUrl: e.target.value })}
-                      className="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50"
-                      placeholder="เช่น https://images.unsplash.com/... หรือเว้นว่างเพื่อใช้ภาพจำลอง"
-                    />
+                    <input
+    type="text"
+    value={tempNews.imageUrl}
+    onChange={(e) => setTempNews({ ...tempNews, imageUrl: e.target.value })}
+    className="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50"
+    placeholder="เช่น https://images.unsplash.com/... หรือเว้นว่างเพื่อใช้ภาพจำลอง"
+  />
                   </div>
                 </div>
 
                 <div className="space-y-1">
                   <label className="font-bold text-slate-600">คำโปรยย่อ (Excerpt)</label>
-                  <input 
-                    type="text"
-                    required
-                    value={tempNews.excerpt}
-                    onChange={(e) => setTempNews({ ...tempNews, excerpt: e.target.value })}
-                    className="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50"
-                    placeholder="สรุปเนื้อหาข่าวสารใน 1-2 บรรทัด เพื่อโชว์ที่หน้าการ์ดแรก..."
-                  />
+                  <input
+    type="text"
+    required
+    value={tempNews.excerpt}
+    onChange={(e) => setTempNews({ ...tempNews, excerpt: e.target.value })}
+    className="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50"
+    placeholder="สรุปเนื้อหาข่าวสารใน 1-2 บรรทัด เพื่อโชว์ที่หน้าการ์ดแรก..."
+  />
                 </div>
 
                 <div className="space-y-1">
                   <label className="font-bold text-slate-600">เนื้อหาข่าวแบบละเอียด (Content)</label>
-                  <textarea 
-                    required
-                    rows={8}
-                    value={tempNews.content}
-                    onChange={(e) => setTempNews({ ...tempNews, content: e.target.value })}
-                    className="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50 leading-relaxed font-mono"
-                    placeholder="ใส่รายละเอียดทั้งหมดของข่าวประชาสัมพันธ์ สามารถขึ้นบรรทัดใหม่ได้..."
-                  />
+                  <textarea
+    required
+    rows={8}
+    value={tempNews.content}
+    onChange={(e) => setTempNews({ ...tempNews, content: e.target.value })}
+    className="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50 leading-relaxed font-mono"
+    placeholder="ใส่รายละเอียดทั้งหมดของข่าวประชาสัมพันธ์ สามารถขึ้นบรรทัดใหม่ได้..."
+  />
                 </div>
 
                 <div className="flex justify-end space-x-3 pt-6 border-t border-slate-100">
                   <button
-                    type="button"
-                    onClick={() => setIsNewsModalOpen(false)}
-                    className="bg-slate-100 hover:bg-slate-200 text-slate-600 px-5 py-2 rounded-xl font-bold"
-                  >
+    type="button"
+    onClick={() => setIsNewsModalOpen(false)}
+    className="bg-slate-100 hover:bg-slate-200 text-slate-600 px-5 py-2 rounded-xl font-bold"
+  >
                     ยกเลิก
                   </button>
                   <button
-                    type="submit"
-                    className="bg-brand-primary hover:bg-blue-700 text-white px-6 py-2 rounded-xl font-bold shadow-md"
-                  >
+    type="submit"
+    className="bg-brand-primary hover:bg-blue-700 text-white px-6 py-2 rounded-xl font-bold shadow-md"
+  >
                     ยืนยันเขียนประกาศ
                   </button>
                 </div>
               </form>
             </motion.div>
-          </div>
-        )}
+          </div>}
       </AnimatePresence>
 
-      {/* 3. Modal/Receipt detail for Enrolled Student */}
+      {
+    /* 3. Modal/Receipt detail for Enrolled Student */
+  }
       <AnimatePresence>
-        {selectedStudent && (
-          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
-            <motion.div 
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white rounded-3xl max-w-2xl w-full border border-slate-200 overflow-hidden shadow-2xl flex flex-col"
-              id="student-receipt-modal"
-            >
+        {selectedStudent && <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+            <motion.div
+    initial={{ scale: 0.95, opacity: 0 }}
+    animate={{ scale: 1, opacity: 1 }}
+    exit={{ scale: 0.95, opacity: 0 }}
+    className="bg-white rounded-3xl max-w-2xl w-full border border-slate-200 overflow-hidden shadow-2xl flex flex-col"
+    id="student-receipt-modal"
+  >
               <div className="bg-brand-secondary text-white p-5 flex justify-between items-center print:hidden">
                 <h3 className="font-extrabold text-xs md:text-sm flex items-center space-x-2">
                   <Printer className="w-4 h-4 text-amber-300" />
@@ -1481,9 +1410,13 @@ export default function AdminView() {
                 </button>
               </div>
 
-              {/* Printable Area */}
+              {
+    /* Printable Area */
+  }
               <div className="p-6 md:p-10 space-y-6 text-slate-800" id="admission-printable-content">
-                {/* Receipt Header Badge */}
+                {
+    /* Receipt Header Badge */
+  }
                 <div className="text-center space-y-2 border-b border-dashed border-slate-200 pb-5">
                   <GraduationCap className="w-10 h-10 text-brand-primary mx-auto" />
                   <div>
@@ -1495,7 +1428,9 @@ export default function AdminView() {
                   </div>
                 </div>
 
-                {/* Info Block */}
+                {
+    /* Info Block */
+  }
                 <div className="grid grid-cols-2 gap-4 text-xs">
                   <div className="space-y-1">
                     <p className="text-[10px] text-slate-400 font-bold uppercase">รหัสผู้สมัครสอบคัดเลือก</p>
@@ -1522,7 +1457,7 @@ export default function AdminView() {
 
                   <div className="space-y-1">
                     <p className="text-[10px] text-slate-400 font-bold uppercase">อีเมลติดต่อกลับ</p>
-                    <p className="text-slate-600 underline">{selectedStudent.email || "ไม่ได้ระบุ"}</p>
+                    <p className="text-slate-600 underline">{selectedStudent.email || "\u0E44\u0E21\u0E48\u0E44\u0E14\u0E49\u0E23\u0E30\u0E1A\u0E38"}</p>
                   </div>
                   <div className="space-y-1">
                     <p className="text-[10px] text-slate-400 font-bold uppercase">เกรดเฉลี่ยสะสม (GPA)</p>
@@ -1536,7 +1471,7 @@ export default function AdminView() {
                   <div className="space-y-1">
                     <p className="text-[10px] text-slate-400 font-bold uppercase">สาขาที่สมัครเรียน</p>
                     <p className="font-extrabold text-slate-800 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-lg inline-block text-[11px]">
-                      {selectedStudent.levelInterest} {majors.find(m => m.id === selectedStudent.majorInterest)?.name || selectedStudent.majorInterest}
+                      {selectedStudent.levelInterest} {majors.find((m) => m.id === selectedStudent.majorInterest)?.name || selectedStudent.majorInterest}
                     </p>
                   </div>
 
@@ -1546,16 +1481,14 @@ export default function AdminView() {
                   </div>
                 </div>
 
-                {/* Stamp and sign area */}
+                {
+    /* Stamp and sign area */
+  }
                 <div className="flex justify-between items-center pt-8 border-t border-slate-200">
                   <div className="space-y-1 text-center border-2 border-dashed border-emerald-500/20 p-3 rounded-2xl bg-emerald-50/10">
                     <p className="text-[10px] text-slate-400">สถานะเอกสารปัจจุบัน</p>
-                    <p className={`text-xs font-extrabold ${
-                      selectedStudent.status === "approved" ? "text-emerald-600" :
-                      selectedStudent.status === "verified" ? "text-blue-600" : "text-amber-500"
-                    }`}>
-                      {selectedStudent.status === "approved" ? "อนุมัติมีสิทธิ์สอบแล้ว" :
-                       selectedStudent.status === "verified" ? "ตรวจสอบผ่านเอกสาร" : "รอเจ้าหน้าที่ตรวจทาน"}
+                    <p className={`text-xs font-extrabold ${selectedStudent.status === "approved" ? "text-emerald-600" : selectedStudent.status === "verified" ? "text-blue-600" : "text-amber-500"}`}>
+                      {selectedStudent.status === "approved" ? "\u0E2D\u0E19\u0E38\u0E21\u0E31\u0E15\u0E34\u0E21\u0E35\u0E2A\u0E34\u0E17\u0E18\u0E34\u0E4C\u0E2A\u0E2D\u0E1A\u0E41\u0E25\u0E49\u0E27" : selectedStudent.status === "verified" ? "\u0E15\u0E23\u0E27\u0E08\u0E2A\u0E2D\u0E1A\u0E1C\u0E48\u0E32\u0E19\u0E40\u0E2D\u0E01\u0E2A\u0E32\u0E23" : "\u0E23\u0E2D\u0E40\u0E08\u0E49\u0E32\u0E2B\u0E19\u0E49\u0E32\u0E17\u0E35\u0E48\u0E15\u0E23\u0E27\u0E08\u0E17\u0E32\u0E19"}
                     </p>
                   </div>
 
@@ -1567,54 +1500,54 @@ export default function AdminView() {
                 </div>
               </div>
 
-              {/* Action Buttons */}
+              {
+    /* Action Buttons */
+  }
               <div className="bg-slate-50 px-6 py-4 flex justify-between items-center border-t border-slate-200 print:hidden">
                 <div className="flex space-x-2">
                   <button
-                    onClick={() => {
-                      updateEnrollmentStatus(selectedStudent.id, "approved");
-                      setSelectedStudent({ ...selectedStudent, status: "approved" });
-                      triggerToast("อนุมัติใบสมัครเรียบร้อยแล้ว");
-                    }}
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs px-4 py-2 rounded-xl transition-all shadow-sm"
-                  >
+    onClick={() => {
+      updateEnrollmentStatus(selectedStudent.id, "approved");
+      setSelectedStudent({ ...selectedStudent, status: "approved" });
+      triggerToast("\u0E2D\u0E19\u0E38\u0E21\u0E31\u0E15\u0E34\u0E43\u0E1A\u0E2A\u0E21\u0E31\u0E04\u0E23\u0E40\u0E23\u0E35\u0E22\u0E1A\u0E23\u0E49\u0E2D\u0E22\u0E41\u0E25\u0E49\u0E27");
+    }}
+    className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs px-4 py-2 rounded-xl transition-all shadow-sm"
+  >
                     อนุมัติใบสมัคร
                   </button>
                   <button
-                    onClick={() => {
-                      updateEnrollmentStatus(selectedStudent.id, "rejected");
-                      setSelectedStudent({ ...selectedStudent, status: "rejected" });
-                      triggerToast("ปรับสถานะเป็นเอกสารไม่ผ่าน");
-                    }}
-                    className="bg-rose-50 hover:bg-rose-100 text-rose-700 font-extrabold text-xs px-4 py-2 rounded-xl transition-all border border-rose-200"
-                  >
+    onClick={() => {
+      updateEnrollmentStatus(selectedStudent.id, "rejected");
+      setSelectedStudent({ ...selectedStudent, status: "rejected" });
+      triggerToast("\u0E1B\u0E23\u0E31\u0E1A\u0E2A\u0E16\u0E32\u0E19\u0E30\u0E40\u0E1B\u0E47\u0E19\u0E40\u0E2D\u0E01\u0E2A\u0E32\u0E23\u0E44\u0E21\u0E48\u0E1C\u0E48\u0E32\u0E19");
+    }}
+    className="bg-rose-50 hover:bg-rose-100 text-rose-700 font-extrabold text-xs px-4 py-2 rounded-xl transition-all border border-rose-200"
+  >
                     ปฏิเสธ/เอกสารไม่ผ่าน
                   </button>
                 </div>
 
                 <div className="flex space-x-2">
                   <button
-                    onClick={() => {
-                      window.print();
-                    }}
-                    className="bg-slate-900 hover:bg-black text-white font-extrabold text-xs px-4 py-2 rounded-xl transition-all flex items-center space-x-1"
-                  >
+    onClick={() => {
+      window.print();
+    }}
+    className="bg-slate-900 hover:bg-black text-white font-extrabold text-xs px-4 py-2 rounded-xl transition-all flex items-center space-x-1"
+  >
                     <Printer className="w-3.5 h-3.5" />
                     <span>พิมพ์ใบสมัคร</span>
                   </button>
                   <button
-                    type="button"
-                    onClick={() => setSelectedStudent(null)}
-                    className="bg-slate-200 hover:bg-slate-300 text-slate-600 font-extrabold text-xs px-4 py-2 rounded-xl transition-all"
-                  >
+    type="button"
+    onClick={() => setSelectedStudent(null)}
+    className="bg-slate-200 hover:bg-slate-300 text-slate-600 font-extrabold text-xs px-4 py-2 rounded-xl transition-all"
+  >
                     ปิดหน้าต่าง
                   </button>
                 </div>
               </div>
             </motion.div>
-          </div>
-        )}
+          </div>}
       </AnimatePresence>
-    </div>
-  );
+    </div>;
 }

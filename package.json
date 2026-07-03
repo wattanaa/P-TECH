@@ -6,9 +6,10 @@
   "scripts": {
     "dev": "vite --port=3000 --host=0.0.0.0",
     "build": "vite build",
+    "build:single": "vite build && node inline-assets.js && python3 make_zip.py",
     "preview": "vite preview",
-    "clean": "rm -rf dist server.js",
-    "lint": "tsc --noEmit"
+    "clean": "rm -rf dist server.js pathumrat-tech-college.html pathumrat-tech-college-website.zip",
+    "lint": "echo 'No TypeScript linting needed for pure JS/JSX project'"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",
