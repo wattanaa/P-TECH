@@ -1,0 +1,6 @@
+{
+  "name": "วิทยาลัยเทคโนโลยีปทุมรัตต์",
+  "description": "เว็บไซต์สำหรับประชาสัมพันธ์ข้อมูลการเรียนและข่าวสารต่างๆ ของวิทยาลัยเทคโนโลยีปทุมรัตต์",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
