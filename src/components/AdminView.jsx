@@ -1466,21 +1466,41 @@ export default function AdminView() {
                 {/* Grid 1: Database Types Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                   <div 
-                    className="p-5 rounded-2xl border bg-slate-50 border-slate-100 relative overflow-hidden flex flex-col justify-between h-40 opacity-75"
+                    onClick={() => {
+                      setDbType("local");
+                      setDbSettings({
+                        type: "local",
+                        gsheetUrl: gsUrl,
+                        gsheetId: gsId,
+                        syncEnabled: false
+                      });
+                      triggerToast("เปิดใช้งานฐานข้อมูล Local Browser (LocalStorage) สำเร็จ!");
+                    }}
+                    className={`p-5 rounded-2xl border transition-all duration-200 cursor-pointer relative overflow-hidden flex flex-col justify-between h-40 ${dbType === "local" ? "bg-amber-50/70 border-amber-500 shadow-md ring-1 ring-amber-500/20" : "bg-white border-slate-200 hover:border-slate-300 hover:shadow"}`}
                   >
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center text-brand-primary">
+                        <span className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center text-amber-600">
                           <HardDrive className="w-4 h-4" />
                         </span>
+                        {dbType === "local" && <span className="text-[10px] bg-amber-600 text-white font-bold px-2 py-0.5 rounded-full">ใช้งานอยู่</span>}
                       </div>
-                      <h4 className="text-xs font-bold text-slate-500 pt-1">Local Browser Database (LocalStorage)</h4>
-                      <p className="text-[10px] text-slate-400 font-medium leading-relaxed">สำรองข้อมูลออฟไลน์ในเว็บบราวเซอร์ของคุณ</p>
+                      <h4 className="text-xs font-bold text-slate-800 pt-1">Local Browser Database (LocalStorage)</h4>
+                      <p className="text-[10px] text-slate-500 leading-relaxed font-medium">สำรองและประมวลผลข้อมูลออฟไลน์อย่างสมบูรณ์ในเว็บบราวเซอร์ของคุณ</p>
                     </div>
                   </div>
 
                   <div 
-                    onClick={() => setDbType("gsheet")}
+                    onClick={() => {
+                      setDbType("gsheet");
+                      setDbSettings({
+                        type: "gsheet",
+                        gsheetUrl: gsUrl,
+                        gsheetId: gsId,
+                        syncEnabled: !!gsUrl
+                      });
+                      triggerToast("เลือกฐานข้อมูลโหมด Google Sheets สำเร็จ! (กรุณากรอกและบันทึกสคริปต์ Webhook ด้านล่าง)");
+                    }}
                     className={`p-5 rounded-2xl border transition-all duration-200 cursor-pointer relative overflow-hidden flex flex-col justify-between h-40 ${dbType === "gsheet" ? "bg-emerald-50/70 border-emerald-500 shadow-md ring-1 ring-emerald-500/20" : "bg-white border-slate-200 hover:border-slate-300 hover:shadow"}`}
                   >
                     <div className="space-y-2">
@@ -1491,22 +1511,32 @@ export default function AdminView() {
                         {dbType === "gsheet" && <span className="text-[10px] bg-emerald-600 text-white font-bold px-2 py-0.5 rounded-full">ใช้งานอยู่</span>}
                       </div>
                       <h4 className="text-xs font-bold text-slate-800 pt-1">Google Sheets Database (Sync Mode)</h4>
-                      <p className="text-[10px] text-slate-400 font-medium leading-relaxed">ซิงโครไนซ์ใบสมัครเรียนและคำถามติดต่อเพิ่มเติมเข้าสู่ Google Sheets</p>
+                      <p className="text-[10px] text-slate-500 leading-relaxed font-medium">ซิงโครไนซ์ใบสมัครเรียนและคำถามติดต่อเพิ่มเติมเข้าสู่ Google Sheets โดยตรง</p>
                     </div>
                   </div>
 
                   <div 
-                    className="p-5 rounded-2xl border bg-blue-50/70 border-blue-500 shadow-md ring-1 ring-blue-500/20 relative overflow-hidden flex flex-col justify-between h-40"
+                    onClick={() => {
+                      setDbType("firestore");
+                      setDbSettings({
+                        type: "firestore",
+                        gsheetUrl: gsUrl,
+                        gsheetId: gsId,
+                        syncEnabled: false
+                      });
+                      triggerToast("เปิดใช้งานฐานข้อมูลหลัก Firebase Cloud Firestore เรียบร้อยแล้ว!");
+                    }}
+                    className={`p-5 rounded-2xl border transition-all duration-200 cursor-pointer relative overflow-hidden flex flex-col justify-between h-40 ${dbType === "firestore" ? "bg-blue-50/70 border-blue-500 shadow-md ring-1 ring-blue-500/20" : "bg-white border-slate-200 hover:border-slate-300 hover:shadow"}`}
                   >
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
                         <span className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center text-brand-primary">
                           <Server className="w-4 h-4" />
                         </span>
-                        <span className="text-[10px] bg-blue-600 text-white font-bold px-2 py-0.5 rounded-full animate-pulse">เชื่อมต่อเรียลไทม์</span>
+                        {dbType === "firestore" && <span className="text-[10px] bg-blue-600 text-white font-bold px-2 py-0.5 rounded-full animate-pulse">ใช้งานอยู่</span>}
                       </div>
-                      <h4 className="text-xs font-extrabold text-blue-900 pt-1">Firebase Cloud Firestore</h4>
-                      <p className="text-[10px] text-blue-600 font-semibold leading-relaxed">ฐานข้อมูลหลักของวิทยาลัย: บันทึก ปรับปรุง และดึงข้อมูลใบสมัคร ข่าวสาร หลักสูตร คณะผู้บริหาร และคำถามอย่างเรียลไทม์</p>
+                      <h4 className="text-xs font-bold text-slate-800 pt-1">Firebase Cloud Firestore</h4>
+                      <p className="text-[10px] text-slate-500 leading-relaxed font-medium">เชื่อมต่อกับฐานข้อมูลหลักของระบบคลาวด์แบบเรียลไทม์ ปลอดภัยและเสถียร</p>
                     </div>
                   </div>
                 </div>
@@ -1514,7 +1544,8 @@ export default function AdminView() {
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                   {/* Left block: Config Form & Guides */}
                   <div className="lg:col-span-7 space-y-6">
-                    {dbType === "gsheet" ? <form onSubmit={handleSaveDbSettings} className="bg-white border border-slate-200 p-6 rounded-2xl space-y-4 shadow-sm">
+                    {dbType === "gsheet" ? (
+                      <form onSubmit={handleSaveDbSettings} className="bg-white border border-slate-200 p-6 rounded-2xl space-y-4 shadow-sm">
                         <div className="flex items-center space-x-2 text-xs font-bold text-emerald-700">
                           <FileSpreadsheet className="w-4 h-4" />
                           <span>กำหนดค่า Google Sheets Webhook</span>
@@ -1557,14 +1588,25 @@ export default function AdminView() {
                           <Check className="w-4 h-4" />
                           <span>บันทึกและเปิดใช้งาน Google Sheets Sync</span>
                         </button>
-                      </form> : <div className="bg-slate-50 border border-slate-200 p-6 rounded-2xl text-center space-y-3">
-                        <HardDrive className="w-10 h-10 text-slate-400 mx-auto" />
-                        <h4 className="text-xs font-bold text-slate-800">ระบบทำงานบนฐานข้อมูล Local Storage</h4>
+                      </form>
+                    ) : dbType === "local" ? (
+                      <div className="bg-white border border-slate-200 p-6 rounded-2xl text-center space-y-4 shadow-sm">
+                        <HardDrive className="w-12 h-12 text-amber-500 mx-auto bg-amber-50 p-2.5 rounded-2xl" />
+                        <h4 className="text-xs font-bold text-slate-800">ระบบทำงานบนฐานข้อมูล Local Storage (LocalStorage)</h4>
                         <p className="text-[11px] text-slate-500 leading-relaxed max-w-sm mx-auto">
-                          ข้อมูลใบสมัคร, ประวัติ, ข่าวสาร, ข้อมูลหลักสูตร ปัจจุบันบันทึกอย่างปลอดภัยในบราวเซอร์ของเครื่องคุณ 
-                          คุณสามารถส่งออกข้อมูลดิบนี้เก็บไว้หรือแชร์เพื่อใช้นำเข้าสเปรดชีตได้ผ่านแผงขวามือ
+                          ข้อมูลใบสมัคร, ข่าวสาร, คณะผู้บริหาร, คำถามที่พบบ่อย และสไลด์นำเสนอทั้งหมดได้รับการบันทึกอย่างออฟไลน์และปลอดภัยในเว็บบราวเซอร์ของคุณเรียบร้อยแล้ว
+                          คุณสามารถส่งออกรายงานและสำรองข้อมูลได้จากแผงควบคุมหลักได้ทันที
                         </p>
-                      </div>}
+                      </div>
+                    ) : (
+                      <div className="bg-white border border-slate-200 p-6 rounded-2xl text-center space-y-4 shadow-sm">
+                        <Server className="w-12 h-12 text-blue-500 mx-auto bg-blue-50 p-2.5 rounded-2xl" />
+                        <h4 className="text-xs font-bold text-slate-800">ระบบทำงานบนฐานข้อมูล Firebase Cloud Firestore</h4>
+                        <p className="text-[11px] text-slate-500 leading-relaxed max-w-sm mx-auto">
+                          เปิดใช้งานระบบฐานข้อมูลหลักคลาวด์คีย์ ข้อมูลใบสมัครเรียนและการปรับแต่งทั้งหมดเชื่อมโยงเรียลไทม์ผ่าน Google Cloud Run คอนเทนเนอร์ของคุณอย่างปลอดภัยสูงสุด
+                        </p>
+                      </div>
+                    )}
 
                     {/* Instruction Box for Google Apps Script */}
                     {dbType === "gsheet" && <div className="bg-slate-900 text-slate-300 p-5 rounded-2xl space-y-3">

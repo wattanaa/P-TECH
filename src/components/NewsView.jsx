@@ -220,7 +220,7 @@ export default function NewsView({ selectedNews, setSelectedNews }) {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredNews.map((news) => <article
       key={news.id}
-      className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer flex flex-col h-full group"
+      className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:scale-[1.02] hover:border-slate-300 transition-all duration-300 ease-out cursor-pointer flex flex-col h-full group"
       onClick={() => handleReadNews(news)}
     >
                   {
