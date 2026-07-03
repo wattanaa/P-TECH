@@ -19,6 +19,8 @@ import {
   ShieldCheck,
   Flame,
   ChevronRight,
+  ChevronDown,
+  ChevronUp,
   Database,
   DownloadCloud,
   HeartHandshake
@@ -27,6 +29,7 @@ import { useData } from "../context/DataContext";
 export default function HomeView({ setActiveTab, setSelectedNews }) {
   const { collegeInfo, majors, newsData, heroSlides } = useData();
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [visibleNewsCount, setVisibleNewsCount] = useState(3);
   useEffect(() => {
     if (!heroSlides || heroSlides.length === 0) return;
     const timer = setInterval(() => {
@@ -542,7 +545,7 @@ export default function HomeView({ setActiveTab, setSelectedNews }) {
       {
     /* Latest News & Announcements Highlights */
   }
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" id="news-section">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-4">
           <div className="space-y-2">
             <span className="text-brand-primary font-bold text-xs uppercase tracking-widest bg-blue-50 px-3 py-1 rounded-full">
@@ -568,10 +571,10 @@ export default function HomeView({ setActiveTab, setSelectedNews }) {
         </div>
 
         {
-    /* 3 latest news posts */
+    /* Dynamic news posts */
   }
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {(newsData || []).slice(0, 3).map((news) => <article
+          {(newsData || []).slice(0, visibleNewsCount).map((news) => <article
     key={news.id}
     className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer flex flex-col h-full group"
     onClick={() => handleNewsClick(news)}
@@ -623,6 +626,33 @@ export default function HomeView({ setActiveTab, setSelectedNews }) {
               </div>
             </article>)}
         </div>
+
+        {/* Expand/Collapse News Controls */}
+        {newsData && newsData.length > 3 && (
+          <div className="mt-10 flex justify-center gap-4">
+            {visibleNewsCount < newsData.length ? (
+              <button
+                onClick={() => setVisibleNewsCount(prev => Math.min(prev + 3, newsData.length))}
+                className="inline-flex items-center space-x-2 bg-white hover:bg-slate-50 text-slate-700 font-semibold px-6 py-3 rounded-full border border-slate-200 shadow-sm transition-all duration-150 transform hover:-translate-y-0.5"
+              >
+                <ChevronDown className="w-4 h-4 text-slate-500 animate-bounce" />
+                <span>แสดงข่าวสารเพิ่มเติม ({newsData.length - visibleNewsCount} หัวข้อ)</span>
+              </button>
+            ) : (
+              <button
+                onClick={() => {
+                  setVisibleNewsCount(3);
+                  const el = document.getElementById("news-section");
+                  if (el) el.scrollIntoView({ behavior: "smooth" });
+                }}
+                className="inline-flex items-center space-x-2 bg-white hover:bg-slate-50 text-slate-700 font-semibold px-6 py-3 rounded-full border border-slate-200 shadow-sm transition-all duration-150 transform hover:-translate-y-0.5"
+              >
+                <ChevronUp className="w-4 h-4 text-slate-500" />
+                <span>แสดงน้อยลง</span>
+              </button>
+            )}
+          </div>
+        )}
       </section>
 
       {

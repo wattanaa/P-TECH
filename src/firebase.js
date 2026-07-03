@@ -4,17 +4,9 @@
  */
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
-
-const firebaseConfig = {
-  projectId: "focused-progress-flsxp",
-  appId: "1:75390990969:web:a89781bbea13fcfd6772a8",
-  apiKey: "AIzaSyA5T3JFGx2kR6cYWXDsaAvKmZ6hgVtBP64",
-  authDomain: "focused-progress-flsxp.firebaseapp.com",
-  storageBucket: "focused-progress-flsxp.firebasestorage.app",
-  messagingSenderId: "75390990969"
-};
+import firebaseConfig from "../firebase-applet-config.json";
 
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
 
 export { db };

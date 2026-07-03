@@ -23,6 +23,33 @@ import {
   faqList as defaultFaqList
 } from "../data";
 
+const OperationType = {
+  CREATE: "create",
+  UPDATE: "update",
+  DELETE: "delete",
+  LIST: "list",
+  GET: "get",
+  WRITE: "write"
+};
+
+function handleFirestoreError(error, operationType, path) {
+  const errInfo = {
+    error: error instanceof Error ? error.message : String(error),
+    authInfo: {
+      userId: null,
+      email: null,
+      emailVerified: null,
+      isAnonymous: null,
+      tenantId: null,
+      providerInfo: []
+    },
+    operationType,
+    path
+  };
+  console.error("Firestore Error: ", JSON.stringify(errInfo));
+  throw new Error(JSON.stringify(errInfo));
+}
+
 const DataContext = createContext(void 0);
 
 const initialMockStudents = [
@@ -94,13 +121,13 @@ const initialMockContactMessages = [
 const defaultSlides = [
   {
     id: "slide-1",
-    title: "ยินดีต้อนรับสู่ วิทยาลัยเทคโนโลยีปทุมรัตต์",
-    subtitle: "ก้าวสู่อนาคตที่มั่นคงด้วยการศึกษาสายอาชีพ",
-    description: "เน้นการเรียนรู้ภาคปฏิบัติ อุปกรณ์ทันสมัยที่ได้รับมาตรฐานสากล จบมาพร้อมทักษะที่ตลาดแรงงานยุคใหม่ต้องการ",
-    cta: "สมัครเรียนออนไลน์",
-    ctaTab: "admission",
+    title: "ยินดีต้อนรับสู่ วิทยาลัยเทคโนโลยีปทุมรัตต์ (PTC)",
+    subtitle: "สถาบันการศึกษาวิชาชีพชั้นนำ มุ่งสู่มาตรฐานระดับสากล",
+    description: "มุ่งเน้นสร้างนักปฏิบัติมืออาชีพและนวัตกรสายอาชีพที่มีคุณภาพ พร้อมขับเคลื่อนเศรษฐกิจด้วยเทคโนโลยีที่ทันสมัยและทักษะรอบด้าน",
+    cta: "สำรวจหลักสูตรวิชาที่เปิดสอน",
+    ctaTab: "curriculum",
     bgImage: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=1600&auto=format&fit=crop",
-    badge: "เปิดรับสมัครปีการศึกษา 2570 แล้ว!"
+    badge: "ยินดีต้อนรับสู่วิทยาลัย PTC"
   },
   {
     id: "slide-2",
@@ -141,19 +168,27 @@ export const DataProvider = ({ children }) => {
       if (docSnap.exists()) {
         setCollegeInfo(docSnap.data());
       } else {
-        setDoc(collegeRef, defaultCollegeInfo);
+        setDoc(collegeRef, defaultCollegeInfo).catch(err => {
+          handleFirestoreError(err, OperationType.WRITE, "college_info/current");
+        });
       }
+    }, (error) => {
+      handleFirestoreError(error, OperationType.GET, "college_info/current");
     });
 
     // Seeding logic if collection is empty
     const checkAndSeedCollection = async (colName, defaultItems) => {
-      const colRef = collection(db, colName);
-      const snapshot = await getDocs(colRef);
-      if (snapshot.empty) {
-        for (const item of defaultItems) {
-          const docId = item.id || item.username || `${colName}-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
-          await setDoc(doc(db, colName, docId), { ...item, id: docId });
+      try {
+        const colRef = collection(db, colName);
+        const snapshot = await getDocs(colRef);
+        if (snapshot.empty) {
+          for (const item of defaultItems) {
+            const docId = item.id || item.username || `${colName}-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
+            await setDoc(doc(db, colName, docId), { ...item, id: docId });
+          }
         }
+      } catch (error) {
+        handleFirestoreError(error, OperationType.WRITE, colName);
       }
     };
 
@@ -188,6 +223,8 @@ export const DataProvider = ({ children }) => {
       const items = [];
       snap.forEach((doc) => items.push({ ...doc.data(), id: doc.id }));
       setMajors(items);
+    }, (error) => {
+      handleFirestoreError(error, OperationType.LIST, "majors");
     });
 
     const unsubNews = onSnapshot(collection(db, "news"), (snap) => {
@@ -201,6 +238,8 @@ export const DataProvider = ({ children }) => {
         return valB - valA;
       });
       setNewsData(items);
+    }, (error) => {
+      handleFirestoreError(error, OperationType.LIST, "news");
     });
 
     const unsubStudents = onSnapshot(collection(db, "enrolled_students"), (snap) => {
@@ -214,6 +253,8 @@ export const DataProvider = ({ children }) => {
         return valB - valA;
       });
       setEnrolledStudents(items);
+    }, (error) => {
+      handleFirestoreError(error, OperationType.LIST, "enrolled_students");
     });
 
     const unsubContacts = onSnapshot(collection(db, "contact_messages"), (snap) => {
@@ -227,30 +268,40 @@ export const DataProvider = ({ children }) => {
         return valB - valA;
       });
       setContactMessages(items);
+    }, (error) => {
+      handleFirestoreError(error, OperationType.LIST, "contact_messages");
     });
 
     const unsubAdmins = onSnapshot(collection(db, "administrators"), (snap) => {
       const items = [];
       snap.forEach((doc) => items.push({ ...doc.data(), id: doc.id }));
       setAdministrators(items);
+    }, (error) => {
+      handleFirestoreError(error, OperationType.LIST, "administrators");
     });
 
     const unsubFaq = onSnapshot(collection(db, "faqList"), (snap) => {
       const items = [];
       snap.forEach((doc) => items.push({ ...doc.data(), id: doc.id }));
       setFaqList(items);
+    }, (error) => {
+      handleFirestoreError(error, OperationType.LIST, "faqList");
     });
 
     const unsubSlides = onSnapshot(collection(db, "hero_slides"), (snap) => {
       const items = [];
       snap.forEach((doc) => items.push({ ...doc.data(), id: doc.id }));
       setHeroSlides(items);
+    }, (error) => {
+      handleFirestoreError(error, OperationType.LIST, "hero_slides");
     });
 
     const unsubAdminUsers = onSnapshot(collection(db, "admin_users"), (snap) => {
       const items = [];
       snap.forEach((doc) => items.push({ ...doc.data(), id: doc.id }));
       setAdminUsers(items);
+    }, (error) => {
+      handleFirestoreError(error, OperationType.LIST, "admin_users");
     });
 
     const unsubNavbarMenus = onSnapshot(collection(db, "navbar_menus"), (snap) => {
@@ -258,6 +309,8 @@ export const DataProvider = ({ children }) => {
       snap.forEach((doc) => items.push({ ...doc.data(), id: doc.id }));
       items.sort((a, b) => (a.order || 0) - (b.order || 0));
       setNavbarMenus(items);
+    }, (error) => {
+      handleFirestoreError(error, OperationType.LIST, "navbar_menus");
     });
 
     return () => {
