@@ -20,9 +20,8 @@ import {
   CheckCircle
 } from "lucide-react";
 import { useData } from "../context/DataContext";
-import { administrators, faqList } from "../data";
 export default function AboutView({ initialSection, setInitialSection } = {}) {
-  const { collegeInfo, addContactMessage } = useData();
+  const { collegeInfo, addContactMessage, administrators, faqList } = useData();
   const [expandedFaq, setExpandedFaq] = useState(null);
   const [contactData, setContactData] = useState({
     name: "",

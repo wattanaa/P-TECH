@@ -4,10 +4,10 @@
 @theme {
   --font-sans: "Sarabun", "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Kanit", "Inter", sans-serif;
-  --color-brand-primary: #1d4ed8; /* Deep rich blue */
-  --color-brand-secondary: #0f172a; /* Deep dark slate for typography */
-  --color-brand-accent: #f59e0b; /* Beautiful golden amber matching TKK */
-  --color-brand-accent-hover: #d97706; /* Rich amber-600 */
+  --color-brand-primary: #2b3e9a; /* Deep royal blue from logo */
+  --color-brand-secondary: #0f172a; /* Deep dark slate */
+  --color-brand-accent: #3b82f6; /* Ocean blue accent */
+  --color-brand-accent-hover: #2563eb;
 }
 
 body {

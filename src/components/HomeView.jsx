@@ -25,34 +25,15 @@ import {
 } from "lucide-react";
 import { useData } from "../context/DataContext";
 export default function HomeView({ setActiveTab, setSelectedNews }) {
-  const { collegeInfo, majors, newsData } = useData();
+  const { collegeInfo, majors, newsData, heroSlides } = useData();
   const [currentSlide, setCurrentSlide] = useState(0);
-  const heroSlides = [
-    {
-      title: "\u0E22\u0E34\u0E19\u0E14\u0E35\u0E15\u0E49\u0E2D\u0E19\u0E23\u0E31\u0E1A\u0E2A\u0E39\u0E48 \u0E27\u0E34\u0E17\u0E22\u0E32\u0E25\u0E31\u0E22\u0E40\u0E17\u0E04\u0E42\u0E19\u0E42\u0E25\u0E22\u0E35\u0E1B\u0E17\u0E38\u0E21\u0E23\u0E31\u0E15\u0E15\u0E4C",
-      subtitle: "\u0E01\u0E49\u0E32\u0E27\u0E2A\u0E39\u0E48\u0E2D\u0E19\u0E32\u0E04\u0E15\u0E17\u0E35\u0E48\u0E21\u0E31\u0E48\u0E19\u0E04\u0E07\u0E14\u0E49\u0E27\u0E22\u0E01\u0E32\u0E23\u0E28\u0E36\u0E01\u0E29\u0E32\u0E2A\u0E32\u0E22\u0E2D\u0E32\u0E0A\u0E35\u0E1E",
-      description: "\u0E40\u0E19\u0E49\u0E19\u0E01\u0E32\u0E23\u0E40\u0E23\u0E35\u0E22\u0E19\u0E23\u0E39\u0E49\u0E20\u0E32\u0E04\u0E1B\u0E0F\u0E34\u0E1A\u0E31\u0E15\u0E34 \u0E2D\u0E38\u0E1B\u0E01\u0E23\u0E13\u0E4C\u0E17\u0E31\u0E19\u0E2A\u0E21\u0E31\u0E22\u0E17\u0E35\u0E48\u0E44\u0E14\u0E49\u0E23\u0E31\u0E1A\u0E21\u0E32\u0E15\u0E23\u0E10\u0E32\u0E19\u0E2A\u0E32\u0E01\u0E25 \u0E08\u0E1A\u0E21\u0E32\u0E1E\u0E23\u0E49\u0E2D\u0E21\u0E17\u0E31\u0E01\u0E29\u0E30\u0E17\u0E35\u0E48\u0E15\u0E25\u0E32\u0E14\u0E41\u0E23\u0E07\u0E07\u0E32\u0E19\u0E22\u0E38\u0E04\u0E43\u0E2B\u0E21\u0E48\u0E15\u0E49\u0E2D\u0E07\u0E01\u0E32\u0E23",
-      cta: "\u0E2A\u0E21\u0E31\u0E04\u0E23\u0E40\u0E23\u0E35\u0E22\u0E19\u0E2D\u0E2D\u0E19\u0E44\u0E25\u0E19\u0E4C",
-      ctaTab: "admission",
-      bgImage: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=1600&auto=format&fit=crop",
-      badge: "\u0E40\u0E1B\u0E34\u0E14\u0E23\u0E31\u0E1A\u0E2A\u0E21\u0E31\u0E04\u0E23\u0E1B\u0E35\u0E01\u0E32\u0E23\u0E28\u0E36\u0E01\u0E29\u0E32 2570 \u0E41\u0E25\u0E49\u0E27!"
-    },
-    {
-      title: "\u0E2A\u0E23\u0E49\u0E32\u0E07\u0E19\u0E27\u0E31\u0E15\u0E01\u0E23\u0E41\u0E25\u0E30\u0E19\u0E31\u0E01\u0E1B\u0E0F\u0E34\u0E1A\u0E31\u0E15\u0E34\u0E21\u0E37\u0E2D\u0E2D\u0E32\u0E0A\u0E35\u0E1E",
-      subtitle: "\u0E27\u0E34\u0E28\u0E27\u0E01\u0E23\u0E23\u0E21\u0E40\u0E17\u0E04\u0E42\u0E19\u0E42\u0E25\u0E22\u0E35 \u0E41\u0E25\u0E30 \u0E1A\u0E23\u0E34\u0E2B\u0E32\u0E23\u0E18\u0E38\u0E23\u0E01\u0E34\u0E08\u0E14\u0E34\u0E08\u0E34\u0E17\u0E31\u0E25",
-      description: "\u0E0A\u0E48\u0E32\u0E07\u0E22\u0E19\u0E15\u0E4C \u0E0A\u0E48\u0E32\u0E07\u0E44\u0E1F\u0E1F\u0E49\u0E32 \u0E40\u0E17\u0E04\u0E42\u0E19\u0E42\u0E25\u0E22\u0E35\u0E2A\u0E32\u0E23\u0E2A\u0E19\u0E40\u0E17\u0E28 \u0E41\u0E25\u0E30\u0E01\u0E32\u0E23\u0E1A\u0E31\u0E0D\u0E0A\u0E35 \u0E1E\u0E31\u0E12\u0E19\u0E32\u0E15\u0E19\u0E40\u0E2D\u0E07\u0E14\u0E49\u0E27\u0E22\u0E19\u0E27\u0E31\u0E15\u0E01\u0E23\u0E23\u0E21 IoT, \u0E22\u0E32\u0E19\u0E22\u0E19\u0E15\u0E4C\u0E44\u0E1F\u0E1F\u0E49\u0E32 EV \u0E41\u0E25\u0E30 AI",
-      cta: "\u0E14\u0E39\u0E2B\u0E25\u0E31\u0E01\u0E2A\u0E39\u0E15\u0E23\u0E17\u0E35\u0E48\u0E40\u0E1B\u0E34\u0E14\u0E2A\u0E2D\u0E19",
-      ctaTab: "curriculum",
-      bgImage: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=1600&auto=format&fit=crop",
-      badge: "\u0E40\u0E19\u0E49\u0E19\u0E17\u0E31\u0E01\u0E29\u0E30\u0E41\u0E2B\u0E48\u0E07\u0E2D\u0E19\u0E32\u0E04\u0E15"
-    }
-  ];
   useEffect(() => {
+    if (!heroSlides || heroSlides.length === 0) return;
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
     }, 6e3);
     return () => clearInterval(timer);
-  }, [heroSlides.length]);
+  }, [heroSlides?.length]);
   const statCards = [
     { value: `${(/* @__PURE__ */ new Date()).getFullYear() + 543 - parseInt(collegeInfo.foundedYear)} \u0E1B\u0E35`, label: "\u0E41\u0E2B\u0E48\u0E07\u0E01\u0E32\u0E23\u0E01\u0E48\u0E2D\u0E15\u0E31\u0E49\u0E07\u0E41\u0E25\u0E30\u0E14\u0E39\u0E41\u0E25\u0E19\u0E31\u0E01\u0E40\u0E23\u0E35\u0E22\u0E19", description: "\u0E40\u0E15\u0E34\u0E1A\u0E42\u0E15\u0E2D\u0E22\u0E48\u0E32\u0E07\u0E21\u0E31\u0E48\u0E19\u0E04\u0E07\u0E40\u0E04\u0E35\u0E22\u0E07\u0E04\u0E39\u0E48\u0E17\u0E49\u0E2D\u0E07\u0E16\u0E34\u0E48\u0E19", icon: Award, color: "text-cyan-500" },
     { value: "95%+", label: "\u0E2D\u0E31\u0E15\u0E23\u0E32\u0E44\u0E14\u0E49\u0E07\u0E32\u0E19\u0E17\u0E33\u0E2B\u0E25\u0E31\u0E07\u0E08\u0E1A\u0E01\u0E32\u0E23\u0E28\u0E36\u0E01\u0E29\u0E32", description: "\u0E20\u0E32\u0E22\u0E43\u0E19 6 \u0E40\u0E14\u0E37\u0E2D\u0E19\u0E2B\u0E25\u0E31\u0E07\u0E2A\u0E33\u0E40\u0E23\u0E47\u0E08\u0E2B\u0E25\u0E31\u0E01\u0E2A\u0E39\u0E15\u0E23", icon: ShieldCheck, color: "text-emerald-500" },
@@ -82,127 +63,127 @@ export default function HomeView({ setActiveTab, setSelectedNews }) {
   };
   return <div className="space-y-16 pb-16" id="home-view">
       {
-    /* News Ticker */
-  }
-      <div className="bg-slate-950 border-b border-blue-500/10 py-2.5 px-4 overflow-hidden" id="news-ticker">
-        <div className="max-w-7xl mx-auto flex items-center space-x-3 text-xs md:text-sm">
-          <div className="flex items-center space-x-1 bg-cyan-600 text-white font-bold py-1 px-3 rounded-md shrink-0 uppercase tracking-wide">
-            <Flame className="w-3.5 h-3.5 animate-bounce" />
-            <span>ข่าวเด่น</span>
-          </div>
-          <div className="w-full overflow-hidden relative">
-            <div className="animate-[marquee_25s_linear_infinite] whitespace-nowrap text-blue-100 hover:pause-animation flex items-center space-x-8">
-              {newsData.map((news) => <span
-    key={news.id}
-    className="cursor-pointer hover:text-white hover:underline inline-flex items-center space-x-2"
-    onClick={() => handleNewsClick(news)}
-  >
-                  <span className="w-2 h-2 rounded-full bg-cyan-400" />
-                  <span>{news.title}</span>
-                </span>)}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {
     /* Hero Slider */
   }
-      <section className="relative h-[480px] md:h-[540px] overflow-hidden bg-slate-950" id="hero-slider">
-        <AnimatePresence mode="wait">
-          <motion.div
-    key={currentSlide}
-    initial={{ opacity: 0, scale: 1.02 }}
-    animate={{ opacity: 1, scale: 1 }}
-    exit={{ opacity: 0, scale: 0.98 }}
-    transition={{ duration: 0.8 }}
-    className="absolute inset-0 bg-cover bg-center"
-    style={{
-      backgroundImage: `linear-gradient(to right, rgba(15, 23, 42, 0.95) 30%, rgba(15, 23, 42, 0.6) 70%, rgba(15, 23, 42, 0.4) 100%), url(${heroSlides[currentSlide].bgImage})`
-    }}
-  >
-            <div className="max-w-7xl mx-auto h-full px-4 sm:px-6 lg:px-8 flex flex-col justify-center">
-              <div className="max-w-2xl text-left space-y-6">
-                <motion.span
-    initial={{ opacity: 0, y: 15 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ delay: 0.2 }}
-    className="inline-flex items-center bg-cyan-500/10 border border-cyan-400/20 text-cyan-400 px-3.5 py-1 rounded-full text-xs font-semibold tracking-wide"
-  >
-                  {heroSlides[currentSlide].badge}
-                </motion.span>
-                
-                <div className="space-y-2">
-                  <motion.h2
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ delay: 0.3 }}
-    className="text-white text-xl md:text-2xl font-bold tracking-tight text-blue-400"
-  >
-                    {heroSlides[currentSlide].subtitle}
-                  </motion.h2>
-                  <motion.h1
-    initial={{ opacity: 0, y: 25 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ delay: 0.4 }}
-    className="text-white text-3xl md:text-5xl font-extrabold tracking-tight leading-tight"
-  >
-                    {heroSlides[currentSlide].title}
-                  </motion.h1>
+      {heroSlides && heroSlides.length > 0 ? (
+        <section className="relative h-[480px] md:h-[540px] overflow-hidden bg-slate-950" id="hero-slider">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentSlide}
+              initial={{ opacity: 0, scale: 1.02 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.98 }}
+              transition={{ duration: 0.8 }}
+              className="absolute inset-0 bg-cover bg-center"
+              style={{
+                backgroundImage: heroSlides[currentSlide]?.mediaType === "video"
+                  ? "none"
+                  : `linear-gradient(to right, rgba(15, 23, 42, 0.95) 30%, rgba(15, 23, 42, 0.6) 70%, rgba(15, 23, 42, 0.4) 100%), url(${heroSlides[currentSlide]?.bgImage || ""})`
+              }}
+            >
+              {heroSlides[currentSlide]?.mediaType === "video" && (
+                <div className="absolute inset-0 overflow-hidden z-0">
+                  <video
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="w-full h-full object-cover"
+                    src={heroSlides[currentSlide]?.bgImage || ""}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-950/70 to-slate-950/45" />
                 </div>
+              )}
+              <div className="max-w-7xl mx-auto h-full px-4 sm:px-6 lg:px-8 flex flex-col justify-center relative z-10">
+                <div className="max-w-2xl text-left space-y-6">
+                  <motion.span
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className="inline-flex items-center bg-cyan-500/10 border border-cyan-400/20 text-cyan-400 px-3.5 py-1 rounded-full text-xs font-semibold tracking-wide"
+                  >
+                    {heroSlides[currentSlide]?.badge}
+                  </motion.span>
+                  
+                  <div className="space-y-2">
+                    <motion.h2
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.3 }}
+                      className="text-white text-xl md:text-2xl font-bold tracking-tight text-blue-400"
+                    >
+                      {heroSlides[currentSlide]?.subtitle}
+                    </motion.h2>
+                    <motion.h1
+                      initial={{ opacity: 0, y: 25 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.4 }}
+                      className="text-white text-3xl md:text-5xl font-extrabold tracking-tight leading-tight"
+                    >
+                      {heroSlides[currentSlide]?.title}
+                    </motion.h1>
+                  </div>
 
-                <motion.p
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ delay: 0.5 }}
-    className="text-slate-300 text-sm md:text-base leading-relaxed"
-  >
-                  {heroSlides[currentSlide].description}
-                </motion.p>
+                  <motion.p
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5 }}
+                    className="text-slate-300 text-sm md:text-base leading-relaxed"
+                  >
+                    {heroSlides[currentSlide]?.description}
+                  </motion.p>
 
-                <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ delay: 0.6 }}
-    className="pt-4 flex flex-wrap gap-4"
-  >
-                  <button
-    onClick={() => {
-      setActiveTab(heroSlides[currentSlide].ctaTab);
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }}
-    className="bg-brand-primary hover:bg-blue-700 text-white font-bold px-7 py-3.5 rounded-full shadow-lg shadow-blue-600/20 flex items-center space-x-2 transition-all duration-150 transform hover:-translate-y-0.5"
-  >
-                    <span>{heroSlides[currentSlide].cta}</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
-                  <button
-    onClick={() => {
-      setActiveTab("curriculum");
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }}
-    className="bg-white/10 hover:bg-white/15 border border-white/20 text-white font-semibold px-6 py-3.5 rounded-full flex items-center space-x-2 transition-all duration-150"
-  >
-                    <span>ข้อมูลหลักสูตรเรียน</span>
-                  </button>
-                </motion.div>
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.6 }}
+                    className="pt-4 flex flex-wrap gap-4"
+                  >
+                    <button
+                      onClick={() => {
+                        setActiveTab(heroSlides[currentSlide]?.ctaTab || "admission");
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                      }}
+                      className="bg-brand-primary hover:bg-blue-700 text-white font-bold px-7 py-3.5 rounded-full shadow-lg shadow-blue-600/20 flex items-center space-x-2 transition-all duration-150 transform hover:-translate-y-0.5"
+                    >
+                      <span>{heroSlides[currentSlide]?.cta}</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => {
+                        setActiveTab("curriculum");
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                      }}
+                      className="bg-white/10 hover:bg-white/15 border border-white/20 text-white font-semibold px-6 py-3.5 rounded-full flex items-center space-x-2 transition-all duration-150"
+                    >
+                      <span>ข้อมูลหลักสูตรเรียน</span>
+                    </button>
+                  </motion.div>
+                </div>
               </div>
-            </div>
-          </motion.div>
-        </AnimatePresence>
+            </motion.div>
+          </AnimatePresence>
 
-        {
-    /* Slide Indicator circles */
-  }
-        <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
-          {heroSlides.map((_, idx) => <button
-    key={idx}
-    onClick={() => setCurrentSlide(idx)}
-    className={`w-3 h-3 rounded-full transition-colors duration-150 ${currentSlide === idx ? "bg-brand-primary" : "bg-white/40"}`}
-    aria-label={`Go to slide ${idx + 1}`}
-  />)}
-        </div>
-      </section>
+          {/* Slide Indicator circles */}
+          <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
+            {heroSlides.map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => setCurrentSlide(idx)}
+                className={`w-3 h-3 rounded-full transition-colors duration-150 ${currentSlide === idx ? "bg-brand-primary" : "bg-white/40"}`}
+                aria-label={`Go to slide ${idx + 1}`}
+              />
+            ))}
+          </div>
+        </section>
+      ) : (
+        <section className="relative h-[480px] md:h-[540px] overflow-hidden bg-slate-950 flex items-center justify-center" id="hero-slider-loading">
+          <div className="text-center space-y-4">
+            <div className="w-12 h-12 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <p className="text-slate-400 text-sm font-medium">กำลังโหลดข้อมูลหน้าแรก...</p>
+          </div>
+        </section>
+      )}
 
       {
     /* Philosophy & Vision Bento Grid */

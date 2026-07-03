@@ -8,16 +8,18 @@ import { Menu, X, Phone, MapPin, ChevronDown } from "lucide-react";
 import { useData } from "../context/DataContext";
 import CollegeLogo from "./CollegeLogo";
 export default function Navbar({ activeTab, setActiveTab, setAboutSection }) {
-  const { collegeInfo } = useData();
+  const { collegeInfo, navbarMenus } = useData();
   const [isOpen, setIsOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileAboutOpen, setIsMobileAboutOpen] = useState(false);
-  const menuItems = [
-    { id: "home", label: "\u0E2B\u0E19\u0E49\u0E32\u0E41\u0E23\u0E01" },
-    { id: "curriculum", label: "\u0E2B\u0E25\u0E31\u0E01\u0E2A\u0E39\u0E15\u0E23\u0E17\u0E35\u0E48\u0E40\u0E1B\u0E34\u0E14\u0E2A\u0E2D\u0E19" },
-    { id: "news", label: "\u0E02\u0E48\u0E32\u0E27\u0E2A\u0E32\u0E23\u0E41\u0E25\u0E30\u0E01\u0E34\u0E08\u0E01\u0E23\u0E23\u0E21" },
-    { id: "contact", label: "\u0E15\u0E34\u0E14\u0E15\u0E48\u0E2D\u0E40\u0E23\u0E32" }
+
+  const menuItems = navbarMenus && navbarMenus.length > 0 ? navbarMenus : [
+    { id: "home", label: "หน้าแรก", targetTab: "home" },
+    { id: "curriculum", label: "หลักสูตรที่เปิดสอน", targetTab: "curriculum" },
+    { id: "news", label: "ข่าวสารและกิจกรรม", targetTab: "news" },
+    { id: "contact", label: "ติดต่อเรา", targetTab: "contact" }
   ];
+
   const handleNavClick = (tabId) => {
     setActiveTab(tabId);
     setIsOpen(false);
@@ -74,19 +76,27 @@ export default function Navbar({ activeTab, setActiveTab, setAboutSection }) {
     /* Desktop Navigation */
   }
           <div className="hidden lg:flex items-center space-x-1" id="desktop-menu">
-            {menuItems.map((item) => <button
-    key={item.id}
-    onClick={() => handleNavClick(item.id)}
-    className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${activeTab === item.id ? "text-brand-primary font-bold" : "text-slate-600 hover:text-brand-primary hover:bg-slate-50"}`}
-    id={`nav-${item.id}`}
-  >
+            {menuItems.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => handleNavClick(item.targetTab || item.id)}
+                className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
+                  activeTab === (item.targetTab || item.id)
+                    ? "text-brand-primary font-bold"
+                    : "text-slate-600 hover:text-brand-primary hover:bg-slate-50"
+                }`}
+                id={`nav-${item.id}`}
+              >
                 {item.label}
-                {activeTab === item.id && <motion.div
-    layoutId="activeTabIndicator"
-    className="absolute bottom-0 left-4 right-4 h-0.5 bg-brand-primary rounded-full"
-    transition={{ type: "spring", stiffness: 380, damping: 30 }}
-  />}
-              </button>)}
+                {activeTab === (item.targetTab || item.id) && (
+                  <motion.div
+                    layoutId="activeTabIndicator"
+                    className="absolute bottom-0 left-4 right-4 h-0.5 bg-brand-primary rounded-full"
+                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                  />
+                )}
+              </button>
+            ))}
 
             {
     /* เกี่ยวกับเรา Dropdown with mouse enter/leave hover action */
@@ -180,13 +190,19 @@ export default function Navbar({ activeTab, setActiveTab, setAboutSection }) {
     id="mobile-drawer"
   >
             <div className="px-4 pt-2 pb-6 space-y-1 sm:px-6">
-              {menuItems.map((item) => <button
-    key={item.id}
-    onClick={() => handleNavClick(item.id)}
-    className={`w-full text-left block px-4 py-3 rounded-lg text-base font-medium transition-colors ${activeTab === item.id ? "bg-blue-50 text-brand-primary font-bold border-l-4 border-brand-primary" : "text-slate-600 hover:bg-slate-50 hover:text-brand-primary"}`}
-  >
+              {menuItems.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => handleNavClick(item.targetTab || item.id)}
+                  className={`w-full text-left block px-4 py-3 rounded-lg text-base font-medium transition-colors ${
+                    activeTab === (item.targetTab || item.id)
+                      ? "bg-blue-50 text-brand-primary font-bold border-l-4 border-brand-primary"
+                      : "text-slate-600 hover:bg-slate-50 hover:text-brand-primary"
+                  }`}
+                >
                   {item.label}
-                </button>)}
+                </button>
+              ))}
 
               {
     /* Mobile เกี่ยวกับเรา Dropdown Accordion */

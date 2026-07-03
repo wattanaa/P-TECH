@@ -25,11 +25,24 @@ import {
   X,
   ChevronRight,
   ShieldAlert,
+  ShieldCheck,
   Award,
   Eye,
-  GraduationCap
+  GraduationCap,
+  Database,
+  FileSpreadsheet,
+  Download,
+  Check,
+  ExternalLink,
+  FileCode,
+  Server,
+  HardDrive,
+  HelpCircle,
+  Image as ImageIcon,
+  Sliders
 } from "lucide-react";
 import CollegeLogo from "./CollegeLogo";
+import MenusManager from "./MenusManager";
 export default function AdminView() {
   const {
     collegeInfo,
@@ -37,6 +50,8 @@ export default function AdminView() {
     newsData,
     enrolledStudents,
     contactMessages,
+    dbSettings,
+    setDbSettings,
     updateCollegeInfo,
     addMajor,
     updateMajor,
@@ -48,23 +63,50 @@ export default function AdminView() {
     deleteEnrollment,
     markContactMessageRead,
     deleteContactMessage,
-    resetToDefaultData
+    resetToDefaultData,
+    administrators,
+    faqList,
+    heroSlides,
+    addAdministrator,
+    updateAdministrator,
+    deleteAdministrator,
+    addFaq,
+    updateFaq,
+    deleteFaq,
+    addHeroSlide,
+    updateHeroSlide,
+    deleteHeroSlide,
+    adminUsers,
+    addAdminUser,
+    updateAdminUser,
+    deleteAdminUser
   } = useData();
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     return sessionStorage.getItem("ptc_admin_authenticated") === "true";
   });
+  const [usernameInput, setUsernameInput] = useState("");
   const [passwordInput, setPasswordInput] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [activeSubTab, setActiveSubTab] = useState("overview");
   const handleLoginSubmit = (e) => {
     e.preventDefault();
-    if (passwordInput === "admin") {
+    const uInput = usernameInput.trim().toLowerCase();
+    const pInput = passwordInput.trim();
+    
+    const foundUser = adminUsers.find(
+      (u) => u.username.trim().toLowerCase() === uInput && u.password === pInput
+    );
+    
+    if (foundUser || (uInput === "admin" && pInput === "admin")) {
+      const adminName = foundUser ? foundUser.name : "ผู้ดูแลระบบ";
       sessionStorage.setItem("ptc_admin_authenticated", "true");
+      sessionStorage.setItem("ptc_admin_username", uInput);
+      sessionStorage.setItem("ptc_admin_name", adminName);
       setIsAuthenticated(true);
       setPasswordError("");
     } else {
-      setPasswordError("\u0E23\u0E2B\u0E31\u0E2A\u0E1C\u0E48\u0E32\u0E19\u0E44\u0E21\u0E48\u0E16\u0E39\u0E01\u0E15\u0E49\u0E2D\u0E07 \u0E01\u0E23\u0E38\u0E13\u0E32\u0E25\u0E2D\u0E07\u0E43\u0E2B\u0E21\u0E48\u0E2D\u0E35\u0E01\u0E04\u0E23\u0E31\u0E49\u0E07");
+      setPasswordError("ชื่อผู้ใช้งาน (ID) หรือรหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง");
     }
   };
   const [searchQuery, setSearchQuery] = useState("");
@@ -98,6 +140,170 @@ export default function AdminView() {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3e3);
   };
+  const handleFileUpload = (e, callback) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      alert("ขนาดไฟล์ใหญ่เกินไป (ไม่ควรเกิน 2MB) เพื่อประสิทธิภาพของระบบฐานข้อมูล");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      callback(reader.result);
+    };
+    reader.readAsDataURL(file);
+  };
+  const [dbType, setDbType] = useState(dbSettings ? dbSettings.type : "local");
+  const [gsUrl, setGsUrl] = useState(dbSettings ? dbSettings.gsheetUrl : "");
+  const [gsId, setGsId] = useState(dbSettings ? dbSettings.gsheetId : "");
+
+  // Administrator Form State
+  const [editingAdmin, setEditingAdmin] = useState(null);
+  const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
+  const [tempAdmin, setTempAdmin] = useState({
+    name: "",
+    position: "",
+    department: "",
+    imageUrl: ""
+  });
+
+  // FAQ Form State
+  const [editingFaq, setEditingFaq] = useState(null);
+  const [isFaqModalOpen, setIsFaqModalOpen] = useState(false);
+  const [tempFaq, setTempFaq] = useState({
+    question: "",
+    answer: ""
+  });
+
+  // Hero Slide Form State
+  const [editingSlide, setEditingSlide] = useState(null);
+  const [isSlideModalOpen, setIsSlideModalOpen] = useState(false);
+  const [tempSlide, setTempSlide] = useState({
+    title: "",
+    subtitle: "",
+    description: "",
+    bgImage: "",
+    badge: "",
+    cta: "",
+    ctaTab: "admission"
+  });
+
+  // Admin Users CMS State & Handlers
+  const [isAdminUserModalOpen, setIsAdminUserModalOpen] = useState(false);
+  const [editingAdminUser, setEditingAdminUser] = useState(null);
+  const [tempAdminUser, setTempAdminUser] = useState({
+    username: "",
+    password: "",
+    name: ""
+  });
+
+  const handleOpenAddAdminUser = () => {
+    setEditingAdminUser(null);
+    setTempAdminUser({
+      username: "",
+      password: "",
+      name: ""
+    });
+    setIsAdminUserModalOpen(true);
+  };
+
+  const handleOpenEditAdminUser = (user) => {
+    setEditingAdminUser(user);
+    setTempAdminUser({
+      username: user.username,
+      password: user.password,
+      name: user.name
+    });
+    setIsAdminUserModalOpen(true);
+  };
+
+  const handleSaveAdminUser = (e) => {
+    e.preventDefault();
+    if (!tempAdminUser.username.trim() || !tempAdminUser.password.trim() || !tempAdminUser.name.trim()) {
+      alert("กรุณากรอกข้อมูลให้ครบถ้วนทุกช่อง");
+      return;
+    }
+    
+    if (editingAdminUser) {
+      updateAdminUser(editingAdminUser.username, tempAdminUser);
+      triggerToast("แก้ไขบัญชีผู้ดูแลระบบสำเร็จ!");
+    } else {
+      const exists = adminUsers.some(
+        (u) => u.username.toLowerCase() === tempAdminUser.username.trim().toLowerCase()
+      );
+      if (exists) {
+        alert("ชื่อผู้ใช้งาน (ID) นี้ถูกใช้ไปแล้วในระบบ");
+        return;
+      }
+      addAdminUser(tempAdminUser);
+      triggerToast("เพิ่มผู้ดูแลระบบคนใหม่สำเร็จ!");
+    }
+    setIsAdminUserModalOpen(false);
+    setEditingAdminUser(null);
+  };
+
+  const handleSaveDbSettings = (e) => {
+    e.preventDefault();
+    setDbSettings({
+      type: dbType,
+      gsheetUrl: gsUrl,
+      gsheetId: gsId,
+      syncEnabled: dbType === "gsheet" && !!gsUrl
+    });
+    triggerToast("\u0E1A\u0E31\u0E19\u0E17\u0E36\u0E01\u0E01\u0E32\u0E23\u0E15\u0E31\u0E49\u0E02\u0E42\u0E02\u0E49\u0E21\u0E39\u0E25\u0E2A\u0E33\u0E40\u0E23\u0E47\u0E08!");
+  };
+
+  const exportAdmissionsCSV = () => {
+    const headers = ["วันที่สมัคร", "เลขที่ใบสมัคร", "ชื่อ-นามสกุล", "เบอร์โทร", "อีเมล", "โรงเรียนเดิม", "GPA", "ระดับชั้นที่สนใจ", "สาขาวิชาที่สนใจ", "สถานะ"];
+    const rows = enrolledStudents.map((student) => [
+      new Date(student.submittedAt).toLocaleDateString("th-TH"),
+      student.id,
+      student.fullName,
+      student.phone,
+      student.email,
+      student.prevSchool,
+      student.prevGpa,
+      student.levelInterest,
+      majors.find((m) => m.id === student.majorInterest)?.name || student.majorInterest,
+      student.status === "approved" ? "อนุมัติเรียน" : student.status === "verified" ? "ตรวจสอบแล้ว" : student.status === "rejected" ? "เอกสารไม่ผ่าน" : "รอตรวจสอบ"
+    ]);
+    let csvContent = "\uFEFF";
+    csvContent += [headers, ...rows].map((e) => e.map((val) => `"${String(val).replace(/"/g, '""')}"`).join(",")).join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `admissions_export_${Date.now()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    triggerToast("\u0E2A\u0E48\u0E07\u0E2D\u0E22\u0E01\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25\u0E1C\u0E39\u0E49\u0E2A\u0E21\u0E31\u0E04\u0E23\u0E2A\u0E33\u0E40\u0E23\u0E47\u0E08!");
+  };
+
+  const exportContactsCSV = () => {
+    const headers = ["วันที่ติดต่อ", "รหัสข้อความ", "ชื่อผู้ส่ง", "อีเมล", "หัวข้อ", "ข้อความ", "สถานะการอ่าน"];
+    const rows = contactMessages.map((msg) => [
+      new Date(msg.submittedAt).toLocaleDateString("th-TH"),
+      msg.id,
+      msg.name,
+      msg.email,
+      msg.subject,
+      msg.message,
+      msg.isRead ? "อ่านแล้ว" : "ยังไม่ได้อ่าน"
+    ]);
+    let csvContent = "\uFEFF";
+    csvContent += [headers, ...rows].map((e) => e.map((val) => `"${String(val).replace(/"/g, '""')}"`).join(",")).join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `contacts_export_${Date.now()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    triggerToast("\u0E2A\u0E48\u0E07\u0E2D\u0E22\u0E01\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25\u0E15\u0E34\u0E14\u0E15\u0E48\u0E2D\u0E2A\u0E33\u0E40\u0E23\u0E47\u0E08!");
+  };
+
   const handleSaveCollege = (e) => {
     e.preventDefault();
     updateCollegeInfo(tempCollege);
@@ -115,6 +321,112 @@ export default function AdminView() {
     }
     setIsMajorModalOpen(false);
     setEditingMajor(null);
+  };
+
+  // Administrator Handlers
+  const handleOpenAddAdmin = () => {
+    setEditingAdmin(null);
+    setTempAdmin({
+      name: "",
+      position: "",
+      department: "",
+      imageUrl: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&auto=format&fit=crop"
+    });
+    setIsAdminModalOpen(true);
+  };
+  const handleOpenEditAdmin = (admin) => {
+    setEditingAdmin(admin);
+    setTempAdmin({
+      name: admin.name,
+      position: admin.position,
+      department: admin.department,
+      imageUrl: admin.imageUrl
+    });
+    setIsAdminModalOpen(true);
+  };
+  const handleSaveAdmin = (e) => {
+    e.preventDefault();
+    if (editingAdmin) {
+      updateAdministrator(editingAdmin.id, tempAdmin);
+      triggerToast("แก้ไขข้อมูลผู้บริหารสำเร็จ!");
+    } else {
+      addAdministrator(tempAdmin);
+      triggerToast("เพิ่มผู้บริหารคนใหม่สำเร็จ!");
+    }
+    setIsAdminModalOpen(false);
+    setEditingAdmin(null);
+  };
+
+  // FAQ Handlers
+  const handleOpenAddFaq = () => {
+    setEditingFaq(null);
+    setTempFaq({
+      question: "",
+      answer: ""
+    });
+    setIsFaqModalOpen(true);
+  };
+  const handleOpenEditFaq = (faq) => {
+    setEditingFaq(faq);
+    setTempFaq({
+      question: faq.question,
+      answer: faq.answer
+    });
+    setIsFaqModalOpen(true);
+  };
+  const handleSaveFaq = (e) => {
+    e.preventDefault();
+    if (editingFaq) {
+      updateFaq(editingFaq.id, tempFaq);
+      triggerToast("แก้ไขคำถามที่พบบ่อยสำเร็จ!");
+    } else {
+      addFaq(tempFaq);
+      triggerToast("เพิ่มคำถามใหม่สำเร็จ!");
+    }
+    setIsFaqModalOpen(false);
+    setEditingFaq(null);
+  };
+
+  // Hero Slide Handlers
+  const handleOpenAddSlide = () => {
+    setEditingSlide(null);
+    setTempSlide({
+      title: "",
+      subtitle: "",
+      description: "",
+      bgImage: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=1600&auto=format&fit=crop",
+      badge: "ประกาศใหม่",
+      cta: "ดูรายละเอียด",
+      ctaTab: "admission",
+      mediaType: "image"
+    });
+    setIsSlideModalOpen(true);
+  };
+  const handleOpenEditSlide = (slide) => {
+    setEditingSlide(slide);
+    setTempSlide({
+      title: slide.title,
+      subtitle: slide.subtitle,
+      description: slide.description,
+      bgImage: slide.bgImage,
+      badge: slide.badge,
+      cta: slide.cta,
+      ctaTab: slide.ctaTab,
+      mediaType: slide.mediaType || "image"
+    });
+    setIsSlideModalOpen(true);
+  };
+  const handleSaveSlide = (e) => {
+    e.preventDefault();
+    if (editingSlide) {
+      updateHeroSlide(editingSlide.id, tempSlide);
+      triggerToast("แก้ไขสไลด์แบนเนอร์สำเร็จ!");
+    } else {
+      addHeroSlide(tempSlide);
+      triggerToast("เพิ่มสไลด์แบนเนอร์ใหม่สำเร็จ!");
+    }
+    setIsSlideModalOpen(false);
+    setEditingSlide(null);
   };
   const handleOpenAddMajor = () => {
     setEditingMajor(null);
@@ -214,22 +526,40 @@ export default function AdminView() {
           <form onSubmit={handleLoginSubmit} className="mt-8 space-y-5" id="admin-login-form">
             <div className="space-y-1.5 relative">
               <label className="text-xs font-bold text-slate-500 block">
+                ชื่อผู้ใช้งาน / ID ผู้ดูแลระบบ (Admin Username)
+              </label>
+              <input
+                type="text"
+                required
+                value={usernameInput}
+                onChange={(e) => {
+                  setUsernameInput(e.target.value);
+                  if (passwordError) setPasswordError("");
+                }}
+                placeholder="กรอกชื่อผู้ใช้งาน..."
+                className="w-full text-sm px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-all duration-150 font-medium"
+                id="admin-username-input"
+                autoFocus
+              />
+            </div>
+
+            <div className="space-y-1.5 relative">
+              <label className="text-xs font-bold text-slate-500 block">
                 รหัสผ่านผู้ดูแลระบบ (Admin Password)
               </label>
               <div className="relative">
                 <input
-      type={showPassword ? "text" : "password"}
-      required
-      value={passwordInput}
-      onChange={(e) => {
-        setPasswordInput(e.target.value);
-        if (passwordError) setPasswordError("");
-      }}
-      placeholder="กรอกรหัสผ่านเพื่อเข้าใช้งาน..."
-      className="w-full text-sm pl-4 pr-10 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-all duration-150 font-medium"
-      id="admin-password-input"
-      autoFocus
-    />
+                  type={showPassword ? "text" : "password"}
+                  required
+                  value={passwordInput}
+                  onChange={(e) => {
+                    setPasswordInput(e.target.value);
+                    if (passwordError) setPasswordError("");
+                  }}
+                  placeholder="กรอกรหัสผ่านเพื่อเข้าใช้งาน..."
+                  className="w-full text-sm pl-4 pr-10 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-all duration-150 font-medium"
+                  id="admin-password-input"
+                />
                 <button
       type="button"
       onClick={() => setShowPassword(!showPassword)}
@@ -395,12 +725,18 @@ export default function AdminView() {
               ส่วนงานบริหารระบบ
             </p>
             {[
-    { id: "overview", label: "\u0E2B\u0E19\u0E49\u0E32\u0E41\u0E23\u0E01\u0E2A\u0E32\u0E23\u0E2A\u0E19\u0E40\u0E17\u0E28", icon: Building2 },
-    { id: "college", label: "\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25\u0E27\u0E34\u0E17\u0E22\u0E32\u0E25\u0E31\u0E22 & \u0E2A\u0E32\u0E2A\u0E4C\u0E19", icon: Settings },
-    { id: "majors", label: "\u0E08\u0E31\u0E14\u0E01\u0E32\u0E23\u0E2A\u0E32\u0E02\u0E32\u0E27\u0E34\u0E0A\u0E32\u0E2B\u0E25\u0E31\u0E01\u0E2A\u0E39\u0E15\u0E23", icon: Award },
-    { id: "news", label: "\u0E08\u0E31\u0E14\u0E01\u0E32\u0E23\u0E02\u0E48\u0E32\u0E27\u0E2A\u0E32\u0E23\u0E01\u0E34\u0E08\u0E01\u0E23\u0E23\u0E21", icon: Newspaper },
-    { id: "admissions", label: "\u0E23\u0E30\u0E1A\u0E1A\u0E1C\u0E39\u0E49\u0E2A\u0E21\u0E31\u0E04\u0E23\u0E40\u0E23\u0E35\u0E22\u0E19\u0E2D\u0E2D\u0E19\u0E44\u0E25\u0E19\u0E4C", icon: Users, count: pendingAdmissions },
-    { id: "contacts", label: "\u0E01\u0E25\u0E48\u0E2D\u0E07\u0E02\u0E49\u0E2D\u0E04\u0E27\u0E32\u0E21\u0E15\u0E34\u0E14\u0E15\u0E48\u0E2D", icon: Mail, count: unreadMessages }
+    { id: "overview", label: "หน้าแรกสารสนเทศ", icon: Building2 },
+    { id: "college", label: "ข้อมูลวิทยาลัย & ปรัชญา", icon: Settings },
+    { id: "slides", label: "จัดการสไลด์แบนเนอร์", icon: ImageIcon },
+    { id: "majors", label: "จัดการสาขาวิชาหลักสูตร", icon: Award },
+    { id: "news", label: "จัดการข่าวสารกิจกรรม", icon: Newspaper },
+    { id: "administrators", label: "จัดการคณะผู้บริหาร", icon: GraduationCap },
+    { id: "faq", label: "จัดการคำถามที่พบบ่อย (FAQ)", icon: HelpCircle },
+    { id: "admissions", label: "ระบบผู้สมัครเรียนออนไลน์", icon: Users, count: pendingAdmissions },
+    { id: "contacts", label: "กล่องข้อความติดต่อ", icon: Mail, count: unreadMessages },
+    { id: "admin_users", label: "จัดการผู้ดูแลระบบ", icon: ShieldCheck },
+    { id: "menus", label: "จัดการเมนูเว็บไซต์", icon: Sliders },
+    { id: "database", label: "ตั้งค่าฐานข้อมูล & ส่งออก", icon: Database }
   ].map((subTab) => {
     const IconComp = subTab.icon;
     return <button
@@ -669,6 +1005,28 @@ export default function AdminView() {
     onChange={(e) => setTempCollege({ ...tempCollege, facebook: e.target.value })}
     className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
   />
+                      </div>
+
+                      <div className="space-y-1 md:col-span-2">
+                        <label className="text-[11px] font-bold text-slate-500">โลโก้วิทยาลัย (Logo URL หรือ อัพโหลดรูปภาพ)</label>
+                        <div className="flex gap-3 items-center">
+                          <input
+                            type="text"
+                            value={tempCollege.logoUrl || ""}
+                            onChange={(e) => setTempCollege({ ...tempCollege, logoUrl: e.target.value })}
+                            className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                            placeholder="https://... หรืออัพโหลดรูปภาพทางด้านขวา"
+                          />
+                          <label className="bg-blue-50 hover:bg-blue-100 text-blue-700 px-4 py-2.5 rounded-xl text-xs font-bold transition-all border border-blue-200 cursor-pointer shrink-0">
+                            <span>อัพโหลดรูป</span>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={(e) => handleFileUpload(e, (base64) => setTempCollege({ ...tempCollege, logoUrl: base64 }))}
+                            />
+                          </label>
+                        </div>
                       </div>
                     </div>
 
@@ -1093,6 +1451,610 @@ export default function AdminView() {
                     </div>}
                 </div>
               </div>}
+
+            {activeSubTab === "database" && <div className="space-y-8" id="database-setup-tab">
+                <div>
+                  <h2 className="text-lg font-extrabold text-slate-800 font-display flex items-center space-x-2">
+                    <Database className="w-5 h-5 text-blue-600 animate-pulse" />
+                    <span>ศูนย์ตั้งค่าฐานข้อมูลและการส่งออกข้อมูลวิทยาการ (Database & Data Center)</span>
+                  </h2>
+                  <p className="text-xs text-slate-500">
+                    ตั้งค่าการเชื่อมต่อฐานข้อมูลภายนอก (Google Sheets / Local) และส่งออกรายงานทั้งหมดเป็นไฟล์ Excel (CSV)
+                  </p>
+                </div>
+
+                {/* Grid 1: Database Types Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                  <div 
+                    className="p-5 rounded-2xl border bg-slate-50 border-slate-100 relative overflow-hidden flex flex-col justify-between h-40 opacity-75"
+                  >
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center text-brand-primary">
+                          <HardDrive className="w-4 h-4" />
+                        </span>
+                      </div>
+                      <h4 className="text-xs font-bold text-slate-500 pt-1">Local Browser Database (LocalStorage)</h4>
+                      <p className="text-[10px] text-slate-400 font-medium leading-relaxed">สำรองข้อมูลออฟไลน์ในเว็บบราวเซอร์ของคุณ</p>
+                    </div>
+                  </div>
+
+                  <div 
+                    onClick={() => setDbType("gsheet")}
+                    className={`p-5 rounded-2xl border transition-all duration-200 cursor-pointer relative overflow-hidden flex flex-col justify-between h-40 ${dbType === "gsheet" ? "bg-emerald-50/70 border-emerald-500 shadow-md ring-1 ring-emerald-500/20" : "bg-white border-slate-200 hover:border-slate-300 hover:shadow"}`}
+                  >
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-600">
+                          <FileSpreadsheet className="w-4 h-4" />
+                        </span>
+                        {dbType === "gsheet" && <span className="text-[10px] bg-emerald-600 text-white font-bold px-2 py-0.5 rounded-full">ใช้งานอยู่</span>}
+                      </div>
+                      <h4 className="text-xs font-bold text-slate-800 pt-1">Google Sheets Database (Sync Mode)</h4>
+                      <p className="text-[10px] text-slate-400 font-medium leading-relaxed">ซิงโครไนซ์ใบสมัครเรียนและคำถามติดต่อเพิ่มเติมเข้าสู่ Google Sheets</p>
+                    </div>
+                  </div>
+
+                  <div 
+                    className="p-5 rounded-2xl border bg-blue-50/70 border-blue-500 shadow-md ring-1 ring-blue-500/20 relative overflow-hidden flex flex-col justify-between h-40"
+                  >
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center text-brand-primary">
+                          <Server className="w-4 h-4" />
+                        </span>
+                        <span className="text-[10px] bg-blue-600 text-white font-bold px-2 py-0.5 rounded-full animate-pulse">เชื่อมต่อเรียลไทม์</span>
+                      </div>
+                      <h4 className="text-xs font-extrabold text-blue-900 pt-1">Firebase Cloud Firestore</h4>
+                      <p className="text-[10px] text-blue-600 font-semibold leading-relaxed">ฐานข้อมูลหลักของวิทยาลัย: บันทึก ปรับปรุง และดึงข้อมูลใบสมัคร ข่าวสาร หลักสูตร คณะผู้บริหาร และคำถามอย่างเรียลไทม์</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                  {/* Left block: Config Form & Guides */}
+                  <div className="lg:col-span-7 space-y-6">
+                    {dbType === "gsheet" ? <form onSubmit={handleSaveDbSettings} className="bg-white border border-slate-200 p-6 rounded-2xl space-y-4 shadow-sm">
+                        <div className="flex items-center space-x-2 text-xs font-bold text-emerald-700">
+                          <FileSpreadsheet className="w-4 h-4" />
+                          <span>กำหนดค่า Google Sheets Webhook</span>
+                        </div>
+                        
+                        <div className="space-y-1.5">
+                          <label className="text-[10px] font-bold text-slate-500 block">
+                            Google Sheets ID
+                          </label>
+                          <input
+                            type="text"
+                            value={gsId}
+                            onChange={(e) => setGsId(e.target.value)}
+                            placeholder="เช่น 1aBcDeFgHiJkLmNoPqRsTuVwXyZ"
+                            className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-emerald-500 focus:outline-none"
+                          />
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="text-[10px] font-bold text-slate-500 block">
+                            Google Web App Script URL (Webhook URL) *
+                          </label>
+                          <input
+                            type="url"
+                            required
+                            value={gsUrl}
+                            onChange={(e) => setGsUrl(e.target.value)}
+                            placeholder="https://script.google.com/macros/s/.../exec"
+                            className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-emerald-500 focus:outline-none"
+                          />
+                          <p className="text-[9px] text-slate-400 leading-normal">
+                            * ระบบจะส่งข้อมูลไปทาง Webhook นี้ทันทีที่มีผู้ส่งใบสมัครเรียนหรือฝากคำถามติดต่อเข้ามาใหม่แบบเรียลไทม์
+                          </p>
+                        </div>
+
+                        <button
+                          type="submit"
+                          className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 px-4 rounded-xl text-xs font-bold shadow-md shadow-emerald-500/10 transition-all flex items-center justify-center space-x-2 cursor-pointer"
+                        >
+                          <Check className="w-4 h-4" />
+                          <span>บันทึกและเปิดใช้งาน Google Sheets Sync</span>
+                        </button>
+                      </form> : <div className="bg-slate-50 border border-slate-200 p-6 rounded-2xl text-center space-y-3">
+                        <HardDrive className="w-10 h-10 text-slate-400 mx-auto" />
+                        <h4 className="text-xs font-bold text-slate-800">ระบบทำงานบนฐานข้อมูล Local Storage</h4>
+                        <p className="text-[11px] text-slate-500 leading-relaxed max-w-sm mx-auto">
+                          ข้อมูลใบสมัคร, ประวัติ, ข่าวสาร, ข้อมูลหลักสูตร ปัจจุบันบันทึกอย่างปลอดภัยในบราวเซอร์ของเครื่องคุณ 
+                          คุณสามารถส่งออกข้อมูลดิบนี้เก็บไว้หรือแชร์เพื่อใช้นำเข้าสเปรดชีตได้ผ่านแผงขวามือ
+                        </p>
+                      </div>}
+
+                    {/* Instruction Box for Google Apps Script */}
+                    {dbType === "gsheet" && <div className="bg-slate-900 text-slate-300 p-5 rounded-2xl space-y-3">
+                        <div className="flex items-center space-x-2 text-xs font-bold text-amber-400">
+                          <FileCode className="w-4 h-4" />
+                          <span>วิธีการตั้งค่า Google Apps Script (ทำครั้งเดียว)</span>
+                        </div>
+                        <ol className="list-decimal list-inside text-[10px] space-y-1.5 text-slate-400">
+                          <li>เปิด Google Sheets ของคุณขึ้นมา</li>
+                          <li>ไปที่เมนู <span className="text-white">Extensions (ส่วนขยาย)</span> &gt; <span className="text-white">Apps Script</span></li>
+                          <li>ลบโค้ดเดิมออกทั้งหมด แล้วคัดลอกและวางโค้ดสคริปต์ด้านล่างนี้ลงไป</li>
+                          <li>คลิกที่ปุ่ม <span className="text-white">Deploy (ทำให้ใช้งานได้)</span> &gt; <span className="text-white">New deployment</span></li>
+                          <li>เลือกประเภทเป็น <span className="text-white">Web app</span>, ตั้งค่า Who has access เป็น <span className="text-white">Anyone (ทุกคน)</span></li>
+                          <li>คัดลอก URL สคริปต์เว็บแอปที่ได้มาใส่ในช่องด้านบน แล้วกดบันทึก</li>
+                        </ol>
+
+                        {/* Code box */}
+                        <div className="relative mt-2">
+                          <pre className="text-[9px] bg-black/60 p-3 rounded-lg overflow-x-auto text-cyan-400 font-mono h-48 border border-white/5">
+{`function doPost(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var params = JSON.parse(e.postData.contents);
+  var data = params.data;
+  
+  if (params.type === "enrollment") {
+    sheet.appendRow([
+      new Date(),
+      data.id,
+      data.fullName,
+      data.phone,
+      data.email,
+      data.prevSchool,
+      data.prevGpa,
+      data.levelInterest,
+      data.majorInterest,
+      data.status
+    ]);
+  } else if (params.type === "contact") {
+    sheet.appendRow([
+      new Date(),
+      data.id,
+      data.name,
+      data.email,
+      data.subject,
+      data.message
+    ]);
+  }
+  return ContentService.createTextOutput("Success");
+}`}
+                          </pre>
+                        </div>
+                      </div>}
+                  </div>
+
+                  {/* Right block: Data Exports */}
+                  <div className="lg:col-span-5 space-y-6">
+                    <div className="bg-white border border-slate-200 p-6 rounded-2xl space-y-4 shadow-sm">
+                      <h3 className="text-xs font-extrabold text-slate-800 flex items-center space-x-2">
+                        <Download className="w-4 h-4 text-brand-primary" />
+                        <span>ดาวน์โหลดข้อมูลรายงาน (Excel CSV Exports)</span>
+                      </h3>
+                      <p className="text-[10px] text-slate-400">
+                        ส่งออกข้อมูลดิบในระบบหลังบ้าน ณ ปัจจุบัน เป็นไฟล์ Excel (.csv) โดยรองรับภาษาไทย 100% (UTF-8 BOM)
+                      </p>
+
+                      <div className="space-y-2.5 pt-2">
+                        <button
+                          onClick={exportAdmissionsCSV}
+                          className="w-full text-left flex items-center justify-between p-3 rounded-xl border border-slate-100 bg-slate-50 hover:bg-slate-100 hover:border-slate-200 transition-all text-xs font-bold text-slate-700 cursor-pointer"
+                        >
+                          <div className="flex items-center space-x-2.5">
+                            <Users className="w-4 h-4 text-blue-500" />
+                            <span>รายชื่อผู้สมัครเรียนทั้งหมด ({enrolledStudents.length} รายการ)</span>
+                          </div>
+                          <Download className="w-3.5 h-3.5 text-slate-400" />
+                        </button>
+
+                        <button
+                          onClick={exportContactsCSV}
+                          className="w-full text-left flex items-center justify-between p-3 rounded-xl border border-slate-100 bg-slate-50 hover:bg-slate-100 hover:border-slate-200 transition-all text-xs font-bold text-slate-700 cursor-pointer"
+                        >
+                          <div className="flex items-center space-x-2.5">
+                            <Mail className="w-4 h-4 text-rose-500" />
+                            <span>ข้อความติดต่อสอบถามทั้งหมด ({contactMessages.length} รายการ)</span>
+                          </div>
+                          <Download className="w-3.5 h-3.5 text-slate-400" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* UX/UI Stats visualization */}
+                    <div className="bg-white border border-slate-200 p-6 rounded-2xl space-y-5 shadow-sm">
+                      <h3 className="text-xs font-extrabold text-slate-800">
+                        สถิตินักศึกษาที่สนใจเรียน (Visual Insights)
+                      </h3>
+
+                      {/* Stats metric 1: Level Interest proportion */}
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-[10px] font-bold text-slate-600">
+                          <span>สัดส่วนระดับชั้นที่สนใจ (ปวช. vs ปวส.)</span>
+                          <span>
+                            ปวช. {enrolledStudents.filter(s => s.levelInterest === "ปวช.").length} | ปวส. {enrolledStudents.filter(s => s.levelInterest === "ปวส.").length}
+                          </span>
+                        </div>
+                        {/* Progress Bar styled visual meter */}
+                        <div className="h-3 w-full bg-slate-100 rounded-full overflow-hidden flex">
+                          <div 
+                            style={{ width: `${(enrolledStudents.filter(s => s.levelInterest === "ปวช.").length / (enrolledStudents.length || 1)) * 100}%` }}
+                            className="bg-brand-primary h-full transition-all duration-300" 
+                          />
+                          <div 
+                            style={{ width: `${(enrolledStudents.filter(s => s.levelInterest === "ปวส.").length / (enrolledStudents.length || 1)) * 100}%` }}
+                            className="bg-cyan-400 h-full transition-all duration-300" 
+                          />
+                        </div>
+                        <div className="flex justify-between text-[8px] text-slate-400 font-bold pt-0.5">
+                          <span className="flex items-center space-x-1">
+                            <span className="w-2 h-2 rounded-full bg-brand-primary" />
+                            <span>ปวช. (ประกาศนียบัตรวิชาชีพ)</span>
+                          </span>
+                          <span className="flex items-center space-x-1">
+                            <span className="w-2 h-2 rounded-full bg-cyan-400" />
+                            <span>ปวส. (ประกาศนียบัตรวิชาชีพชั้นสูง)</span>
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Stats metric 2: Popular majors horizontal bar */}
+                      <div className="space-y-3 pt-2">
+                        <p className="text-[10px] font-bold text-slate-600">สาขาวิชายอดนิยมอันดับต้นๆ</p>
+                        
+                        <div className="space-y-2.5">
+                          {["it-high", "acc-voc", "auto-voc"].map((majorId) => {
+                            const count = enrolledStudents.filter(s => s.majorInterest === majorId).length;
+                            const majorName = majors.find(m => m.id === majorId)?.name || majorId;
+                            const percentage = Math.round((count / (enrolledStudents.length || 1)) * 100);
+                            
+                            return (
+                              <div key={majorId} className="space-y-1">
+                                <div className="flex justify-between text-[9px] font-semibold text-slate-600">
+                                  <span>{majorName}</span>
+                                  <span>{count} ราย ({percentage}%)</span>
+                                </div>
+                                <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                                  <div 
+                                    style={{ width: `${percentage}%` }}
+                                    className="bg-amber-400 h-full rounded-full"
+                                  />
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>}
+
+            {activeSubTab === "admin_users" && (
+              <div className="space-y-6">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                  <div>
+                    <h2 className="text-lg font-extrabold text-slate-800 font-display flex items-center space-x-2">
+                      <ShieldCheck className="w-5 h-5 text-brand-primary" />
+                      <span>จัดการสิทธิ์ผู้ดูแลระบบ (Admin User Management)</span>
+                    </h2>
+                    <p className="text-xs text-slate-500">
+                      เพิ่ม ลบ หรือแก้ไขบัญชีและรหัสผ่านสำหรับเข้าใช้งานระบบหลังบ้าน CMS Portal แห่งนี้
+                    </p>
+                  </div>
+                  <button
+                    onClick={handleOpenAddAdminUser}
+                    className="flex items-center space-x-1.5 bg-brand-primary hover:bg-blue-800 text-white px-4 py-2.5 rounded-2xl text-xs font-bold transition-all shadow-sm cursor-pointer shrink-0"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>เพิ่มบัญชีผู้ดูแลระบบ</span>
+                  </button>
+                </div>
+
+                <div className="border border-slate-200 rounded-3xl overflow-hidden shadow-sm bg-white">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                      <thead>
+                        <tr className="bg-slate-50/75 border-b border-slate-200 text-slate-500 text-[10px] font-extrabold uppercase tracking-wider">
+                          <th className="p-4 pl-6">ชื่อ-นามสกุล / เจ้าหน้าที่</th>
+                          <th className="p-4">ชื่อผู้ใช้งาน (Username / ID)</th>
+                          <th className="p-4">รหัสผ่าน (Password)</th>
+                          <th className="p-4 text-right pr-6">การจัดการ</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 text-xs font-medium text-slate-700">
+                        {adminUsers.map((user) => (
+                          <tr key={user.id} className="hover:bg-slate-50/50 transition-colors">
+                            <td className="p-4 pl-6">
+                              <div className="flex items-center space-x-3">
+                                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-brand-primary font-bold">
+                                  {user.name ? user.name.charAt(0) : "A"}
+                                </div>
+                                <span className="font-bold text-slate-800">{user.name}</span>
+                              </div>
+                            </td>
+                            <td className="p-4">
+                              <span className="bg-slate-100 px-2.5 py-1 rounded-lg text-slate-600 font-mono text-[11px]">
+                                {user.username}
+                              </span>
+                            </td>
+                            <td className="p-4">
+                              <span className="font-mono tracking-widest text-slate-400">
+                                {user.password}
+                              </span>
+                            </td>
+                            <td className="p-4 text-right pr-6">
+                              <div className="flex space-x-2 justify-end">
+                                <button
+                                  onClick={() => handleOpenEditAdminUser(user)}
+                                  className="p-2 text-blue-600 hover:bg-blue-50 border border-blue-100 rounded-xl transition-all cursor-pointer"
+                                  title="แก้ไขข้อมูลผู้ใช้"
+                                >
+                                  <Edit className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    if (user.username.toLowerCase() === "admin") {
+                                      alert("ไม่สามารถลบบัญชีหลัก (admin) ของระบบได้");
+                                      return;
+                                    }
+                                    if (confirm(`คุณแน่ใจว่าต้องการลบบัญชีผู้ใช้งาน "${user.name}" ออกจากระบบ?`)) {
+                                      deleteAdminUser(user.id);
+                                      triggerToast("ลบบัญชีผู้ดูแลระบบเรียบร้อย!");
+                                    }
+                                  }}
+                                  className="p-2 text-rose-600 hover:bg-rose-50 border border-rose-100 rounded-xl transition-all cursor-pointer"
+                                  title="ลบบัญชีผู้ใช้"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                        {adminUsers.length === 0 && (
+                          <tr>
+                            <td colSpan={4} className="p-8 text-center text-slate-400">
+                              ไม่มีบัญชีผู้ดูแลระบบในระบบขณะนี้
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* NEW SUB-TAB: Hero Slides Manager */}
+            {activeSubTab === "slides" && (
+              <div className="space-y-6">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                  <div>
+                    <h2 className="text-lg font-extrabold text-slate-800 font-display">
+                      จัดการภาพสไลด์แบนเนอร์หน้าแรก (Hero Carousel)
+                    </h2>
+                    <p className="text-xs text-slate-500">
+                      เพิ่ม ลบ หรือแก้ไขภาพสไลด์และเนื้อหาแบนเนอร์ประชาสัมพันธ์ที่ปรากฏในหน้าหลักของวิทยาลัย
+                    </p>
+                  </div>
+                  <button
+                    onClick={handleOpenAddSlide}
+                    className="flex items-center space-x-1.5 bg-brand-primary hover:bg-blue-800 text-white px-4 py-2.5 rounded-2xl text-xs font-bold transition-all shadow-sm cursor-pointer shrink-0"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>เพิ่มแบนเนอร์ใหม่</span>
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {heroSlides.map((slide) => (
+                    <div key={slide.id} className="border border-slate-200 rounded-3xl overflow-hidden bg-white shadow-sm flex flex-col hover:shadow-md transition-all">
+                      <div className="relative h-40 bg-slate-100">
+                        <img 
+                          src={slide.bgImage} 
+                          alt={slide.title} 
+                          className="w-full h-full object-cover"
+                          referrerPolicy="no-referrer"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end p-4">
+                          {slide.badge && (
+                            <span className="self-start bg-amber-500 text-white text-[9px] font-extrabold px-2 py-0.5 rounded-md mb-1.5 shadow-sm">
+                              {slide.badge}
+                            </span>
+                          )}
+                          <h3 className="text-sm font-extrabold text-white leading-snug drop-shadow-sm">{slide.title}</h3>
+                          <p className="text-[11px] text-slate-200 line-clamp-1 mt-0.5">{slide.subtitle}</p>
+                        </div>
+                      </div>
+                      <div className="p-4 flex-grow flex flex-col justify-between space-y-4">
+                        <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">{slide.description}</p>
+                        
+                        <div className="flex justify-between items-center pt-3 border-t border-slate-100">
+                          <div className="flex flex-col">
+                            <span className="text-[9px] text-slate-400 font-bold uppercase">ลิงก์หน้าจอ</span>
+                            <span className="text-[10px] text-brand-primary font-extrabold">
+                              {slide.cta} ({slide.ctaTab === "admission" ? "สมัครเรียน" : slide.ctaTab === "majors" ? "หลักสูตรที่เปิดสอน" : slide.ctaTab === "about" ? "เกี่ยวกับวิทยาลัย" : "ข่าวสารและประกาศ"})
+                            </span>
+                          </div>
+                          
+                          <div className="flex space-x-1.5">
+                            <button
+                              onClick={() => handleOpenEditSlide(slide)}
+                              className="p-2 text-blue-600 hover:bg-blue-50 border border-blue-100 rounded-xl transition-all cursor-pointer"
+                              title="แก้ไขสไลด์"
+                            >
+                              <Edit className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={() => {
+                                if (confirm("คุณแน่ใจว่าต้องการลบสไลด์นี้?")) {
+                                  deleteHeroSlide(slide.id);
+                                  triggerToast("ลบสไลด์แบนเนอร์เรียบร้อยแล้ว!");
+                                }
+                              }}
+                              className="p-2 text-rose-600 hover:bg-rose-50 border border-rose-100 rounded-xl transition-all cursor-pointer"
+                              title="ลบสไลด์"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+
+                  {heroSlides.length === 0 && (
+                    <div className="col-span-full border border-dashed border-slate-200 rounded-3xl p-12 text-center text-slate-400 text-xs">
+                      <ImageIcon className="w-10 h-10 mx-auto text-slate-300 mb-2 animate-pulse" />
+                      ไม่มีสไลด์แบนเนอร์แสดงผลในขณะนี้ กรุณากดปุ่มเพิ่มเพื่อเริ่มต้นใช้งาน
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* NEW SUB-TAB: Administrators Manager */}
+            {activeSubTab === "administrators" && (
+              <div className="space-y-6">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                  <div>
+                    <h2 className="text-lg font-extrabold text-slate-800 font-display">
+                      จัดการทำเนียบคณะผู้บริหาร (College Administrators)
+                    </h2>
+                    <p className="text-xs text-slate-500">
+                      จัดการข้อมูลรายชื่อ รูปภาพ ตำแหน่ง และฝ่ายงานของคณะผู้บริหารเพื่อแสดงในหน้าเกี่ยวกับเรา
+                    </p>
+                  </div>
+                  <button
+                    onClick={handleOpenAddAdmin}
+                    className="flex items-center space-x-1.5 bg-brand-primary hover:bg-blue-800 text-white px-4 py-2.5 rounded-2xl text-xs font-bold transition-all shadow-sm cursor-pointer shrink-0"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>เพิ่มคณะผู้บริหาร</span>
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {administrators.map((admin) => (
+                    <div key={admin.id} className="border border-slate-200 rounded-3xl p-5 bg-white shadow-sm flex flex-col items-center text-center hover:shadow-md transition-all relative group">
+                      <div className="w-24 h-24 rounded-full overflow-hidden bg-slate-100 border-2 border-slate-200 mb-4 shadow-inner relative">
+                        <img 
+                          src={admin.imageUrl} 
+                          alt={admin.name} 
+                          className="w-full h-full object-cover"
+                          referrerPolicy="no-referrer"
+                        />
+                      </div>
+                      
+                      <div className="space-y-1">
+                        <h3 className="text-xs font-extrabold text-slate-800">{admin.name}</h3>
+                        <p className="text-[10px] text-brand-primary font-bold">{admin.position}</p>
+                        <p className="text-[9px] text-slate-400 font-medium">{admin.department}</p>
+                      </div>
+
+                      <div className="flex space-x-1.5 mt-5 pt-3 border-t border-slate-100 w-full justify-center">
+                        <button
+                          onClick={() => handleOpenEditAdmin(admin)}
+                          className="p-1.5 px-3 text-[10px] font-bold text-blue-600 hover:bg-blue-50 border border-blue-100 rounded-lg transition-all flex items-center space-x-1 cursor-pointer"
+                        >
+                          <Edit className="w-3 h-3" />
+                          <span>แก้ไข</span>
+                        </button>
+                        <button
+                          onClick={() => {
+                            if (confirm(`คุณแน่ใจว่าต้องการลบรายชื่อผู้บริหาร ${admin.name}?`)) {
+                              deleteAdministrator(admin.id);
+                              triggerToast("ลบข้อมูลคณะผู้บริหารเรียบร้อย!");
+                            }
+                          }}
+                          className="p-1.5 px-3 text-[10px] font-bold text-rose-600 hover:bg-rose-50 border border-rose-100 rounded-lg transition-all flex items-center space-x-1 cursor-pointer"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                          <span>ลบ</span>
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+
+                  {administrators.length === 0 && (
+                    <div className="col-span-full border border-dashed border-slate-200 rounded-3xl p-12 text-center text-slate-400 text-xs">
+                      <GraduationCap className="w-10 h-10 mx-auto text-slate-300 mb-2" />
+                      ไม่มีข้อมูลคณะผู้บริหารในทำเนียบขณะนี้
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* NEW SUB-TAB: FAQ Manager */}
+            {activeSubTab === "faq" && (
+              <div className="space-y-6">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                  <div>
+                    <h2 className="text-lg font-extrabold text-slate-800 font-display">
+                      จัดการคำถามที่พบบ่อย (FAQs Management)
+                    </h2>
+                    <p className="text-xs text-slate-500">
+                      แก้ไขข้อสงสัยยอดฮิตและข้อมูลคำถามพบบ่อยเกี่ยวกับการรับสมัครเรียนของวิทยาลัย
+                    </p>
+                  </div>
+                  <button
+                    onClick={handleOpenAddFaq}
+                    className="flex items-center space-x-1.5 bg-brand-primary hover:bg-blue-800 text-white px-4 py-2.5 rounded-2xl text-xs font-bold transition-all shadow-sm cursor-pointer shrink-0"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>เพิ่มคำถามใหม่</span>
+                  </button>
+                </div>
+
+                <div className="space-y-4">
+                  {faqList.map((faq, index) => (
+                    <div key={faq.id} className="border border-slate-200 rounded-2xl p-5 bg-white shadow-sm flex flex-col md:flex-row justify-between gap-4 hover:border-slate-300 transition-all">
+                      <div className="space-y-2 flex-grow">
+                        <div className="flex items-start space-x-2">
+                          <span className="text-[10px] bg-blue-50 text-blue-700 font-extrabold px-2 py-0.5 rounded-md shrink-0">
+                            Q#{index + 1}
+                          </span>
+                          <h3 className="text-xs font-extrabold text-slate-800 leading-snug">{faq.question}</h3>
+                        </div>
+                        <p className="text-xs text-slate-500 pl-8 leading-relaxed font-medium bg-slate-50 p-3 rounded-xl border border-slate-100">{faq.answer}</p>
+                      </div>
+
+                      <div className="flex md:flex-col justify-end gap-1.5 self-end md:self-center shrink-0">
+                        <button
+                          onClick={() => handleOpenEditFaq(faq)}
+                          className="p-2 text-blue-600 hover:bg-blue-50 border border-blue-100 rounded-xl transition-all flex items-center space-x-1.5 text-xs font-bold cursor-pointer"
+                          title="แก้ไขคำถาม"
+                        >
+                          <Edit className="w-3.5 h-3.5" />
+                          <span className="md:hidden">แก้ไข</span>
+                        </button>
+                        <button
+                          onClick={() => {
+                            if (confirm("คุณแน่ใจว่าต้องการลบคำถามพบบ่อยหัวข้อนี้?")) {
+                              deleteFaq(faq.id);
+                              triggerToast("ลบหัวข้อคำถามพบบ่อยสำเร็จ!");
+                            }
+                          }}
+                          className="p-2 text-rose-600 hover:bg-rose-50 border border-rose-100 rounded-xl transition-all flex items-center space-x-1.5 text-xs font-bold cursor-pointer"
+                          title="ลบคำถาม"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          <span className="md:hidden">ลบ</span>
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+
+                  {faqList.length === 0 && (
+                    <div className="border border-dashed border-slate-200 rounded-3xl p-12 text-center text-slate-400 text-xs">
+                      <HelpCircle className="w-10 h-10 mx-auto text-slate-300 mb-2" />
+                      ยังไม่มีคำถามที่พบบ่อยบันทึกไว้ในทำเนียบ
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* SUB-TAB: Menus Management */}
+            {activeSubTab === "menus" && (
+              <MenusManager />
+            )}
           </div>
         </div>
       </div>
@@ -1333,14 +2295,25 @@ export default function AdminView() {
                   </div>
 
                   <div className="space-y-1">
-                    <label className="font-bold text-slate-600">รูปภาพปกข่าวสาร (URL ลิงก์รูปภาพ)</label>
-                    <input
-    type="text"
-    value={tempNews.imageUrl}
-    onChange={(e) => setTempNews({ ...tempNews, imageUrl: e.target.value })}
-    className="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50"
-    placeholder="เช่น https://images.unsplash.com/... หรือเว้นว่างเพื่อใช้ภาพจำลอง"
-  />
+                    <label className="font-bold text-slate-600">รูปภาพปกข่าวสาร (หรืออัพโหลด)</label>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={tempNews.imageUrl}
+                        onChange={(e) => setTempNews({ ...tempNews, imageUrl: e.target.value })}
+                        className="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50"
+                        placeholder="เช่น https://images.unsplash.com/... หรืออัพโหลดรูปภาพ"
+                      />
+                      <label className="bg-blue-50 hover:bg-blue-100 text-blue-700 px-3 py-2.5 rounded-xl text-xs font-bold transition-all border border-blue-200 cursor-pointer shrink-0 flex items-center">
+                        <span>อัพโหลด</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => handleFileUpload(e, (base64) => setTempNews({ ...tempNews, imageUrl: base64 }))}
+                        />
+                      </label>
+                    </div>
                   </div>
                 </div>
 
@@ -1548,6 +2521,418 @@ export default function AdminView() {
               </div>
             </motion.div>
           </div>}
+      </AnimatePresence>
+
+      {/* 4. Modal for Hero Slide edit/create */}
+      <AnimatePresence>
+        {isSlideModalOpen && (
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-white rounded-3xl max-w-xl w-full border border-slate-200 overflow-hidden shadow-2xl flex flex-col max-h-[90vh]"
+            >
+              <div className="bg-brand-secondary text-white p-5 flex justify-between items-center">
+                <h3 className="font-extrabold text-sm md:text-base font-display">
+                  {editingSlide ? `แก้ไขแบนเนอร์หน้าแรก: ${tempSlide.title}` : "เพิ่มภาพสไลด์แบนเนอร์ใหม่"}
+                </h3>
+                <button onClick={() => setIsSlideModalOpen(false)} className="text-white hover:text-slate-300">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <form onSubmit={handleSaveSlide} className="p-6 overflow-y-auto space-y-4 flex-grow">
+                <div className="space-y-4 text-xs">
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-600">หัวข้อแบนเนอร์ (Title) *</label>
+                    <input
+                      type="text"
+                      required
+                      value={tempSlide.title}
+                      onChange={(e) => setTempSlide({ ...tempSlide, title: e.target.value })}
+                      className="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50 font-bold"
+                      placeholder="เช่น สมัครเรียนออนไลน์ โควตาพิเศษ 2570!"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-600">หัวข้อย่อย (Subtitle)</label>
+                    <input
+                      type="text"
+                      value={tempSlide.subtitle}
+                      onChange={(e) => setTempSlide({ ...tempSlide, subtitle: e.target.value })}
+                      className="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50"
+                      placeholder="เช่น ระดับ ปวช. และ ปวส. เรียนต่อสายอาชีพอนาคตไกล"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-600">คำอธิบายเพิ่มเติม *</label>
+                    <textarea
+                      required
+                      rows={3}
+                      value={tempSlide.description}
+                      onChange={(e) => setTempSlide({ ...tempSlide, description: e.target.value })}
+                      className="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50"
+                      placeholder="คำอธิบายสั้นๆ เกี่ยวกับแบนเนอร์นี้ที่จะแสดงบนเว็บหน้าแรก..."
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <label className="font-bold text-slate-600">ป้ายสัญลักษณ์ (Badge)</label>
+                      <input
+                        type="text"
+                        value={tempSlide.badge}
+                        onChange={(e) => setTempSlide({ ...tempSlide, badge: e.target.value })}
+                        className="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50"
+                        placeholder="เช่น ด่วนที่สุด, ใหม่, ข่าวดี"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="font-bold text-slate-600">ข้อความบนปุ่มกด (CTA Button) *</label>
+                      <input
+                        type="text"
+                        required
+                        value={tempSlide.cta}
+                        onChange={(e) => setTempSlide({ ...tempSlide, cta: e.target.value })}
+                        className="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50"
+                        placeholder="เช่น สมัครเรียนเลย!"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-600">ลิงก์หน้าปลายทางเมื่อคลิกปุ่ม *</label>
+                    <select
+                      value={tempSlide.ctaTab}
+                      onChange={(e) => setTempSlide({ ...tempSlide, ctaTab: e.target.value })}
+                      className="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50 font-bold"
+                    >
+                      <option value="admission">ระบบสมัครเรียนออนไลน์</option>
+                      <option value="majors">หลักสูตรที่เปิดสอน</option>
+                      <option value="about">เกี่ยวกับวิทยาลัย / คณะผู้บริหาร</option>
+                      <option value="news">ข่าวประชาสัมพันธ์ล่าสุด</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-600">ประเภทสื่อแบนเนอร์ *</label>
+                    <select
+                      value={tempSlide.mediaType || "image"}
+                      onChange={(e) => setTempSlide({ ...tempSlide, mediaType: e.target.value })}
+                      className="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50 font-bold"
+                    >
+                      <option value="image">รูปภาพ (Image)</option>
+                      <option value="video">วิดีโอ (Video MP4)</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-600">
+                      {tempSlide.mediaType === "video" ? "ลิงก์วิดีโอ หรือ อัพโหลดวิดีโอ MP4 *" : "URL ภาพพื้นหลังแบนเนอร์ หรือ อัพโหลดรูปภาพ *"}
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        required
+                        value={tempSlide.bgImage || ""}
+                        onChange={(e) => setTempSlide({ ...tempSlide, bgImage: e.target.value })}
+                        className="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50 font-mono text-[10px]"
+                        placeholder={tempSlide.mediaType === "video" ? "เช่น https://.../video.mp4 หรืออัพโหลด" : "เช่น https://images.unsplash.com/... หรืออัพโหลด"}
+                      />
+                      <label className="bg-blue-50 hover:bg-blue-100 text-blue-700 px-3 py-2.5 rounded-xl text-xs font-bold transition-all border border-blue-200 cursor-pointer shrink-0 flex items-center">
+                        <span>อัพโหลด</span>
+                        <input
+                          type="file"
+                          accept={tempSlide.mediaType === "video" ? "video/mp4" : "image/*"}
+                          className="hidden"
+                          onChange={(e) => handleFileUpload(e, (base64) => setTempSlide({ ...tempSlide, bgImage: base64 }))}
+                        />
+                      </label>
+                    </div>
+                    <p className="text-[10px] text-slate-400">
+                      {tempSlide.mediaType === "video" 
+                        ? "แนะนำไฟล์ขนาดไม่เกิน 2MB เพื่อความเร็วในการโหลดเล่น หรือระบุลิงก์วิดีโอ MP4 ภายนอก" 
+                        : "แนะนำความละเอียดขนาด 1920x1080 หรือรูปถ่ายทิวทัศน์วิทยาลัยที่สวยงาม"}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex justify-end space-x-3 pt-6 border-t border-slate-100">
+                  <button
+                    type="button"
+                    onClick={() => setIsSlideModalOpen(false)}
+                    className="bg-slate-100 hover:bg-slate-200 text-slate-600 px-5 py-2 rounded-xl font-bold text-xs cursor-pointer"
+                  >
+                    ยกเลิก
+                  </button>
+                  <button
+                    type="submit"
+                    className="bg-brand-primary hover:bg-blue-700 text-white px-6 py-2 rounded-xl font-bold text-xs shadow-md cursor-pointer"
+                  >
+                    บันทึกข้อมูลสไลด์
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* 5. Modal for Administrator edit/create */}
+      <AnimatePresence>
+        {isAdminModalOpen && (
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-white rounded-3xl max-w-md w-full border border-slate-200 overflow-hidden shadow-2xl flex flex-col"
+            >
+              <div className="bg-brand-secondary text-white p-5 flex justify-between items-center">
+                <h3 className="font-extrabold text-sm md:text-base font-display">
+                  {editingAdmin ? `แก้ไขประวัติผู้บริหาร: ${tempAdmin.name}` : "เพิ่มคณะผู้บริหารใหม่"}
+                </h3>
+                <button onClick={() => setIsAdminModalOpen(false)} className="text-white hover:text-slate-300">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <form onSubmit={handleSaveAdmin} className="p-6 space-y-4">
+                <div className="space-y-4 text-xs">
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-600">ชื่อ-นามสกุลผู้บริหาร *</label>
+                    <input
+                      type="text"
+                      required
+                      value={tempAdmin.name}
+                      onChange={(e) => setTempAdmin({ ...tempAdmin, name: e.target.value })}
+                      className="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50 font-bold"
+                      placeholder="เช่น ดร.วิทยา เทพประสิทธิ์"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-600">ตำแหน่งงาน *</label>
+                    <input
+                      type="text"
+                      required
+                      value={tempAdmin.position}
+                      onChange={(e) => setTempAdmin({ ...tempAdmin, position: e.target.value })}
+                      className="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50"
+                      placeholder="เช่น ผู้อำนวยการวิทยาลัยเทคโนโลยีปทุมรัตต์"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-600">แผนกงาน / ฝ่ายบริหาร *</label>
+                    <input
+                      type="text"
+                      required
+                      value={tempAdmin.department}
+                      onChange={(e) => setTempAdmin({ ...tempAdmin, department: e.target.value })}
+                      className="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50"
+                      placeholder="เช่น ฝ่ายวิชาการและเทคโนโลยีสารสนเทศ"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-600">URL รูปถ่ายผู้บริหาร * (หรืออัพโหลด)</label>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        required
+                        value={tempAdmin.imageUrl}
+                        onChange={(e) => setTempAdmin({ ...tempAdmin, imageUrl: e.target.value })}
+                        className="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50 font-mono text-[10px]"
+                        placeholder="https://images.unsplash.com/photo-..."
+                      />
+                      <label className="bg-blue-50 hover:bg-blue-100 text-blue-700 px-3 py-2.5 rounded-xl text-xs font-bold transition-all border border-blue-200 cursor-pointer shrink-0 flex items-center">
+                        <span>อัพโหลด</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => handleFileUpload(e, (base64) => setTempAdmin({ ...tempAdmin, imageUrl: base64 }))}
+                        />
+                      </label>
+                    </div>
+                    <p className="text-[10px] text-slate-400">ขนาดแนะนำ: อัตราส่วนสี่เหลี่ยมจัตุรัส (1:1)</p>
+                  </div>
+                </div>
+
+                <div className="flex justify-end space-x-3 pt-6 border-t border-slate-100">
+                  <button
+                    type="button"
+                    onClick={() => setIsAdminModalOpen(false)}
+                    className="bg-slate-100 hover:bg-slate-200 text-slate-600 px-5 py-2 rounded-xl font-bold text-xs cursor-pointer"
+                  >
+                    ยกเลิก
+                  </button>
+                  <button
+                    type="submit"
+                    className="bg-brand-primary hover:bg-blue-700 text-white px-6 py-2 rounded-xl font-bold text-xs shadow-md cursor-pointer"
+                  >
+                    บันทึกผู้บริหาร
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* 6. Modal for FAQ edit/create */}
+      <AnimatePresence>
+        {isFaqModalOpen && (
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-white rounded-3xl max-w-md w-full border border-slate-200 overflow-hidden shadow-2xl flex flex-col"
+            >
+              <div className="bg-brand-secondary text-white p-5 flex justify-between items-center">
+                <h3 className="font-extrabold text-sm md:text-base font-display">
+                  {editingFaq ? "แก้ไขหัวข้อคำถามพบบ่อย" : "เพิ่มข้อคำถามพบบ่อยใหม่"}
+                </h3>
+                <button onClick={() => setIsFaqModalOpen(false)} className="text-white hover:text-slate-300">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <form onSubmit={handleSaveFaq} className="p-6 space-y-4">
+                <div className="space-y-4 text-xs">
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-600">คำถาม (Question) *</label>
+                    <input
+                      type="text"
+                      required
+                      value={tempFaq.question}
+                      onChange={(e) => setTempFaq({ ...tempFaq, question: e.target.value })}
+                      className="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50 font-bold"
+                      placeholder="เช่น สมัครเรียนที่วิทยาลัยต้องเตรียมเอกสารอะไรบ้าง?"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-600">คำตอบเฉลยละเอียด (Answer) *</label>
+                    <textarea
+                      required
+                      rows={5}
+                      value={tempFaq.answer}
+                      onChange={(e) => setTempFaq({ ...tempFaq, answer: e.target.value })}
+                      className="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50 leading-relaxed"
+                      placeholder="เช่น เอกสารที่ต้องเตรียม ได้แก่ 1. สำเนาใบระเบียนแสดงผลการเรียน (ปพ.1)..."
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-end space-x-3 pt-6 border-t border-slate-100">
+                  <button
+                    type="button"
+                    onClick={() => setIsFaqModalOpen(false)}
+                    className="bg-slate-100 hover:bg-slate-200 text-slate-600 px-5 py-2 rounded-xl font-bold text-xs cursor-pointer"
+                  >
+                    ยกเลิก
+                  </button>
+                  <button
+                    type="submit"
+                    className="bg-brand-primary hover:bg-blue-700 text-white px-6 py-2 rounded-xl font-bold text-xs shadow-md cursor-pointer"
+                  >
+                    บันทึกคำถามพบบ่อย
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* 7. Modal for Admin Users edit/create */}
+      <AnimatePresence>
+        {isAdminUserModalOpen && (
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-white rounded-3xl max-w-md w-full border border-slate-200 overflow-hidden shadow-2xl flex flex-col"
+            >
+              <div className="bg-brand-secondary text-white p-5 flex justify-between items-center">
+                <h3 className="font-extrabold text-sm md:text-base font-display">
+                  {editingAdminUser ? `แก้ไขบัญชีผู้ดูแลระบบ: ${tempAdminUser.username}` : "เพิ่มบัญชีผู้ดูแลระบบใหม่"}
+                </h3>
+                <button onClick={() => setIsAdminUserModalOpen(false)} className="text-white hover:text-slate-300">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <form onSubmit={handleSaveAdminUser} className="p-6 space-y-4">
+                <div className="space-y-4 text-xs">
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-600">ชื่อแสดงผล / ชื่อ-นามสกุล เจ้าหน้าที่ *</label>
+                    <input
+                      type="text"
+                      required
+                      value={tempAdminUser.name}
+                      onChange={(e) => setTempAdminUser({ ...tempAdminUser, name: e.target.value })}
+                      className="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50 font-bold"
+                      placeholder="เช่น อาจารย์ณรงค์ชัย สายดี"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-600">ชื่อผู้ใช้งาน (ID / Username) *</label>
+                    <input
+                      type="text"
+                      required
+                      disabled={!!editingAdminUser}
+                      value={tempAdminUser.username}
+                      onChange={(e) => setTempAdminUser({ ...tempAdminUser, username: e.target.value })}
+                      className={`w-full p-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50 font-mono ${editingAdminUser ? "opacity-60 cursor-not-allowed bg-slate-100" : ""}`}
+                      placeholder="เช่น narong_ptc"
+                    />
+                    {!editingAdminUser && (
+                      <p className="text-[10px] text-slate-400">ใช้เป็น ID สำหรับพิมพ์กรอกในช่องตอนเข้าระบบ</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-600">รหัสผ่าน (Password) *</label>
+                    <input
+                      type="text"
+                      required
+                      value={tempAdminUser.password}
+                      onChange={(e) => setTempAdminUser({ ...tempAdminUser, password: e.target.value })}
+                      className="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50 font-mono"
+                      placeholder="เช่น 123456"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-end space-x-3 pt-6 border-t border-slate-100">
+                  <button
+                    type="button"
+                    onClick={() => setIsAdminUserModalOpen(false)}
+                    className="bg-slate-100 hover:bg-slate-200 text-slate-600 px-5 py-2 rounded-xl font-bold text-xs cursor-pointer"
+                  >
+                    ยกเลิก
+                  </button>
+                  <button
+                    type="submit"
+                    className="bg-brand-primary hover:bg-blue-700 text-white px-6 py-2 rounded-xl font-bold text-xs shadow-md cursor-pointer"
+                  >
+                    บันทึกบัญชีผู้ดูแลระบบ
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
       </AnimatePresence>
     </div>;
 }

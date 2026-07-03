@@ -2,157 +2,149 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
+import { useData } from "../context/DataContext";
+
 export default function CollegeLogo({ className = "", size = 48 }) {
-  return <svg
-    width={size}
-    height={size}
-    viewBox="0 0 200 200"
-    className={`${className}`}
-    id="college-official-seal"
-  >
+  const { collegeInfo } = useData();
+
+  if (collegeInfo?.logoUrl) {
+    return (
+      <img
+        src={collegeInfo.logoUrl}
+        alt={collegeInfo.name || "วิทยาลัยเทคโนโลยีปทุมรัตต์"}
+        style={{ width: size, height: size }}
+        className={`object-contain rounded-full bg-white p-1 border border-slate-200 shadow-sm ${className}`}
+        referrerPolicy="no-referrer"
+      />
+    );
+  }
+
+  // Draw a stunning vector SVG of the Pathumrat Technology College logo
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 200 200"
+      className={`${className}`}
+      id="college-official-seal"
+    >
       <defs>
-        {
-    /* Glow and drop shadows for realistic depth */
-  }
-        <filter id="logo-drop-shadow" x="-20%" y="-20%" width="140%" height="140%">
-          <feDropShadow dx="0" dy="4" stdDeviation="4" floodColor="#000000" floodOpacity="0.2" />
+        <filter id="logo-drop-shadow" x="-10%" y="-10%" width="120%" height="120%">
+          <feDropShadow dx="0" dy="2" stdDeviation="2" floodColor="#000000" floodOpacity="0.15" />
         </filter>
-        <radialGradient id="gold-metallic" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#FFF4D0" />
-          <stop offset="30%" stopColor="#F5D061" />
-          <stop offset="70%" stopColor="#D4A316" />
-          <stop offset="100%" stopColor="#AA7C00" />
-        </radialGradient>
-        <linearGradient id="navy-royal" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#1E3A8A" />
-          <stop offset="50%" stopColor="#0B132B" />
-          <stop offset="100%" stopColor="#1D1A39" />
-        </linearGradient>
-        {
-    /* Curved circular paths for text alignment */
-  }
-        <path id="arc-path-top" d="M 22 100 A 78 78 0 0 1 178 100" fill="none" />
-        <path id="arc-path-bottom" d="M 178 100 A 78 78 0 0 1 22 100" fill="none" />
+        {/* Curved paths for circular text */}
+        <path id="arc-path-top" d="M 28 100 A 72 72 0 0 1 172 100" fill="none" />
+        <path id="arc-path-bottom" d="M 172 100 A 72 72 0 0 1 28 100" fill="none" />
       </defs>
 
-      {
-    /* Outer Golden Rim */
-  }
-      <circle cx="100" cy="100" r="95" fill="url(#navy-royal)" stroke="url(#gold-metallic)" strokeWidth="6" filter="url(#logo-drop-shadow)" />
-      
-      {
-    /* Inner dotted decorative ring */
-  }
-      <circle cx="100" cy="100" r="82" fill="none" stroke="url(#gold-metallic)" strokeWidth="1.5" strokeDasharray="3 2" />
+      {/* 1. Outer Blue Gear Ring */}
+      <g fill="#2b3e9a" stroke="#2b3e9a" strokeWidth="1" filter="url(#logo-drop-shadow)">
+        {/* Main outer ring */}
+        <circle cx="100" cy="100" r="92" />
+        {/* Gear Teeth (20 teeth) */}
+        {Array.from({ length: 20 }).map((_, i) => {
+          const angle = (i * 360) / 20;
+          return (
+            <rect
+              key={i}
+              x="92"
+              y="3"
+              width="16"
+              height="15"
+              rx="2"
+              transform={`rotate(${angle} 100 100)`}
+            />
+          );
+        })}
+      </g>
 
-      {
-    /* Circular Institutional Text in Thai (Top) */
-  }
-      <text fill="url(#gold-metallic)" fontSize="11" fontWeight="900" fontFamily="'Inter', 'Sarabun', sans-serif" letterSpacing="0.8">
+      {/* 2. Inner White Ring with Blue Borders */}
+      <circle cx="100" cy="100" r="82" fill="#ffffff" stroke="#2b3e9a" strokeWidth="3" />
+      <circle cx="100" cy="100" r="54" fill="none" stroke="#2b3e9a" strokeWidth="2" />
+
+      {/* 3. Thai Text (Top) */}
+      <text
+        fill="#2b3e9a"
+        fontSize="12"
+        fontWeight="800"
+        fontFamily="'Sarabun', 'Inter', sans-serif"
+        letterSpacing="0.5"
+      >
         <textPath href="#arc-path-top" startOffset="50%" textAnchor="middle">
           วิทยาลัยเทคโนโลยีปทุมรัตต์
         </textPath>
       </text>
-      
-      {
-    /* Circular Institutional Text in English (Bottom) */
-  }
-      <text fill="url(#gold-metallic)" fontSize="8.5" fontWeight="900" fontFamily="'Inter', sans-serif" letterSpacing="0.9">
+
+      {/* 4. Thai Text (Bottom) */}
+      <text
+        fill="#2b3e9a"
+        fontSize="12.5"
+        fontWeight="800"
+        fontFamily="'Sarabun', 'Inter', sans-serif"
+        letterSpacing="0.2"
+      >
         <textPath href="#arc-path-bottom" startOffset="50%" textAnchor="middle">
-          PATHUMRAT TECHNOLOGY COLLEGE
+          อ.ปทุมรัตต์ จ.ร้อยเอ็ด
         </textPath>
       </text>
 
-      {
-    /* Central Emblem Backdrop */
-  }
-      <circle cx="100" cy="100" r="56" fill="#0B132B" stroke="url(#gold-metallic)" strokeWidth="3" />
+      {/* 5. Central Emblem (Split into 3 sections) */}
+      {/* Outer boundary circle for central emblem */}
+      <circle cx="100" cy="100" r="50" fill="#ffffff" stroke="#2b3e9a" strokeWidth="2.5" />
 
-      {
-    /* Tech Cogwheel (representing Technology) */
-  }
-      <g stroke="url(#gold-metallic)" strokeWidth="2" fill="none" opacity="0.85">
-        <circle cx="100" cy="100" r="28" />
-        {Array.from({ length: 8 }).map((_, i) => {
-    const angle = i * 360 / 8;
-    return <line
-      key={i}
-      x1="100"
-      y1="100"
-      x2={100 + 34 * Math.cos(angle * Math.PI / 180)}
-      y2={100 + 34 * Math.sin(angle * Math.PI / 180)}
-      strokeWidth="4.5"
-      strokeLinecap="round"
-    />;
-  })}
+      {/* Dividers (Mercedes-benz style star meeting at center) */}
+      <g stroke="#2b3e9a" strokeWidth="2.5" strokeLinecap="round">
+        {/* Vertical Downwards line */}
+        <line x1="100" y1="100" x2="100" y2="150" />
+        {/* Top-Right line (approx 30 deg up-right, i.e., 150 deg from vertical down) */}
+        <line x1="100" y1="100" x2="143" y2="75" />
+        {/* Top-Left line (approx 30 deg up-left, i.e., 210 deg from vertical down) */}
+        <line x1="100" y1="100" x2="57" y2="75" />
       </g>
-      <circle cx="100" cy="100" r="23" fill="#0B132B" />
 
-      {
-    /* Open Academic Book Base */
-  }
-      <path
-    d="M 72 116 Q 86 112 100 118 Q 114 112 128 116 L 128 123 Q 114 119 100 125 Q 86 119 72 123 Z"
-    fill="url(#gold-metallic)"
-    stroke="#0F172A"
-    strokeWidth="0.5"
-  />
+      {/* 6. Section 1 (Top Field): Candle, Book, and Leaves */}
+      <g transform="translate(100, 72) scale(0.65)" stroke="#2b3e9a" fill="none" strokeWidth="2">
+        {/* Flame/Light */}
+        <path d="M 0 -22 C -4 -12 -4 -4 0 0 C 4 -4 4 -12 0 -22 Z" fill="#2b3e9a" />
+        {/* Torch holder */}
+        <line x1="0" y1="0" x2="0" y2="14" strokeWidth="3" />
+        {/* Book */}
+        <path d="M -18 14 Q -9 11 0 16 Q 9 11 18 14 L 18 20 Q 9 17 0 22 Q -9 17 -18 20 Z" fill="#ffffff" />
+        {/* Left Laurel leaf branch */}
+        <path d="M -8 10 Q -18 -2 -12 -12" />
+        <circle cx="-15" cy="-8" r="1.5" fill="#2b3e9a" />
+        <circle cx="-13" cy="-3" r="1.5" fill="#2b3e9a" />
+        <circle cx="-10" cy="2" r="1.5" fill="#2b3e9a" />
+        {/* Right Laurel leaf branch */}
+        <path d="M 8 10 Q 18 -2 12 -12" />
+        <circle cx="15" cy="-8" r="1.5" fill="#2b3e9a" />
+        <circle cx="13" cy="-3" r="1.5" fill="#2b3e9a" />
+        <circle cx="10" cy="2" r="1.5" fill="#2b3e9a" />
+      </g>
 
-      {
-    /* Golden Sacred Lotus Petals (representing "ปทุมรัตต์") */
-  }
-      {
-    /* Central main petal */
-  }
-      <path
-    d="M 100 72 C 95 83 95 104 100 112 C 105 104 105 83 100 72 Z"
-    fill="url(#gold-metallic)"
-    stroke="#1E3A8A"
-    strokeWidth="0.5"
-  />
-      {
-    /* Inner left petal */
-  }
-      <path
-    d="M 100 81 C 87 87 85 104 98 112 C 93 102 95 89 100 81 Z"
-    fill="url(#gold-metallic)"
-    stroke="#1E3A8A"
-    strokeWidth="0.5"
-  />
-      {
-    /* Inner right petal */
-  }
-      <path
-    d="M 100 81 C 113 87 115 104 102 112 C 107 102 105 89 100 81 Z"
-    fill="url(#gold-metallic)"
-    stroke="#1E3A8A"
-    strokeWidth="0.5"
-  />
-      {
-    /* Outer left petal */
-  }
-      <path
-    d="M 100 90 C 76 96 80 110 95 112 C 82 104 88 96 100 90 Z"
-    fill="url(#gold-metallic)"
-    stroke="#1E3A8A"
-    strokeWidth="0.5"
-  />
-      {
-    /* Outer right petal */
-  }
-      <path
-    d="M 100 90 C 124 96 120 110 105 112 C 118 104 112 96 100 90 Z"
-    fill="url(#gold-metallic)"
-    stroke="#1E3A8A"
-    strokeWidth="0.5"
-  />
+      {/* 7. Section 2 (Bottom-Left Field): Lotus Flower ("ปทุม") */}
+      <g transform="translate(76, 116) scale(0.55)" stroke="#2b3e9a" strokeWidth="2.5" fill="none">
+        {/* Lotus Petals */}
+        <path d="M 0 -18 C -10 -5 -12 12 0 18 C 12 12 10 -5 0 -18 Z" fill="#ffffff" />
+        <path d="M 0 -5 C -15 0 -15 15 -2 18 C -10 10 -8 2 0 -5 Z" fill="#ffffff" />
+        <path d="M 0 -5 C 15 0 15 15 2 18 C 10 10 8 2 0 -5 Z" fill="#ffffff" />
+        {/* Water ripples below */}
+        <path d="M -14 24 Q 0 21 14 24" strokeWidth="2" />
+        <path d="M -8 28 Q 0 26 8 28" strokeWidth="1.5" />
+      </g>
 
-      {
-    /* Sparkling Crown Diamond/Flame */
-  }
-      <path
-    d="M 100 54 L 102.5 59.5 L 108 61 L 104 64.5 L 105 70 L 100 67 L 95 70 L 96 64.5 L 92 61 L 97.5 59.5 Z"
-    fill="url(#gold-metallic)"
-  />
-    </svg>;
+      {/* 8. Section 3 (Bottom-Right Field): Computer */}
+      <g transform="translate(122, 116) scale(0.6)" stroke="#2b3e9a" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
+        {/* Monitor */}
+        <rect x="-16" y="-14" width="28" height="20" rx="3" fill="#ffffff" />
+        <line x1="-12" y1="-2" x2="8" y2="-2" />
+        {/* Screen inside */}
+        <rect x="-13" y="-11" width="22" height="13" rx="1" fill="#ffffff" />
+        {/* Stand */}
+        <path d="M -6 6 L -10 14 L 6 14 L 2 6 Z" fill="#ffffff" />
+        {/* Keyboard lines */}
+        <path d="M -14 18 L 10 18" strokeWidth="2" />
+      </g>
+    </svg>
+  );
 }
