@@ -178,7 +178,7 @@ export const DataProvider = ({ children }) => {
       }
     }
     return {
-      type: "local",
+      type: "firestore",
       gsheetUrl: "",
       gsheetId: "1wwm30RHJ_icNvMqSo-oFNYfEtPQXQ_NhM69bNQMt4Vk",
       syncEnabled: false

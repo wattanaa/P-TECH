@@ -16,8 +16,8 @@ import {
 } from "lucide-react";
 import { useData } from "../context/DataContext";
 export default function NewsView({ selectedNews, setSelectedNews }) {
-  const { newsData } = useData();
-  const [activeCategoryFilter, setActiveCategoryFilter] = useState("\u0E17\u0E31\u0E49\u0E07\u0E2B\u0E21\u0E14");
+  const { newsData, dbSettings, isLoading } = useData();
+  const [activeCategoryFilter, setActiveCategoryFilter] = useState("ทั้งหมด");
   const [searchQuery, setSearchQuery] = useState("");
   const [localNewsList, setLocalNewsList] = useState(newsData);
   useEffect(() => {
@@ -168,11 +168,26 @@ export default function NewsView({ selectedNews, setSelectedNews }) {
             {
       /* Header description */
     }
-            <div className="text-center max-w-3xl mx-auto space-y-3">
-              <span className="text-brand-primary font-bold text-xs uppercase tracking-widest bg-blue-50 px-3 py-1 rounded-full">
-                ข่าวสารและประกาศสำคัญ
-              </span>
-              <h2 className="text-2xl md:text-4xl font-extrabold text-brand-secondary tracking-tight">
+            <div className="text-center max-w-3xl mx-auto space-y-3 flex flex-col items-center">
+              <div className="flex flex-wrap gap-2 justify-center items-center">
+                <span className="text-brand-primary font-bold text-xs uppercase tracking-widest bg-blue-50 px-3 py-1 rounded-full">
+                  ข่าวสารและประกาศสำคัญ
+                </span>
+                {dbSettings?.type === "firestore" ? (
+                  <div className="inline-flex items-center space-x-1.5 bg-emerald-50 text-emerald-700 text-[11px] font-bold px-3 py-1 rounded-full border border-emerald-100 shadow-sm animate-pulse-subtle">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                    </span>
+                    <span>เชื่อมต่อกับ Cloud Firestore (เรียลไทม์)</span>
+                  </div>
+                ) : (
+                  <div className="inline-flex items-center space-x-1.5 bg-amber-50 text-amber-700 text-[11px] font-bold px-3 py-1 rounded-full border border-amber-100 shadow-sm">
+                    <span>ข้อมูลจำลองแบบ Local</span>
+                  </div>
+                )}
+              </div>
+              <h2 className="text-2xl md:text-4xl font-extrabold text-brand-secondary tracking-tight w-full">
                 ศูนย์ข่าวสารและกิจกรรม วิทยาลัยเทคโนโลยีปทุมรัตต์
               </h2>
               <p className="text-slate-500 text-sm">

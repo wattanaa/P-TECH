@@ -2,7 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   useData
@@ -39,8 +39,12 @@ import {
   HardDrive,
   HelpCircle,
   Image as ImageIcon,
-  Sliders
+  Sliders,
+  Globe,
+  Lock
 } from "lucide-react";
+import { db } from "../firebase";
+import { collection, doc, setDoc, onSnapshot } from "firebase/firestore";
 import CollegeLogo from "./CollegeLogo";
 import MenusManager from "./MenusManager";
 export default function AdminView() {
@@ -89,8 +93,123 @@ export default function AdminView() {
   const [passwordError, setPasswordError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [activeSubTab, setActiveSubTab] = useState("overview");
+
+  // --- SECURITY ENHANCEMENTS STATE & LOGIC ---
+  const [lockoutTimeLeft, setLockoutTimeLeft] = useState(0);
+  const [securityLogs, setSecurityLogs] = useState([]);
+  const [securitySubTab, setSecuritySubTab] = useState("users"); // "users" or "logs"
+
+  // 1. Audit Log Action Writer
+  const logAdminAction = async (actionType, detail, overrideUser = null, overrideName = null) => {
+    const username = overrideUser || sessionStorage.getItem("ptc_admin_username") || "system";
+    const name = overrideName || sessionStorage.getItem("ptc_admin_name") || "ระบบ";
+    const logItem = {
+      id: `log-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      timestamp: new Date().toISOString(),
+      username,
+      name,
+      action: actionType,
+      detail,
+      ip: "127.0.0.1" // Mock/Client-side representation
+    };
+
+    if (dbSettings.type === "firestore") {
+      try {
+        await setDoc(doc(db, "admin_logs", logItem.id), logItem);
+      } catch (err) {
+        console.error("Failed to write security audit log to Firestore:", err);
+      }
+    } else {
+      const logs = JSON.parse(localStorage.getItem("ptc_admin_logs") || "[]");
+      logs.unshift(logItem);
+      localStorage.setItem("ptc_admin_logs", JSON.stringify(logs.slice(0, 100)));
+      setSecurityLogs(logs.slice(0, 100));
+    }
+  };
+
+  // 2. Lockout Countdown Tick Effect
+  useEffect(() => {
+    const checkLockout = () => {
+      const storedUntil = localStorage.getItem("ptc_admin_lockout_until");
+      if (storedUntil) {
+        const timeLeft = Math.max(0, Math.ceil((parseInt(storedUntil) - Date.now()) / 1000));
+        setLockoutTimeLeft(timeLeft);
+        if (timeLeft <= 0) {
+          localStorage.removeItem("ptc_admin_lockout_until");
+          localStorage.removeItem("ptc_admin_failed_attempts");
+        }
+      }
+    };
+
+    checkLockout();
+    const interval = setInterval(checkLockout, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // 3. Security logs Firestore/LocalStorage Sync
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    if (dbSettings.type === "firestore") {
+      const unsub = onSnapshot(collection(db, "admin_logs"), (snap) => {
+        const items = [];
+        snap.forEach((doc) => items.push({ ...doc.data(), id: doc.id }));
+        items.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        setSecurityLogs(items);
+      }, (error) => {
+        console.error("Firestore security logs fetch error:", error);
+      });
+      return unsub;
+    } else {
+      const logs = JSON.parse(localStorage.getItem("ptc_admin_logs") || "[]");
+      setSecurityLogs(logs);
+    }
+  }, [isAuthenticated, dbSettings.type]);
+
+  // 4. Inactivity Auto-Logout Effect (15 minutes limit)
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    let timeoutId;
+    const INACTIVITY_LIMIT = 15 * 60 * 1000; // 15 minutes
+
+    const handleAutoLogout = () => {
+      logAdminAction("ออกจากระบบอัตโนมัติ", "ระบบนำผู้ใช้ออกจากระบบอัตโนมัติเนื่องจากไม่มีการเคลื่อนไหวเกิน 15 นาที");
+      sessionStorage.clear();
+      setIsAuthenticated(false);
+      triggerToast("ระบบทำรายการออกเนื่องจากไม่มีความเคลื่อนไหวเกิน 15 นาที เพื่อความปลอดภัย");
+    };
+
+    const resetTimer = () => {
+      if (timeoutId) clearTimeout(timeoutId);
+      timeoutId = setTimeout(handleAutoLogout, INACTIVITY_LIMIT);
+    };
+
+    window.addEventListener("mousemove", resetTimer);
+    window.addEventListener("keypress", resetTimer);
+    window.addEventListener("scroll", resetTimer);
+    window.addEventListener("click", resetTimer);
+
+    resetTimer();
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+      window.removeEventListener("mousemove", resetTimer);
+      window.removeEventListener("keypress", resetTimer);
+      window.removeEventListener("scroll", resetTimer);
+      window.removeEventListener("click", resetTimer);
+    };
+  }, [isAuthenticated]);
+
+  // Handle Login Submit
   const handleLoginSubmit = (e) => {
     e.preventDefault();
+    
+    // Check if lockout is active
+    if (lockoutTimeLeft > 0) {
+      setPasswordError(`ระบบล็อกอินยังคงถูกล็อกชั่วคราวกรุณารออีก ${lockoutTimeLeft} วินาที`);
+      return;
+    }
+
     const uInput = usernameInput.trim().toLowerCase();
     const pInput = passwordInput.trim();
     
@@ -99,14 +218,35 @@ export default function AdminView() {
     );
     
     if (foundUser || (uInput === "admin" && pInput === "admin")) {
-      const adminName = foundUser ? foundUser.name : "ผู้ดูแลระบบ";
+      const adminName = foundUser ? foundUser.name : "ผู้ดูแลระบบหลัก";
       sessionStorage.setItem("ptc_admin_authenticated", "true");
       sessionStorage.setItem("ptc_admin_username", uInput);
       sessionStorage.setItem("ptc_admin_name", adminName);
+      
+      // Clear brute force lockout states
+      localStorage.removeItem("ptc_admin_failed_attempts");
+      localStorage.removeItem("ptc_admin_lockout_until");
+      setLockoutTimeLeft(0);
+      
       setIsAuthenticated(true);
       setPasswordError("");
+      
+      // Audit Log Success
+      logAdminAction("เข้าสู่ระบบ", "ผู้ดูแลระบบเข้าใช้งานระบบเรียบร้อย (Login Success)", uInput, adminName);
     } else {
-      setPasswordError("ชื่อผู้ใช้งาน (ID) หรือรหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง");
+      const currentAttempts = parseInt(localStorage.getItem("ptc_admin_failed_attempts") || "0") + 1;
+      localStorage.setItem("ptc_admin_failed_attempts", currentAttempts.toString());
+
+      if (currentAttempts >= 5) {
+        const lockUntil = Date.now() + 60000; // 60s
+        localStorage.setItem("ptc_admin_lockout_until", lockUntil.toString());
+        setLockoutTimeLeft(60);
+        setPasswordError("คุณกรอกรหัสผ่านผิดพลาดเกิน 5 ครั้ง ระบบทำการระงับสิทธิ์ล็อกอินชั่วคราว 60 วินาที เพื่อความปลอดภัย");
+        logAdminAction("ล็อกเอ้าต์ระบบความปลอดภัย", `ถูกล็อกอินบล็อกเป็นเวลา 60 วินาทีเนื่องจากกรอกรหัสผ่านผิดเกิน 5 ครั้ง สำหรับ ID: ${uInput}`, uInput, "ผู้ใช้ทั่วไป / ผู้ลักลอบ");
+      } else {
+        setPasswordError(`ชื่อผู้ใช้งาน (ID) หรือรหัสผ่านไม่ถูกต้อง (กรอกได้อีก ${5 - currentAttempts} ครั้ง)`);
+        logAdminAction("เข้าสู่ระบบล้มเหลว", `กรอกรหัสผ่านผิดพลาดในการพยายามเข้าระบบ บัญชี: ${uInput} (ครั้งที่ ${currentAttempts})`, uInput, "ผู้ใช้ทั่วไป");
+      }
     }
   };
   const [searchQuery, setSearchQuery] = useState("");
@@ -227,6 +367,7 @@ export default function AdminView() {
     if (editingAdminUser) {
       updateAdminUser(editingAdminUser.username, tempAdminUser);
       triggerToast("แก้ไขบัญชีผู้ดูแลระบบสำเร็จ!");
+      logAdminAction("จัดการผู้ดูแลระบบ", `แก้ไขข้อมูลสิทธิ์สำหรับ ID: ${tempAdminUser.username} (${tempAdminUser.name})`);
     } else {
       const exists = adminUsers.some(
         (u) => u.username.toLowerCase() === tempAdminUser.username.trim().toLowerCase()
@@ -237,6 +378,7 @@ export default function AdminView() {
       }
       addAdminUser(tempAdminUser);
       triggerToast("เพิ่มผู้ดูแลระบบคนใหม่สำเร็จ!");
+      logAdminAction("จัดการผู้ดูแลระบบ", `สร้างบัญชีผู้ใช้ใหม่ ID: ${tempAdminUser.username} (${tempAdminUser.name})`);
     }
     setIsAdminUserModalOpen(false);
     setEditingAdminUser(null);
@@ -309,15 +451,18 @@ export default function AdminView() {
     updateCollegeInfo(tempCollege);
     setIsEditingCollege(false);
     triggerToast("\u0E1A\u0E31\u0E19\u0E17\u0E36\u0E01\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25\u0E27\u0E34\u0E17\u0E22\u0E32\u0E25\u0E31\u0E22\u0E40\u0E23\u0E35\u0E22\u0E1A\u0E23\u0E49\u0E2D\u0E22\u0E41\u0E25\u0E49\u0E27!");
+    logAdminAction("แก้ไขข้อมูลทั่วไป", "อัปเดตข้อมูลทั่วไปวิทยาลัยและค่าตัวแปรระบบ SEO");
   };
   const handleSaveMajor = (e) => {
     e.preventDefault();
     if (editingMajor) {
       updateMajor(editingMajor.id, tempMajor);
       triggerToast("\u0E41\u0E01\u0E49\u0E44\u0E02\u0E2A\u0E32\u0E02\u0E32\u0E27\u0E34\u0E0A\u0E32\u0E2A\u0E33\u0E40\u0E23\u0E47\u0E08!");
+      logAdminAction("จัดการหลักสูตร", `แก้ไขข้อมูลสาขาวิชา: ${tempMajor.name} (${tempMajor.level})`);
     } else {
       addMajor(tempMajor);
       triggerToast("\u0E40\u0E1E\u0E34\u0E48\u0E21\u0E2A\u0E32\u0E02\u0E32\u0E27\u0E34\u0E0A\u0E32\u0E43\u0E2B\u0E21\u0E48\u0E2A\u0E33\u0E40\u0E23\u0E47\u0E08!");
+      logAdminAction("จัดการหลักสูตร", `เพิ่มสาขาวิชาใหม่: ${tempMajor.name} (${tempMajor.level})`);
     }
     setIsMajorModalOpen(false);
     setEditingMajor(null);
@@ -349,9 +494,11 @@ export default function AdminView() {
     if (editingAdmin) {
       updateAdministrator(editingAdmin.id, tempAdmin);
       triggerToast("แก้ไขข้อมูลผู้บริหารสำเร็จ!");
+      logAdminAction("จัดการทำเนียบผู้บริหาร", `แก้ไขข้อมูลคณะผู้บริหาร: ${tempAdmin.name}`);
     } else {
       addAdministrator(tempAdmin);
       triggerToast("เพิ่มผู้บริหารคนใหม่สำเร็จ!");
+      logAdminAction("จัดการทำเนียบผู้บริหาร", `เพิ่มรายนามผู้บริหารใหม่: ${tempAdmin.name}`);
     }
     setIsAdminModalOpen(false);
     setEditingAdmin(null);
@@ -379,9 +526,11 @@ export default function AdminView() {
     if (editingFaq) {
       updateFaq(editingFaq.id, tempFaq);
       triggerToast("แก้ไขคำถามที่พบบ่อยสำเร็จ!");
+      logAdminAction("จัดการคำถามที่พบบ่อย (FAQ)", `แก้ไขคำถาม: ${tempFaq.question}`);
     } else {
       addFaq(tempFaq);
       triggerToast("เพิ่มคำถามใหม่สำเร็จ!");
+      logAdminAction("จัดการคำถามที่พบบ่อย (FAQ)", `เพิ่มคำถามใหม่: ${tempFaq.question}`);
     }
     setIsFaqModalOpen(false);
     setEditingFaq(null);
@@ -421,9 +570,11 @@ export default function AdminView() {
     if (editingSlide) {
       updateHeroSlide(editingSlide.id, tempSlide);
       triggerToast("แก้ไขสไลด์แบนเนอร์สำเร็จ!");
+      logAdminAction("จัดการสไลด์แบนเนอร์", `แก้ไขสไลด์: ${tempSlide.title}`);
     } else {
       addHeroSlide(tempSlide);
       triggerToast("เพิ่มสไลด์แบนเนอร์ใหม่สำเร็จ!");
+      logAdminAction("จัดการสไลด์แบนเนอร์", `เพิ่มสไลด์ใหม่: ${tempSlide.title}`);
     }
     setIsSlideModalOpen(false);
     setEditingSlide(null);
@@ -464,9 +615,11 @@ export default function AdminView() {
     if (editingNews) {
       updateNews(editingNews.id, tempNews);
       triggerToast("\u0E41\u0E01\u0E49\u0E44\u0E02\u0E2B\u0E31\u0E27\u0E02\u0E49\u0E2D\u0E02\u0E48\u0E32\u0E27\u0E2A\u0E32\u0E23\u0E2A\u0E33\u0E40\u0E23\u0E47\u0E08!");
+      logAdminAction("จัดการข่าวสาร", `แก้ไขประกาศข่าว: ${tempNews.title}`);
     } else {
       addNews(tempNews);
       triggerToast("\u0E40\u0E02\u0E35\u0E22\u0E19\u0E02\u0E48\u0E32\u0E27\u0E2A\u0E32\u0E23\u0E43\u0E2B\u0E21\u0E48\u0E2A\u0E33\u0E40\u0E23\u0E47\u0E08!");
+      logAdminAction("จัดการข่าวสาร", `ลงประกาศข่าวใหม่: ${tempNews.title}`);
     }
     setIsNewsModalOpen(false);
     setEditingNews(null);
@@ -1028,6 +1181,74 @@ export default function AdminView() {
                           </label>
                         </div>
                       </div>
+
+                      {/* SEO SETTINGS SECTION */}
+                      <div className="md:col-span-2 border-t border-slate-200 pt-6 mt-2 space-y-4">
+                        <h3 className="text-xs font-extrabold text-slate-800 flex items-center space-x-2">
+                          <Globe className="w-4 h-4 text-emerald-600" />
+                          <span>การตั้งค่า Search Engine Optimization (SEO) & Meta Tags</span>
+                        </h3>
+                        <p className="text-[11px] text-slate-500">
+                          ตั้งค่าหัวข้อ คำอธิบาย และคีย์เวิร์ดของเว็บไซต์วิทยาลัยเพื่อให้ปรากฏบน Google Search, Facebook, Line และโซเชียลมีเดียได้อย่างถูกต้องและน่าดึงดูด
+                        </p>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-1 md:col-span-2">
+                            <label className="text-[11px] font-bold text-slate-500">SEO Title (หัวข้อเว็บไซต์เมื่อแสดงในผลลัพธ์การค้นหา) *</label>
+                            <input
+                              type="text"
+                              value={tempCollege.seoTitle || ""}
+                              onChange={(e) => setTempCollege({ ...tempCollege, seoTitle: e.target.value })}
+                              className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                              placeholder="เช่น วิทยาลัยเทคโนโลยีปทุมรัตต์ - ทักษะเยี่ยม เปี่ยมคุณธรรม เลิศล้ำเทคโนโลยี"
+                            />
+                          </div>
+
+                          <div className="space-y-1 md:col-span-2">
+                            <label className="text-[11px] font-bold text-slate-500">SEO Description (คำอธิบายสั้นๆ ของเว็บไซต์) *</label>
+                            <textarea
+                              rows={2}
+                              value={tempCollege.seoDescription || ""}
+                              onChange={(e) => setTempCollege({ ...tempCollege, seoDescription: e.target.value })}
+                              className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                              placeholder="เช่น ระบบรับสมัครเรียนออนไลน์และบริการข้อมูลข่าวสารวิทยาลัยเทคโนโลยีปทุมรัตต์ จังหวัดร้อยเอ็ด..."
+                            />
+                          </div>
+
+                          <div className="space-y-1">
+                            <label className="text-[11px] font-bold text-slate-500">SEO Keywords (คีย์เวิร์ดสำหรับระบบค้นหา - คั่นด้วยจุลภาค) *</label>
+                            <input
+                              type="text"
+                              value={tempCollege.seoKeywords || ""}
+                              onChange={(e) => setTempCollege({ ...tempCollege, seoKeywords: e.target.value })}
+                              className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                              placeholder="เช่น สมัครเรียน ปวช, ช่างยนต์, ช่างไฟฟ้ากำลัง, ปทุมรัตต์"
+                            />
+                          </div>
+
+                          <div className="space-y-1">
+                            <label className="text-[11px] font-bold text-slate-500">SEO Open Graph Image (รูปภาพประกอบหน้าเว็บเวลาแชร์ลงโซเชียล URL)</label>
+                            <div className="flex gap-2">
+                              <input
+                                type="text"
+                                value={tempCollege.seoOgImage || ""}
+                                onChange={(e) => setTempCollege({ ...tempCollege, seoOgImage: e.target.value })}
+                                className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                                placeholder="https://... หรืออัพโหลดรูปปกแชร์"
+                              />
+                              <label className="bg-blue-50 hover:bg-blue-100 text-blue-700 px-3 py-2 rounded-xl text-xs font-bold transition-all border border-blue-200 cursor-pointer shrink-0 flex items-center">
+                                <span>อัพโหลด</span>
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  className="hidden"
+                                  onChange={(e) => handleFileUpload(e, (base64) => setTempCollege({ ...tempCollege, seoOgImage: base64 }))}
+                                />
+                              </label>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
 
                     <div className="flex space-x-3 justify-end pt-4 border-t border-slate-100">
@@ -1103,6 +1324,66 @@ export default function AdminView() {
                         <div className="flex items-center space-x-2">
                           <Users className="w-4 h-4 text-indigo-500 shrink-0" />
                           <span>Facebook: {collegeInfo.facebook}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* SEO REAL-TIME PREVIEWS */}
+                    <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100 space-y-4">
+                      <div>
+                        <h3 className="text-xs font-extrabold text-slate-700 border-b border-slate-200 pb-2 flex items-center space-x-2">
+                          <Globe className="w-4 h-4 text-emerald-600 shrink-0" />
+                          <span>ตัวอย่างผลลัพธ์ในระบบสืบค้นและโซเชียลมีเดีย (SEO Preview)</span>
+                        </h3>
+                        <p className="text-[10px] text-slate-400 mt-1">
+                          ลักษณะที่เว็บไซต์จะถูกแสดงผลบน Google Search Engine และแอปพลิเคชันส่งข่าวสารต่างๆ
+                        </p>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Google Result Preview */}
+                        <div className="space-y-1.5">
+                          <p className="text-[9px] text-slate-500 font-extrabold uppercase">ตัวอย่างบน Google Search (Desktop)</p>
+                          <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-xs space-y-1">
+                            <div className="text-[10px] text-slate-500 truncate flex items-center space-x-1 font-mono">
+                              <span>https://pathumrat-tech.ac.th</span>
+                              <span className="text-[9px] text-slate-400">▼</span>
+                            </div>
+                            <h4 className="text-blue-800 text-xs font-semibold hover:underline cursor-pointer truncate font-sans">
+                              {collegeInfo.seoTitle || `${collegeInfo.name} | ${collegeInfo.philosophy}`}
+                            </h4>
+                            <p className="text-slate-600 text-[10px] leading-relaxed line-clamp-2">
+                              {collegeInfo.seoDescription || collegeInfo.vision}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Facebook / Line Share Card Preview */}
+                        <div className="space-y-1.5">
+                          <p className="text-[9px] text-slate-500 font-extrabold uppercase">ตัวอย่างบนโซเชียลมีเดีย (Facebook/Line Share Card)</p>
+                          <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-xs flex flex-col">
+                            <div className="aspect-[1.91/1] w-full bg-slate-100 overflow-hidden relative border-b border-slate-100 flex items-center justify-center">
+                              {collegeInfo.seoOgImage || collegeInfo.logoUrl ? (
+                                <img 
+                                  src={collegeInfo.seoOgImage || collegeInfo.logoUrl} 
+                                  alt="SEO Share Preview" 
+                                  className="w-full h-full object-cover"
+                                  referrerPolicy="no-referrer"
+                                />
+                              ) : (
+                                <span className="text-slate-400 text-[9px] font-semibold">ไม่มีภาพปกแชร์พิเศษ (ดึงโลโก้วิทยาลัยแทน)</span>
+                              )}
+                            </div>
+                            <div className="p-2 bg-slate-50 space-y-0.5">
+                              <p className="text-slate-400 text-[8px] uppercase font-mono tracking-wider">pathumrat-tech.ac.th</p>
+                              <h5 className="text-slate-800 font-bold text-[10px] truncate">
+                                {collegeInfo.seoTitle || `${collegeInfo.name} | ${collegeInfo.philosophy}`}
+                              </h5>
+                              <p className="text-slate-500 text-[9px] line-clamp-1">
+                                {collegeInfo.seoDescription || collegeInfo.vision}
+                              </p>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -1772,93 +2053,215 @@ export default function AdminView() {
                   <div>
                     <h2 className="text-lg font-extrabold text-slate-800 font-display flex items-center space-x-2">
                       <ShieldCheck className="w-5 h-5 text-brand-primary" />
-                      <span>จัดการสิทธิ์ผู้ดูแลระบบ (Admin User Management)</span>
+                      <span>ศูนย์ความปลอดภัยและผู้ดูแลระบบ (Security & Administration Center)</span>
                     </h2>
                     <p className="text-xs text-slate-500">
-                      เพิ่ม ลบ หรือแก้ไขบัญชีและรหัสผ่านสำหรับเข้าใช้งานระบบหลังบ้าน CMS Portal แห่งนี้
+                      เพิ่ม ลบ หรือแก้ไขบัญชีและตรวจสอบประวัติการทำรายการหลังบ้านเพื่อความปลอดภัยสูงสุด
                     </p>
                   </div>
+                  {securitySubTab === "users" && (
+                    <button
+                      onClick={handleOpenAddAdminUser}
+                      className="flex items-center space-x-1.5 bg-brand-primary hover:bg-blue-800 text-white px-4 py-2.5 rounded-2xl text-xs font-bold transition-all shadow-sm cursor-pointer shrink-0"
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span>เพิ่มบัญชีผู้ดูแลระบบ</span>
+                    </button>
+                  )}
+                </div>
+
+                {/* Tab Switchers inside admin_users section */}
+                <div className="flex border-b border-slate-200">
                   <button
-                    onClick={handleOpenAddAdminUser}
-                    className="flex items-center space-x-1.5 bg-brand-primary hover:bg-blue-800 text-white px-4 py-2.5 rounded-2xl text-xs font-bold transition-all shadow-sm cursor-pointer shrink-0"
+                    onClick={() => setSecuritySubTab("users")}
+                    className={`pb-3 pt-1 px-4 text-xs font-bold border-b-2 transition-all cursor-pointer ${securitySubTab === "users" ? "border-brand-primary text-brand-primary" : "border-transparent text-slate-400 hover:text-slate-600"}`}
                   >
-                    <Plus className="w-4 h-4" />
-                    <span>เพิ่มบัญชีผู้ดูแลระบบ</span>
+                    บัญชีผู้ดูแลระบบ ({adminUsers.length})
+                  </button>
+                  <button
+                    onClick={() => setSecuritySubTab("logs")}
+                    className={`pb-3 pt-1 px-4 text-xs font-bold border-b-2 transition-all cursor-pointer ${securitySubTab === "logs" ? "border-brand-primary text-brand-primary" : "border-transparent text-slate-400 hover:text-slate-600"}`}
+                  >
+                    ประวัติกิจกรรมความปลอดภัย ({securityLogs.length})
                   </button>
                 </div>
 
-                <div className="border border-slate-200 rounded-3xl overflow-hidden shadow-sm bg-white">
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
-                      <thead>
-                        <tr className="bg-slate-50/75 border-b border-slate-200 text-slate-500 text-[10px] font-extrabold uppercase tracking-wider">
-                          <th className="p-4 pl-6">ชื่อ-นามสกุล / เจ้าหน้าที่</th>
-                          <th className="p-4">ชื่อผู้ใช้งาน (Username / ID)</th>
-                          <th className="p-4">รหัสผ่าน (Password)</th>
-                          <th className="p-4 text-right pr-6">การจัดการ</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-100 text-xs font-medium text-slate-700">
-                        {adminUsers.map((user) => (
-                          <tr key={user.id} className="hover:bg-slate-50/50 transition-colors">
-                            <td className="p-4 pl-6">
-                              <div className="flex items-center space-x-3">
-                                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-brand-primary font-bold">
-                                  {user.name ? user.name.charAt(0) : "A"}
+                {securitySubTab === "users" ? (
+                  <div className="border border-slate-200 rounded-3xl overflow-hidden shadow-sm bg-white">
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left border-collapse">
+                        <thead>
+                          <tr className="bg-slate-50/75 border-b border-slate-200 text-slate-500 text-[10px] font-extrabold uppercase tracking-wider">
+                            <th className="p-4 pl-6">ชื่อ-นามสกุล / เจ้าหน้าที่</th>
+                            <th className="p-4">ชื่อผู้ใช้งาน (Username / ID)</th>
+                            <th className="p-4">รหัสผ่าน (Password)</th>
+                            <th className="p-4 text-right pr-6">การจัดการ</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100 text-xs font-medium text-slate-700">
+                          {adminUsers.map((user) => (
+                            <tr key={user.id} className="hover:bg-slate-50/50 transition-colors">
+                              <td className="p-4 pl-6">
+                                <div className="flex items-center space-x-3">
+                                  <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-brand-primary font-bold">
+                                    {user.name ? user.name.charAt(0) : "A"}
+                                  </div>
+                                  <span className="font-bold text-slate-800">{user.name}</span>
                                 </div>
-                                <span className="font-bold text-slate-800">{user.name}</span>
-                              </div>
-                            </td>
-                            <td className="p-4">
-                              <span className="bg-slate-100 px-2.5 py-1 rounded-lg text-slate-600 font-mono text-[11px]">
-                                {user.username}
-                              </span>
-                            </td>
-                            <td className="p-4">
-                              <span className="font-mono tracking-widest text-slate-400">
-                                {user.password}
-                              </span>
-                            </td>
-                            <td className="p-4 text-right pr-6">
-                              <div className="flex space-x-2 justify-end">
-                                <button
-                                  onClick={() => handleOpenEditAdminUser(user)}
-                                  className="p-2 text-blue-600 hover:bg-blue-50 border border-blue-100 rounded-xl transition-all cursor-pointer"
-                                  title="แก้ไขข้อมูลผู้ใช้"
-                                >
-                                  <Edit className="w-3.5 h-3.5" />
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    if (user.username.toLowerCase() === "admin") {
-                                      alert("ไม่สามารถลบบัญชีหลัก (admin) ของระบบได้");
-                                      return;
-                                    }
-                                    if (confirm(`คุณแน่ใจว่าต้องการลบบัญชีผู้ใช้งาน "${user.name}" ออกจากระบบ?`)) {
-                                      deleteAdminUser(user.id);
-                                      triggerToast("ลบบัญชีผู้ดูแลระบบเรียบร้อย!");
-                                    }
-                                  }}
-                                  className="p-2 text-rose-600 hover:bg-rose-50 border border-rose-100 rounded-xl transition-all cursor-pointer"
-                                  title="ลบบัญชีผู้ใช้"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                        {adminUsers.length === 0 && (
-                          <tr>
-                            <td colSpan={4} className="p-8 text-center text-slate-400">
-                              ไม่มีบัญชีผู้ดูแลระบบในระบบขณะนี้
-                            </td>
-                          </tr>
-                        )}
-                      </tbody>
-                    </table>
+                              </td>
+                              <td className="p-4">
+                                <span className="bg-slate-100 px-2.5 py-1 rounded-lg text-slate-600 font-mono text-[11px]">
+                                  {user.username}
+                                </span>
+                              </td>
+                              <td className="p-4">
+                                <span className="font-mono tracking-widest text-slate-400">
+                                  {user.password}
+                                </span>
+                              </td>
+                              <td className="p-4 text-right pr-6">
+                                <div className="flex space-x-2 justify-end">
+                                  <button
+                                    onClick={() => handleOpenEditAdminUser(user)}
+                                    className="p-2 text-blue-600 hover:bg-blue-50 border border-blue-100 rounded-xl transition-all cursor-pointer"
+                                    title="แก้ไขข้อมูลผู้ใช้"
+                                  >
+                                    <Edit className="w-3.5 h-3.5" />
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      if (user.username.toLowerCase() === "admin") {
+                                        alert("ไม่สามารถลบบัญชีหลัก (admin) ของระบบได้");
+                                        return;
+                                      }
+                                      if (confirm(`คุณแน่ใจว่าต้องการลบบัญชีผู้ใช้งาน "${user.name}" ออกจากระบบ?`)) {
+                                        deleteAdminUser(user.id);
+                                        logAdminAction("จัดการผู้ดูแลระบบ", `ลบบัญชีผู้ใช้ ID: ${user.username} (${user.name})`);
+                                        triggerToast("ลบบัญชีผู้ดูแลระบบเรียบร้อย!");
+                                      }
+                                    }}
+                                    className="p-2 text-rose-600 hover:bg-rose-50 border border-rose-100 rounded-xl transition-all cursor-pointer"
+                                    title="ลบบัญชีผู้ใช้"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                          {adminUsers.length === 0 && (
+                            <tr>
+                              <td colSpan={4} className="p-8 text-center text-slate-400">
+                                ไม่มีบัญชีผู้ดูแลระบบในระบบขณะนี้
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  // BEAUTIFUL SECURITY AUDIT LOGS DISPLAY
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 flex items-center space-x-3">
+                        <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-600">
+                          <CheckCircle className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-emerald-600 font-extrabold uppercase">ประวัติการทำงานสำเร็จ</p>
+                          <p className="text-lg font-black text-emerald-950 font-mono">
+                            {securityLogs.filter(l => !l.action.includes("ล้มเหลว") && !l.action.includes("บล็อก")).length} รายการ
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="bg-rose-50 border border-rose-100 rounded-2xl p-4 flex items-center space-x-3">
+                        <div className="w-10 h-10 rounded-xl bg-rose-500/10 flex items-center justify-center text-rose-600">
+                          <ShieldAlert className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-rose-600 font-extrabold uppercase">การแจ้งเตือนความปลอดภัย</p>
+                          <p className="text-lg font-black text-rose-950 font-mono">
+                            {securityLogs.filter(l => l.action.includes("ล้มเหลว") || l.action.includes("บล็อก")).length} ครั้ง
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="bg-slate-50 border border-slate-150 rounded-2xl p-4 flex items-center space-x-3">
+                        <div className="w-10 h-10 rounded-xl bg-slate-500/10 flex items-center justify-center text-slate-600">
+                          <Clock className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-slate-500 font-extrabold uppercase">รายการล่าสุดเมื่อ</p>
+                          <p className="text-xs font-bold text-slate-700 leading-relaxed truncate font-mono">
+                            {securityLogs[0] ? new Date(securityLogs[0].timestamp).toLocaleTimeString("th-TH") : "ไม่มีข้อมูล"}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="border border-slate-200 rounded-3xl overflow-hidden shadow-sm bg-white">
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse">
+                          <thead>
+                            <tr className="bg-slate-50/75 border-b border-slate-200 text-slate-500 text-[10px] font-extrabold uppercase tracking-wider">
+                              <th className="p-4 pl-6 w-40">วันเวลาทำรายการ</th>
+                              <th className="p-4 w-40">ประเภทกิจกรรม</th>
+                              <th className="p-4 w-40">ผู้กระทำ (ID)</th>
+                              <th className="p-4">รายละเอียดเหตุการณ์</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-100 text-xs font-medium text-slate-700">
+                            {securityLogs.map((log) => {
+                              let badgeColor = "bg-blue-50 text-blue-700 border-blue-100";
+                              if (log.action.includes("ลบ")) badgeColor = "bg-rose-50 text-rose-700 border-rose-100";
+                              else if (log.action.includes("แก้ไข")) badgeColor = "bg-amber-50 text-amber-700 border-amber-100";
+                              else if (log.action.includes("เพิ่ม") || log.action.includes("สร้าง")) badgeColor = "bg-emerald-50 text-emerald-700 border-emerald-100";
+                              else if (log.action.includes("ล้มเหลว") || log.action.includes("บล็อก")) badgeColor = "bg-rose-100 text-rose-900 border-rose-200 animate-pulse";
+
+                              return (
+                                <tr key={log.id} className="hover:bg-slate-50/50 transition-colors">
+                                  <td className="p-4 pl-6 text-slate-500 font-mono text-[10px]">
+                                    {new Date(log.timestamp).toLocaleString("th-TH", {
+                                      year: "numeric",
+                                      month: "short",
+                                      day: "numeric",
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                      second: "2-digit"
+                                    })}
+                                  </td>
+                                  <td className="p-4">
+                                    <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold border ${badgeColor}`}>
+                                      {log.action}
+                                    </span>
+                                  </td>
+                                  <td className="p-4">
+                                    <div className="flex flex-col">
+                                      <span className="font-bold text-slate-800">{log.name}</span>
+                                      <span className="text-[10px] text-slate-400 font-mono">@{log.username}</span>
+                                    </div>
+                                  </td>
+                                  <td className="p-4 text-slate-600 text-[11px] leading-relaxed">
+                                    {log.detail}
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                            {securityLogs.length === 0 && (
+                              <tr>
+                                <td colSpan={4} className="p-8 text-center text-slate-400">
+                                  ไม่มีข้อมูลประวัติกิจกรรมความปลอดภัยในระบบขณะนี้
+                                </td>
+                              </tr>
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
@@ -2953,6 +3356,31 @@ export default function AdminView() {
                       className="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50 font-mono"
                       placeholder="เช่น 123456"
                     />
+                    {/* Password Strength Evaluation Meter */}
+                    {tempAdminUser.password && (
+                      <div className="space-y-1 pt-1">
+                        <div className="flex justify-between items-center text-[10px]">
+                          <span className="font-bold text-slate-500">ความปลอดภัยของรหัสผ่าน:</span>
+                          <span className={
+                            tempAdminUser.password.length < 4 ? "text-rose-500 font-extrabold" :
+                            tempAdminUser.password.length < 6 ? "text-amber-500 font-extrabold" :
+                            /[0-9]/.test(tempAdminUser.password) && /[a-zA-Z]/.test(tempAdminUser.password) ? "text-emerald-500 font-extrabold" : "text-blue-500 font-extrabold"
+                          }>
+                            {tempAdminUser.password.length < 4 ? "ต่ำมาก (อันตราย)" :
+                             tempAdminUser.password.length < 6 ? "ปานกลาง (ควรปรับปรุง)" :
+                             /[0-9]/.test(tempAdminUser.password) && /[a-zA-Z]/.test(tempAdminUser.password) ? "ปลอดภัยสูง" : "ปลอดภัยดี"}
+                          </span>
+                        </div>
+                        <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden flex">
+                          <div className={`h-full transition-all duration-300 ${
+                            tempAdminUser.password.length < 4 ? "bg-rose-500 w-1/4" :
+                            tempAdminUser.password.length < 6 ? "bg-amber-500 w-2/4" :
+                            /[0-9]/.test(tempAdminUser.password) && /[a-zA-Z]/.test(tempAdminUser.password) ? "bg-emerald-500 w-full" : "bg-blue-500 w-3/4"
+                          }`} />
+                        </div>
+                        <p className="text-[9px] text-slate-400">คำแนะนำ: ความยาว 6+ ตัวอักษร และผสมตัวเลขกับตัวอักษรภาษาอังกฤษ</p>
+                      </div>
+                    )}
                   </div>
                 </div>
 

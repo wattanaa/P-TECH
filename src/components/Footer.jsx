@@ -67,41 +67,49 @@ export default function Footer({ setActiveTab }) {
             <ul className="space-y-2 text-sm">
               <li>
                 <button
-    onClick={() => handleLinkClick("home")}
-    className="hover:text-cyan-400 transition-colors duration-150 text-left"
-  >
+                  onClick={() => handleLinkClick("home")}
+                  className="hover:text-cyan-400 transition-colors duration-150 text-left cursor-pointer"
+                >
                   หน้าแรกวิทยาลัย
                 </button>
               </li>
               <li>
                 <button
-    onClick={() => handleLinkClick("curriculum")}
-    className="hover:text-cyan-400 transition-colors duration-150 text-left"
-  >
-                  หลักสูตรประกาศนียบัตร (ปวช.)
+                  onClick={() => handleLinkClick("history")}
+                  className="hover:text-cyan-400 transition-colors duration-150 text-left cursor-pointer"
+                >
+                  ประวัติความเป็นมาของวิทยาลัย
                 </button>
               </li>
               <li>
                 <button
-    onClick={() => handleLinkClick("curriculum")}
-    className="hover:text-cyan-400 transition-colors duration-150 text-left"
-  >
-                  หลักสูตรประกาศนียบัตรชั้นสูง (ปวส.)
+                  onClick={() => handleLinkClick("personnel")}
+                  className="hover:text-cyan-400 transition-colors duration-150 text-left cursor-pointer"
+                >
+                  ทำเนียบคณะผู้บริหารสถานศึกษา
                 </button>
               </li>
               <li>
                 <button
-    onClick={() => handleLinkClick("news")}
-    className="hover:text-cyan-400 transition-colors duration-150 text-left"
-  >
-                  ข่าวสารและประกาศจัดซื้อจัดจ้าง
+                  onClick={() => handleLinkClick("curriculum")}
+                  className="hover:text-cyan-400 transition-colors duration-150 text-left cursor-pointer"
+                >
+                  หลักสูตรประกาศนียบัตรวิชาชีพ
                 </button>
               </li>
               <li>
                 <button
-    onClick={() => handleLinkClick("admission")}
-    className="hover:text-cyan-400 transition-colors duration-150 text-left"
-  >
+                  onClick={() => handleLinkClick("news")}
+                  className="hover:text-cyan-400 transition-colors duration-150 text-left cursor-pointer"
+                >
+                  ข่าวสารและกิจกรรมประกาศ
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => handleLinkClick("admission")}
+                  className="hover:text-cyan-400 transition-colors duration-150 text-left cursor-pointer"
+                >
                   แบบฟอร์มสมัครเรียนออนไลน์
                 </button>
               </li>
@@ -178,12 +186,12 @@ export default function Footer({ setActiveTab }) {
   }
         <div className="mt-12 pt-8 border-t border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-slate-500">
           <p
-    onClick={() => handleLinkClick("admin")}
-    className="cursor-pointer hover:text-slate-400 select-none transition-colors duration-200"
-    title="ระบบบริหารจัดการสำหรับเจ้าหน้าที่"
-    id="footer-admin-gate"
-  >
-            © {currentYear} {collegeInfo.name}. สงวนลิขสิทธิ์ทั้งหมด
+            onClick={() => handleLinkClick("admin")}
+            className="cursor-pointer hover:text-slate-300 select-none transition-colors duration-200 font-medium"
+            title="ระบบจัดการหลังบ้าน"
+            id="footer-admin-gate"
+          >
+            © 2026 วิทยาลัยเทคโนโลยีปทุมรัตต์
           </p>
           <div className="flex space-x-4">
             <span className="hover:text-slate-400">นโยบายความเป็นส่วนตัว</span>
