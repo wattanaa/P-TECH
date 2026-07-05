@@ -31,6 +31,15 @@ export default function HomeView({ setActiveTab, setSelectedNews }) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [visibleNewsCount, setVisibleNewsCount] = useState(3);
 
+  const calculateReadingTime = (text) => {
+    if (!text) return `1 ${t("นาที", "min")}`;
+    const totalChars = text.length;
+    const isThai = /[\u0E00-\u0E7F]/.test(text);
+    const speed = isThai ? 300 : 900;
+    const minutes = Math.max(1, Math.ceil(totalChars / speed));
+    return `${minutes} ${t("นาทีในการอ่าน", "min read")}`;
+  };
+
   const displaySlides = heroSlides?.map((slide, index) => {
     if (index === 0) {
       return {
@@ -870,7 +879,7 @@ export default function HomeView({ setActiveTab, setSelectedNews }) {
               }
               <div className="p-6 flex flex-col justify-between flex-grow space-y-4">
                 <div className="space-y-2">
-                  <div className="flex items-center space-x-4 text-xs text-slate-400">
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-400">
                     <span className="flex items-center space-x-1">
                       <Calendar className="w-3.5 h-3.5" />
                       <span>{news.date}</span>
@@ -878,6 +887,10 @@ export default function HomeView({ setActiveTab, setSelectedNews }) {
                     <span className="flex items-center space-x-1">
                       <Eye className="w-3.5 h-3.5" />
                       <span>{news.views} ครั้ง</span>
+                    </span>
+                    <span className="flex items-center space-x-1 text-slate-500 font-semibold">
+                      <BookOpen className="w-3.5 h-3.5" />
+                      <span>{calculateReadingTime(news.content)}</span>
                     </span>
                   </div>
                   <h3 className="text-base font-bold text-slate-900 group-hover:text-brand-primary transition-colors line-clamp-2 leading-snug">
