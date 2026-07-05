@@ -15,6 +15,7 @@ import PersonnelView from "./components/PersonnelView";
 import AdminView from "./components/AdminView";
 import ContactView from "./components/ContactView";
 import { useData } from "./context/DataContext";
+import { ArrowUp, X } from "lucide-react";
 
 export default function App() {
   const { collegeInfo } = useData() || {};
@@ -23,6 +24,67 @@ export default function App() {
   const [aboutSection, setAboutSection] = useState("");
   const [preSelectedMajor, setPreSelectedMajor] = useState("");
   const [preSelectedLevel, setPreSelectedLevel] = useState("");
+  const [lightboxImage, setLightboxImage] = useState(null);
+  const [showBackToTop, setShowBackToTop] = useState(false);
+
+  // Monitor scroll height to show Back to Top button when scrolling past hero section
+  useEffect(() => {
+    const handleScroll = () => {
+      // 450px corresponds to scrolling past the hero banner of HomeView
+      if (window.scrollY > 450) {
+        setShowBackToTop(true);
+      } else {
+        setShowBackToTop(false);
+      }
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Handle global image clicks for Lightbox effect
+  useEffect(() => {
+    const handleImageClick = (e) => {
+      const target = e.target;
+      if (target.tagName === "IMG") {
+        // Exclude UI/layout specific image elements from lightbox zoom
+        const isNavbar = target.closest("nav") || target.closest("#navbar");
+        const isFooterLogo = target.closest("footer") && (target.src.includes("logo") || target.classList.contains("h-8") || target.classList.contains("h-10"));
+        const isNoLightbox = target.classList.contains("no-lightbox") || target.closest(".no-lightbox");
+        const isTiny = target.naturalWidth < 60 || target.naturalHeight < 60 || target.clientWidth < 60 || target.clientHeight < 60;
+        
+        // Exclude list card thumbnail clicks where the card click is the primary navigation
+        const isInsideClickableCard = target.closest(".cursor-pointer:not(img)") || target.closest("a") || target.closest("button");
+        
+        // Exclude admin preview form fields
+        const isAdminFormPreview = target.closest("form") && target.closest(".bg-slate-50") && target.closest(".border");
+        
+        if (isNavbar || isFooterLogo || isNoLightbox || isTiny || (isInsideClickableCard && !target.classList.contains("force-lightbox")) || isAdminFormPreview) {
+          return;
+        }
+
+        setLightboxImage({
+          src: target.src,
+          alt: target.alt || "รูปภาพขยาย"
+        });
+      }
+    };
+
+    document.addEventListener("click", handleImageClick);
+    return () => document.removeEventListener("click", handleImageClick);
+  }, []);
+
+  // Close lightbox with Escape key
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        setLightboxImage(null);
+      }
+    };
+    if (lightboxImage) {
+      window.addEventListener("keydown", handleKeyDown);
+    }
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [lightboxImage]);
 
   // Listen to cross-component tab change requests
   useEffect(() => {
@@ -187,5 +249,74 @@ export default function App() {
     /* Structured footer with links */
   }
       <Footer setActiveTab={setActiveTab} />
+
+      {/* Back to Top Button */}
+      <AnimatePresence>
+        {showBackToTop && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.8, y: 15 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.8, y: 15 }}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            className="fixed bottom-8 right-8 z-[9990] bg-brand-primary hover:bg-blue-700 text-white p-3.5 rounded-full shadow-lg hover:shadow-xl border border-blue-400/20 flex items-center justify-center transition-all focus:outline-none cursor-pointer"
+            title="เลื่อนขึ้นบนสุด"
+            id="back-to-top-btn"
+          >
+            <ArrowUp className="w-5 h-5" />
+          </motion.button>
+        )}
+      </AnimatePresence>
+
+      {/* Lightbox Fullscreen Modal */}
+      <AnimatePresence>
+        {lightboxImage && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            onClick={() => setLightboxImage(null)}
+            className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-slate-950/90 backdrop-blur-sm p-4 cursor-zoom-out"
+            id="lightbox-overlay"
+          >
+            {/* Close Button */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setLightboxImage(null);
+              }}
+              className="absolute top-4 right-4 md:top-6 md:right-6 text-white bg-white/10 hover:bg-white/20 hover:scale-105 p-3 rounded-full transition-all duration-150 backdrop-blur-md flex items-center justify-center border border-white/15 cursor-pointer z-50"
+              title="ปิด"
+              id="lightbox-close-btn"
+            >
+              <X className="w-5 h-5 md:w-6 md:h-6" />
+            </button>
+
+            {/* Expanded Image Container */}
+            <div className="relative max-w-[95vw] max-h-[85vh] flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
+              <motion.img
+                src={lightboxImage.src}
+                alt={lightboxImage.alt}
+                initial={{ scale: 0.95, y: 10, opacity: 0 }}
+                animate={{ scale: 1, y: 0, opacity: 1 }}
+                exit={{ scale: 0.95, y: 10, opacity: 0 }}
+                transition={{ type: "spring", damping: 25, stiffness: 320 }}
+                className="max-w-full max-h-[75vh] md:max-h-[80vh] rounded-2xl object-contain shadow-2xl border border-white/10 select-none cursor-default"
+                referrerPolicy="no-referrer"
+                id="lightbox-img"
+              />
+              
+              {/* Floating Caption */}
+              {lightboxImage.alt && (
+                <div className="absolute -bottom-14 left-1/2 transform -translate-x-1/2 bg-slate-900/90 hover:bg-slate-900 text-white text-xs md:text-sm font-bold py-2.5 px-5 rounded-2xl border border-white/10 shadow-lg text-center backdrop-blur-md max-w-[85vw] whitespace-nowrap overflow-hidden text-ellipsis transition-all">
+                  {lightboxImage.alt}
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>;
 }

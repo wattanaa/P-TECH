@@ -20,3 +20,22 @@ body {
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-display);
 }
+
+/* Lightbox eligible image cursor hover zoom */
+main img:not(.no-lightbox):not(.logo) {
+  cursor: zoom-in;
+  transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+}
+
+main img:not(.no-lightbox):not(.logo):hover {
+  opacity: 0.95;
+}
+
+/* For clickable cards, links, buttons, keep standard pointer/cursor style */
+.cursor-pointer img, 
+a img, 
+button img,
+.no-lightbox,
+.no-lightbox img {
+  cursor: inherit !important;
+}

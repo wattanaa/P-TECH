@@ -8,6 +8,8 @@ export const collegeInfo = {
   philosophy: "\u0E17\u0E31\u0E01\u0E29\u0E30\u0E40\u0E22\u0E35\u0E48\u0E22\u0E21 \u0E40\u0E1B\u0E35\u0E48\u0E22\u0E21\u0E04\u0E38\u0E13\u0E18\u0E23\u0E23\u0E21 \u0E40\u0E25\u0E34\u0E28\u0E25\u0E49\u0E33\u0E40\u0E17\u0E04\u0E42\u0E19\u0E42\u0E25\u0E22\u0E35",
   philosophyTitle: "มุ่งสร้างกำลังคนระดับอาชีพ เพื่อยกระดับสังคมและพัฒนาชาติ",
   directorWelcome: "ยินดีต้อนรับสู่ รั้วเทคโนโลยีปทุมรัตต์ (PTC)",
+  heroTitle: "ยินดีต้อนรับสู่ รั้วเทคโนโลยีปทุมรัตต์ (PTC)",
+  heroImage: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=1600&auto=format&fit=crop",
   gatewayTitle: "PTC Digital Gateway & Portal",
   curriculumTitle: "หลักสูตรปรีชาพากเพียร ปวช. และ ปวส.",
   mouTitle: "ภาคีเครือข่ายความร่วมมือทางวิชาการและอุตสาหกรรม (MOU)",
@@ -20,6 +22,7 @@ export const collegeInfo = {
   mobile: "088-555-xxxx",
   email: "info@pathumrat-tech.ac.th",
   facebook: "facebook.com/pathumrat.tech",
+  googleMapIframe: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3835.4852922114757!2d103.465132!3d15.632123!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3118cf94cf5b8e9f%3A0xe54e605d39e38d7!2sPathumrat%20Technology%20College!5e0!3m2!1sen!2sth!4v1700000000000!5m2!1sen!2sth",
   foundedYear: "2548",
   directorName: "ดร. สมเกียรติ ปทุมสวัสดิ์",
   directorDegree: "Ph.D. in Vocational Education Management",
@@ -286,6 +289,69 @@ export const faqList = [
   },
   {
     question: "\u0E21\u0E35\u0E2B\u0E2D\u0E1E\u0E31\u0E01\u0E41\u0E25\u0E30\u0E1A\u0E23\u0E34\u0E01\u0E32\u0E23\u0E08\u0E31\u0E14\u0E2B\u0E32\u0E07\u0E32\u0E19\u0E2B\u0E25\u0E31\u0E07\u0E40\u0E23\u0E35\u0E22\u0E19\u0E08\u0E1A\u0E44\u0E2B\u0E21?",
-    answer: "\u0E40\u0E23\u0E32\u0E21\u0E35\u0E40\u0E04\u0E23\u0E37\u0E2D\u0E02\u0E48\u0E32\u0E22\u0E2B\u0E2D\u0E1E\u0E31\u0E01\u0E19\u0E31\u0E01\u0E28\u0E36\u0E01\u0E29\u0E32\u0E1E\u0E31\u0E19\u0E18\u0E21\u0E34\u0E15\u0E23\u0E23\u0E2D\u0E1A\u0E27\u0E34\u0E17\u0E22\u0E32\u0E25\u0E31\u0E22\u0E41\u0E22\u0E01\u0E0A\u0E32\u0E22-\u0E2B\u0E0D\u0E34\u0E07 \u0E1B\u0E25\u0E2D\u0E14\u0E20\u0E31\u0E22 \u0E23\u0E32\u0E04\u0E32\u0E44\u0E21\u0E48\u0E41\u0E1E\u0E07 \u0E41\u0E25\u0E30\u0E17\u0E32\u0E07\u0E27\u0E34\u0E17\u0E22\u0E32\u0E25\u0E31\u0E22\u0E21\u0E35\u0E07\u0E32\u0E19 'PTC Job Fair' \u0E17\u0E38\u0E01\u0E1B\u0E35 \u0E23\u0E48\u0E27\u0E21\u0E21\u0E37\u0E2D\u0E01\u0E31\u0E1A\u0E42\u0E23\u0E07\u0E07\u0E32\u0E19 \u0E19\u0E34\u0E04\u0E21\u0E2D\u0E38\u0E15\u0E2A\u0E32\u0E2B\u0E01\u0E23\u0E23\u0E21 \u0E41\u0E25\u0E30\u0E1A\u0E23\u0E34\u0E29\u0E31\u0E17\u0E44\u0E2D\u0E17\u0E35\u0E0A\u0E31\u0E49\u0E19\u0E19\u0E33\u0E43\u0E19\u0E01\u0E23\u0E38\u0E07\u0E40\u0E17\u0E1E\u0E2F \u0E41\u0E25\u0E30\u0E15\u0E48\u0E32\u0E07\u0E08\u0E31\u0E07\u0E2B\u0E27\u0E31\u0E14 \u0E2A\u0E48\u0E07\u0E1C\u0E25\u0E43\u0E2B\u0E49\u0E19\u0E31\u0E01\u0E28\u0E36\u0E01\u0E29\u0E32\u0E02\u0E2D\u0E07\u0E40\u0E23\u0E32\u0E21\u0E35\u0E2D\u0E31\u0E15\u0E23\u0E32\u0E44\u0E14\u0E49\u0E07\u0E32\u0E19\u0E17\u0E33\u0E2B\u0E25\u0E31\u0E07\u0E08\u0E1A\u0E01\u0E32\u0E23\u0E28\u0E36\u0E01\u0E29\u0E32\u0E17\u0E31\u0E19\u0E17\u0E35\u0E2A\u0E39\u0E07\u0E01\u0E27\u0E48\u0E32 95%"
+    answer: "\u0E40\u0E23\u0E32\u0E21\u0E35\u0E40\u0E04\u0E23\u0E37\u0E2D\u0E02\u0E48\u0E32\u0E22\u0E2B\u0E2D\u0E1E\u0E31\u0E01\u0E19\u0E31\u0E01\u0E28\u0E36\u0E01\u0E29\u0E32\u0E1E\u0E31\u0E19\u0E18\u0E21\u0E34\u0E15\u0E23\u0E23\u0E2D\u0E1A\u0E27\u0E34\u0E17\u0E22\u0E32\u0E25\u0E31\u0E22\u0E41\u0E22\u0E01\u0E0A\u0E32\u0E22-\u0E2B\u0E0D\u0E34\u0E07 \u0E1B\u0E25\u0E2D\u0E14\u0E20\u0E31\u0E22 \u0E23\u0E32\u0E04\u0E32\u0E44\u0E21\u0E48\u0E41\u0E1E\u0E07 \u0E41\u0E25\u0E30\u0E17\u0E32\u0E07\u0E27\u0E34\u0E17\u0E22\u0E32\u0E25\u0E31\u0E22\u0E21\u0E35\u0E07\u0E32\u0E19 'PTC Job Fair' \u0E17\u0E38\u0E01\u0E1B\u0E35 \u0E23\u0E48\u0E27\u0E21\u0E21\u0E37\u0E2D\u0E01\u0E31\u0E1A\u0E42\u0E23\u0E07\u0E07\u0E32\u0E19 \u0E19\u0E34\u0E04\u0E21\u0E2D\u0E38\u0E15\u0E2A\u0E32\u0E2B\u0E01\u0E23\u0E23\u0E21 \u0E41\u0E25\u0E30\u0E1A\u0E23\u0E31\u0E29\u0E31\u0E17\u0E44\u0E2D\u0E17\u0E35\u0E0A\u0E31\u0E49\u0E19\u0E19\u0E33\u0E43\u0E19\u0E01\u0E23\u0E38\u0E07\u0E40\u0E17\u0E1E\u0E2F \u0E41\u0E25\u0E30\u0E15\u0E48\u0E32\u0E07\u0E08\u0E31\u0E07\u0E2B\u0E27\u0E31\u0E14 \u0E2A\u0E48\u0E07\u0E1C\u0E25\u0E43\u0E2B\u0E49\u0E19\u0E31\u0E01\u0E28\u0E36\u0E01\u0E29\u0E32\u0E02\u0E2D\u0E07\u0E40\u0E23\u0E32\u0E21\u0E35\u0E2D\u0E31\u0E15\u0E23\u0E32\u0E44\u0E14\u0E49\u0E07\u0E32\u0E19\u0E17\u0E33\u0E2B\u0E25\u0E31\u0E07\u0E08\u0E1A\u0E01\u0E32\u0E23\u0E28\u0E36\u0E01\u0E29\u0E32\u0E17\u0E31\u0E19\u0E17\u0E35\u0E2A\u0E39\u0E07\u0E01\u0E27\u0E48\u0E32 95%"
+  }
+];
+
+export const academicCalendar = [
+  {
+    id: "cal-1",
+    title: "เปิดรับสมัครนักศึกษาใหม่ โควตาพิเศษ ประจำปีการศึกษา 2570",
+    date: "1 ก.ค. - 31 ส.ค. 2569",
+    rawDate: "2026-07-01",
+    category: "deadline",
+    description: "รับสมัครผู้เรียนจบ ม.3 และ ม.6 เข้าศึกษาต่อระดับ ปวช. และ ปวส. โควตาฟรีค่าลงทะเบียนเรียนและอุปกรณ์วิชาชีพ",
+    isUrgent: true,
+    location: "ห้องรับสมัครวิทยาลัย หรือ ยื่นผ่านเว็บไซต์วิทยาลัย"
+  },
+  {
+    id: "cal-2",
+    title: "วันรายงานตัวและปฐมนิเทศนักศึกษาใหม่ รอบโควตา",
+    date: "15 ก.ย. 2569",
+    rawDate: "2026-09-15",
+    category: "activity",
+    description: "น้องๆ นักศึกษาที่ผ่านการคัดเลือกรอบโควตา รายงานตัว ถ่ายรูปทำบัตร และรับฟังแนวทางการเรียนต่อสายอาชีพระบบทวิภาคี",
+    isUrgent: false,
+    location: "หอประชุมใหญ่ อาคารวิทยบริการ ชั้น 3"
+  },
+  {
+    id: "cal-3",
+    title: "เปิดลงทะเบียนเรียนออนไลน์ ภาคเรียนที่ 2/2569",
+    date: "1 ต.ค. - 15 ต.ค. 2569",
+    rawDate: "2026-10-01",
+    category: "deadline",
+    description: "นักเรียน ปวช. และ ปวส. ทุกชั้นปี ลงทะเบียนรายวิชาและชำระค่าธรรมเนียมผ่านระบบสารสนเทศดิจิทัลทางอินเทอร์เน็ต",
+    isUrgent: true,
+    location: "พอร์ทัลบริการการศึกษาดิจิทัลออนไลน์"
+  },
+  {
+    id: "cal-4",
+    title: "เปิดภาคเรียนที่ 2 ปีการศึกษา 2569 อย่างเป็นทางการ",
+    date: "1 พ.ย. 2569",
+    rawDate: "2026-11-01",
+    category: "academic",
+    description: "เริ่มต้นกิจกรรมการเรียนการสอนรายวิชาสามัญและแผนกวิชาช่างเทคนิคทุกกลุ่มสาขาและสายบริหารธุรกิจอย่างเป็นทางการ",
+    isUrgent: false,
+    location: "ห้องเรียนวิทยาลัยเทคโนโลยีปทุมรัตต์"
+  },
+  {
+    id: "cal-5",
+    title: "พิธีมอบประกาศนียบัตรผู้สำเร็จการศึกษา ประจำปีการศึกษา 2568",
+    date: "15 มี.ค. 2570",
+    rawDate: "2027-03-15",
+    category: "activity",
+    description: "พิธีแสดงความยินดีกับผู้สำเร็จการศึกษาระดับ ปวช. และ ปวส. พร้อมการรับมอบวุฒิบัตรวิชาชีพจากคณะผู้บริหาร",
+    isUrgent: false,
+    location: "หอประชุมอเนกประสงค์วิทยาลัย (โดมใหญ่)"
+  },
+  {
+    id: "cal-6",
+    title: "การสอบประเมินผลปลายภาคเรียนที่ 2/2569",
+    date: "1 มี.ค. - 7 มี.ค. 2570",
+    rawDate: "2027-03-01",
+    category: "academic",
+    description: "สอบประเมินผลสัมฤทธิ์ทางการเรียนภาคทฤษฎีและปฏิบัติ สำหรับวิชาเฉพาะสายอาชีพและวิชาบังคับพื้นฐาน",
+    isUrgent: true,
+    location: "อาคารเรียนรวมและห้องสอบประจำแผนกวิชาช่าง"
   }
 ];

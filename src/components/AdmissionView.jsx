@@ -540,30 +540,6 @@ export default function AdmissionView({
           </div>}
       </div>
 
-      {
-    /* Submitted Forms History Log */
-  }
-      {enrolledStudents.length > 0 && <div className="bg-white border border-slate-200 rounded-3xl p-6 md:p-8 shadow-sm space-y-4" id="log-history-submissions">
-          <h4 className="text-slate-900 font-bold text-sm flex items-center space-x-2">
-            <FileText className="w-5 h-5 text-slate-500" />
-            <span>ประวัติการลงทะเบียนเรียนทั้งหมดในระบบ (บันทึกบนเครื่องนี้)</span>
-          </h4>
-          <p className="text-slate-400 text-xs">ข้อมูลระบบฐานข้อมูลการลงทะเบียนศึกษาต่อปทุมรัตต์:</p>
 
-          <div className="divide-y divide-slate-200">
-            {enrolledStudents.map((item, index) => <div key={index} className="py-4 flex justify-between items-center text-xs md:text-sm">
-                <div>
-                  <p className="font-bold text-slate-800">{item.fullName}</p>
-                  <p className="text-slate-400 text-xs">
-                    ระดับ {item.levelInterest} สาขาวิชา {majors.find((m) => m.id === item.majorInterest)?.name || item.majorInterest}
-                  </p>
-                  <p className="text-slate-400 text-[10px]">โรงเรียนเดิม: {item.prevSchool}</p>
-                </div>
-                <span className={`px-3 py-1 rounded-full text-[10px] font-bold ${item.status === "approved" ? "bg-emerald-100 text-emerald-800 border border-emerald-200" : item.status === "verified" ? "bg-blue-100 text-blue-800 border border-blue-200" : item.status === "rejected" ? "bg-rose-100 text-rose-800 border border-rose-200" : "bg-amber-100 text-amber-800 border border-amber-200"}`}>
-                  {item.status === "approved" ? "\u0E2D\u0E19\u0E38\u0E21\u0E31\u0E15\u0E34\u0E40\u0E23\u0E35\u0E22\u0E19\u0E41\u0E25\u0E49\u0E27" : item.status === "verified" ? "\u0E40\u0E2D\u0E01\u0E2A\u0E32\u0E23\u0E2A\u0E21\u0E1A\u0E39\u0E23\u0E13\u0E4C" : item.status === "rejected" ? "\u0E40\u0E2D\u0E01\u0E2A\u0E32\u0E23\u0E44\u0E21\u0E48\u0E1C\u0E48\u0E32\u0E19" : "\u0E23\u0E2D\u0E1E\u0E34\u0E08\u0E32\u0E23\u0E13\u0E32\u0E40\u0E2D\u0E01\u0E2A\u0E32\u0E23"}
-                </span>
-              </div>)}
-          </div>
-        </div>}
     </div>;
 }

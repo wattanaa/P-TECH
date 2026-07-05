@@ -46,7 +46,9 @@ import {
   Megaphone,
   Laptop,
   Briefcase,
-  BookOpen
+  BookOpen,
+  Calendar,
+  MapPin
 } from "lucide-react";
 import { db } from "../firebase";
 import { collection, doc, setDoc, onSnapshot } from "firebase/firestore";
@@ -82,6 +84,10 @@ export default function AdminView() {
     addFaq,
     updateFaq,
     deleteFaq,
+    academicCalendar,
+    addCalendarEvent,
+    updateCalendarEvent,
+    deleteCalendarEvent,
     addHeroSlide,
     updateHeroSlide,
     deleteHeroSlide,
@@ -333,6 +339,66 @@ export default function AdminView() {
     cta: "",
     ctaTab: "admission"
   });
+
+  // Academic Calendar Form State
+  const [editingCalendar, setEditingCalendar] = useState(null);
+  const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
+  const [tempCalendar, setTempCalendar] = useState({
+    title: "",
+    date: "",
+    rawDate: "",
+    category: "deadline",
+    description: "",
+    isUrgent: false,
+    location: ""
+  });
+
+  const handleOpenAddCalendar = () => {
+    setEditingCalendar(null);
+    setTempCalendar({
+      title: "",
+      date: "",
+      rawDate: "",
+      category: "deadline",
+      description: "",
+      isUrgent: false,
+      location: ""
+    });
+    setIsCalendarModalOpen(true);
+  };
+
+  const handleOpenEditCalendar = (event) => {
+    setEditingCalendar(event);
+    setTempCalendar({
+      title: event.title || "",
+      date: event.date || "",
+      rawDate: event.rawDate || "",
+      category: event.category || "deadline",
+      description: event.description || "",
+      isUrgent: event.isUrgent || false,
+      location: event.location || ""
+    });
+    setIsCalendarModalOpen(true);
+  };
+
+  const handleSaveCalendar = (e) => {
+    e.preventDefault();
+    if (!tempCalendar.title || !tempCalendar.date || !tempCalendar.rawDate) {
+      alert("กรุณากรอกข้อมูล หัวข้อกำหนดการ วันที่แสดงผล และ วันที่จัดเรียง (rawDate) ให้ครบถ้วน");
+      return;
+    }
+    if (editingCalendar) {
+      updateCalendarEvent(editingCalendar.id, tempCalendar);
+      triggerToast("แก้ไขกำหนดการสำเร็จ!");
+      logAdminAction("จัดการปฏิทินวิชาการ", `แก้ไขกำหนดการ: ${tempCalendar.title}`);
+    } else {
+      addCalendarEvent(tempCalendar);
+      triggerToast("เพิ่มกำหนดการสำเร็จ!");
+      logAdminAction("จัดการปฏิทินวิชาการ", `เพิ่มกำหนดการใหม่: ${tempCalendar.title}`);
+    }
+    setIsCalendarModalOpen(false);
+    setEditingCalendar(null);
+  };
 
   // Admin Users CMS State & Handlers
   const [isAdminUserModalOpen, setIsAdminUserModalOpen] = useState(false);
@@ -891,6 +957,7 @@ export default function AdminView() {
     { id: "news", label: "จัดการข่าวสารกิจกรรม", icon: Newspaper },
     { id: "administrators", label: "จัดการคณะผู้บริหาร", icon: GraduationCap },
     { id: "faq", label: "จัดการคำถามที่พบบ่อย (FAQ)", icon: HelpCircle },
+    { id: "academic_calendar", label: "จัดการปฏิทินวิชาการ", icon: Calendar },
     { id: "admissions", label: "ระบบผู้สมัครเรียนออนไลน์", icon: Users, count: pendingAdmissions },
     { id: "contacts", label: "กล่องข้อความติดต่อ", icon: Mail, count: unreadMessages },
     { id: "admin_users", label: "จัดการผู้ดูแลระบบ", icon: ShieldCheck },
@@ -1070,9 +1137,10 @@ export default function AdminView() {
                 </div>
 
                 {/* Sub-tabs bar */}
-                <div className="flex overflow-x-auto pb-2 gap-2 scrollbar-none border-b border-slate-100 -mx-4 px-4 md:mx-0 md:px-0">
+                <div className="flex flex-wrap gap-2 pb-3.5 border-b border-slate-100">
                   {[
                     { id: "general", label: "ข้อมูลพื้นฐาน", icon: Building2 },
+                    { id: "hero", label: "แบนเนอร์หลัก (Hero Banner)", icon: ImageIcon },
                     { id: "philosophy", label: "ปรัชญาและวิสัยทัศน์", icon: Compass },
                     { id: "director", label: "สาส์นผู้อำนวยการ", icon: GraduationCap },
                     { id: "gateway", label: "ระบบบริการออนไลน์", icon: Laptop },
@@ -1181,6 +1249,26 @@ export default function AdminView() {
                             />
                           </div>
                           <div className="space-y-1 md:col-span-2">
+                            <label className="text-[11px] font-bold text-slate-500">พิกัดแผนที่เดินทาง Google Maps (ลิงก์ Embed URL หรือโค้ด &lt;iframe&gt;)</label>
+                            <input
+                              type="text"
+                              value={tempCollege.googleMapIframe || ""}
+                              onChange={(e) => {
+                                let val = e.target.value;
+                                if (val.includes("<iframe") && val.includes("src=")) {
+                                  const match = val.match(/src="([^"]+)"/);
+                                  if (match && match[1]) val = match[1];
+                                }
+                                setTempCollege({ ...tempCollege, googleMapIframe: val });
+                              }}
+                              className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                              placeholder="เช่น https://www.google.com/maps/embed?... หรือใส่โค้ด <iframe> ทั้งหมดที่คัดลอกมาจาก Google Maps"
+                            />
+                            <p className="text-[10px] text-slate-400 leading-relaxed mt-0.5">
+                              ระบบจะสกัดเอาเฉพาะลิงก์แผนที่จริงมาใช้งานโดยอัตโนมัติ เพื่อนำไปแสดงผลเป็นแผนที่ GPS นำทางจริงบนหน้าติดต่อวิทยาลัย
+                            </p>
+                          </div>
+                          <div className="space-y-1 md:col-span-2">
                             <label className="text-[11px] font-bold text-slate-500">โลโก้วิทยาลัย (Logo Image URL หรือ อัปโหลด)</label>
                             <div className="flex gap-3 items-center">
                               <input
@@ -1245,6 +1333,10 @@ export default function AdminView() {
                               <span className="text-[10px] text-slate-400 font-bold block uppercase">ช่องทาง Facebook Page</span>
                               <span className="font-medium text-brand-primary">{collegeInfo.facebook || "-"}</span>
                             </div>
+                            <div className="text-xs pt-2 border-t border-slate-100">
+                              <span className="text-[10px] text-slate-400 font-bold block uppercase">แผนที่เดินทาง Google Maps (GPS)</span>
+                              <p className="font-semibold text-slate-700 truncate max-w-md" title={collegeInfo.googleMapIframe}>{collegeInfo.googleMapIframe || "ใช้แผนที่จำลองระบบ"}</p>
+                            </div>
                           </div>
                           <div className="flex flex-col items-center justify-center p-6 bg-slate-50 border border-slate-100 rounded-2xl">
                             <span className="text-[10px] text-slate-400 font-bold mb-3 uppercase">โลโก้สถาบันปัจจุบัน</span>
@@ -1252,6 +1344,91 @@ export default function AdminView() {
                               <img src={collegeInfo.logoUrl} alt="College Logo" className="h-28 w-auto object-contain p-2 bg-white rounded-xl shadow-xs" referrerPolicy="no-referrer" />
                             ) : (
                               <div className="h-28 w-28 rounded-xl bg-slate-200 flex items-center justify-center text-slate-400 text-xs font-bold text-center p-2">ไม่มีภาพโลโก้</div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* TAB 1.5: Hero Banner Settings */}
+                  {activeSectionTab === "hero" && (
+                    <div className="space-y-6">
+                      <div className="bg-sky-50/50 border border-sky-100 rounded-2xl p-4 flex items-start gap-3">
+                        <ImageIcon className="w-5 h-5 text-sky-600 shrink-0 mt-0.5" />
+                        <div>
+                          <h4 className="text-xs font-extrabold text-sky-900">เซกชัน: แบนเนอร์หลักหน้าแรก (Hero Banner Settings)</h4>
+                          <p className="text-[10px] text-sky-700 leading-relaxed mt-0.5">
+                            จัดการพาดหัวต้อนรับหลักและภาพหน้าปกแรกสุดของวิทยาลัย (Hero Cover Image) ที่จะถูกนำไปแสดงผลเด่นสง่าด้านบนสุดของหน้าแรกทันที
+                          </p>
+                        </div>
+                      </div>
+
+                      {isEditingCollege ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-1 md:col-span-2">
+                            <label className="text-[11px] font-bold text-slate-500">พาดหัวต้อนรับแบนเนอร์แรกสุด (Hero Headline) *</label>
+                            <input
+                              type="text"
+                              required
+                              value={tempCollege.heroTitle || ""}
+                              onChange={(e) => setTempCollege({ ...tempCollege, heroTitle: e.target.value })}
+                              className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                              placeholder="เช่น ยินดีต้อนรับสู่ รั้วเทคโนโลยีปทุมรัตต์ (PTC)"
+                            />
+                          </div>
+                          <div className="space-y-1 md:col-span-2">
+                            <label className="text-[11px] font-bold text-slate-500">รูปภาพหน้าปกแบนเนอร์แรกสุด (Hero Cover Image URL หรือ อัปโหลด)</label>
+                            <div className="flex gap-3 items-center">
+                              <input
+                                type="text"
+                                value={tempCollege.heroImage || ""}
+                                onChange={(e) => setTempCollege({ ...tempCollege, heroImage: e.target.value })}
+                                className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                                placeholder="ป้อนที่อยู่ URL หรือกดปุ่มอัปโหลดขวามือ"
+                              />
+                              <label className="bg-sky-50 hover:bg-sky-100 text-sky-700 px-4 py-2.5 rounded-xl text-xs font-bold transition-all border border-sky-200 cursor-pointer shrink-0">
+                                <span>อัปโหลดรูป</span>
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  className="hidden"
+                                  onChange={(e) => handleFileUpload(e, (base64) => setTempCollege({ ...tempCollege, heroImage: base64 }))}
+                                />
+                              </label>
+                            </div>
+                            {tempCollege.heroImage && (
+                              <div className="mt-3">
+                                <p className="text-[10px] text-slate-400 font-bold mb-1">ภาพหน้าปกตัวอย่างที่อัปโหลด:</p>
+                                <img src={tempCollege.heroImage} alt="Hero banner cover" className="max-h-44 w-auto object-contain rounded-xl border" referrerPolicy="no-referrer" />
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                          <div className="md:col-span-2 space-y-4 text-xs">
+                            <div>
+                              <span className="text-[10px] text-slate-400 font-bold block uppercase">พาดหัวแบนเนอร์หลักหน้าแรก</span>
+                              <span className="font-extrabold text-slate-800 text-sm">{collegeInfo.heroTitle || "ยินดีต้อนรับสู่ รั้วเทคโนโลยีปทุมรัตต์ (PTC)"}</span>
+                            </div>
+                            <div className="pt-2 border-t border-slate-100">
+                              <span className="text-[10px] text-slate-400 font-bold block">คำชี้แจงสำหรับรูปภาพ:</span>
+                              <p className="text-slate-500 font-medium leading-relaxed mt-0.5">
+                                ภาพหน้าปกที่อัปโหลดจะทำหน้าที่เป็นภาพพื้นหลังเด่นสุดทางตอนบนของหน้าหลัก โดยระบบจะจัดตำแหน่งให้อยู่ตรงกลางและปรับแต่งค่าสี (Overlay) ให้เหมาะสมเพื่อให้อ่านพาดหัวได้คมชัดที่สุด
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex flex-col items-center justify-center p-6 bg-slate-50 border border-slate-100 rounded-2xl text-center">
+                            <span className="text-[10px] text-slate-400 font-bold mb-3 uppercase">รูปภาพหน้าปกหลักปัจจุบัน</span>
+                            {collegeInfo.heroImage ? (
+                              <img src={collegeInfo.heroImage} alt="Hero banner cover" className="max-h-40 w-full object-cover rounded-xl shadow-xs border" referrerPolicy="no-referrer" />
+                            ) : (
+                              <div className="h-40 w-full rounded-xl border border-dashed border-slate-200 bg-white flex flex-col items-center justify-center text-slate-400 text-xs font-bold text-center p-4">
+                                <ImageIcon className="w-8 h-8 text-slate-300 mb-1.5" />
+                                <span>ไม่แสดงภาพกำหนดเอง</span>
+                                <span className="text-[9px] font-medium text-slate-400 mt-0.5">(ระบบจะใช้ภาพแบนเนอร์มาตรฐานของวิทยาลัย)</span>
+                              </div>
                             )}
                           </div>
                         </div>
@@ -3072,6 +3249,115 @@ export default function AdminView() {
               </div>
             )}
 
+            {/* SUB-TAB: Academic Calendar Manager */}
+            {activeSubTab === "academic_calendar" && (
+              <div className="space-y-6 animate-fade-in">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                  <div>
+                    <h2 className="text-lg font-extrabold text-slate-800 font-display">
+                      จัดการปฏิทินวิชาการ (Academic Calendar Management)
+                    </h2>
+                    <p className="text-xs text-slate-500">
+                      เพิ่ม แก้ไข และลบ วันสำคัญ วันเปิดภาคเรียน กำหนดการสอบ และกิจกรรมทางการศึกษาต่างๆ ของวิทยาลัย
+                    </p>
+                  </div>
+                  <button
+                    onClick={handleOpenAddCalendar}
+                    className="flex items-center space-x-1.5 bg-brand-primary hover:bg-blue-800 text-white px-4 py-2.5 rounded-2xl text-xs font-bold transition-all shadow-sm cursor-pointer shrink-0"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>เพิ่มกำหนดการใหม่</span>
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {academicCalendar.map((event) => {
+                    return (
+                      <div key={event.id} className="border border-slate-200 rounded-2xl p-5 bg-white shadow-sm flex flex-col justify-between gap-4 hover:border-slate-300 transition-all">
+                        <div className="space-y-2.5">
+                          <div className="flex items-center justify-between">
+                            <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${
+                              event.category === "deadline" ? "bg-rose-50 text-rose-600" :
+                              event.category === "academic" ? "bg-blue-50 text-blue-600" :
+                              "bg-emerald-50 text-emerald-600"
+                            }`}>
+                              {event.category === "deadline" ? "รับสมัคร/กำหนดเวลา" :
+                               event.category === "academic" ? "เรียนการสอน/สอบ" :
+                               "กิจกรรม/พิธีการ"}
+                            </span>
+                            
+                            <div className="flex items-center space-x-1">
+                              {event.isUrgent && (
+                                <span className="bg-amber-100 text-amber-800 text-[9px] font-bold px-2 py-0.5 rounded-md">
+                                  ด่วนมาก
+                                </span>
+                              )}
+                              <span className="text-[10px] text-slate-400 font-mono">
+                                ID: {event.id}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div>
+                            <h3 className="text-xs font-extrabold text-slate-800 leading-snug">{event.title}</h3>
+                            <p className="text-xs text-slate-500 mt-1 leading-relaxed font-medium line-clamp-2">
+                              {event.description || "ไม่มีคำอธิบายกำหนดการ"}
+                            </p>
+                          </div>
+
+                          <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-100 space-y-1.5 text-[11px] font-semibold text-slate-600">
+                            <div className="flex items-center space-x-1.5">
+                              <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                              <span>แสดงผล: <span className="text-slate-800">{event.date}</span></span>
+                            </div>
+                            <div className="flex items-center space-x-1.5">
+                              <Clock className="w-3.5 h-3.5 text-slate-400" />
+                              <span>วันจัดเรียง (rawDate): <span className="text-slate-800 font-mono">{event.rawDate}</span></span>
+                            </div>
+                            <div className="flex items-center space-x-1.5">
+                              <MapPin className="w-3.5 h-3.5 text-slate-400" />
+                              <span>สถานที่: <span className="text-slate-800">{event.location || "วิทยาลัยเทคโนโลยีปทุมรัตต์"}</span></span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex justify-end gap-1.5 border-t border-slate-50 pt-3">
+                          <button
+                            onClick={() => handleOpenEditCalendar(event)}
+                            className="p-2 px-3 text-blue-600 hover:bg-blue-50 border border-blue-100 rounded-xl transition-all flex items-center space-x-1 text-xs font-bold cursor-pointer"
+                            title="แก้ไขกำหนดการ"
+                          >
+                            <Edit className="w-3.5 h-3.5" />
+                            <span>แก้ไข</span>
+                          </button>
+                          <button
+                            onClick={() => {
+                              if (confirm("คุณแน่ใจว่าต้องการลบกำหนดการวิชาการนี้?")) {
+                                deleteCalendarEvent(event.id);
+                                triggerToast("ลบกำหนดการสำเร็จ!");
+                              }
+                            }}
+                            className="p-2 px-3 text-rose-600 hover:bg-rose-50 border border-rose-100 rounded-xl transition-all flex items-center space-x-1 text-xs font-bold cursor-pointer"
+                            title="ลบกำหนดการ"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            <span>ลบ</span>
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+
+                  {academicCalendar.length === 0 && (
+                    <div className="col-span-full border border-dashed border-slate-200 rounded-3xl p-12 text-center text-slate-400 text-xs">
+                      <Calendar className="w-10 h-10 mx-auto text-slate-300 mb-2" />
+                      ยังไม่มีรายการกำหนดการในปฏิทินบันทึกไว้ในระบบ
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* SUB-TAB: Menus Management */}
             {activeSubTab === "menus" && (
               <MenusManager />
@@ -3973,6 +4259,136 @@ export default function AdminView() {
                     className="bg-brand-primary hover:bg-blue-700 text-white px-6 py-2 rounded-xl font-bold text-xs shadow-md cursor-pointer"
                   >
                     บันทึกบัญชีผู้ดูแลระบบ
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* 9. Modal for Academic Calendar edit/create */}
+      <AnimatePresence>
+        {isCalendarModalOpen && (
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-white rounded-3xl max-w-lg w-full border border-slate-200 overflow-hidden shadow-2xl flex flex-col my-8"
+            >
+              <div className="bg-brand-secondary text-white p-5 flex justify-between items-center">
+                <h3 className="font-extrabold text-sm md:text-base font-display">
+                  {editingCalendar ? "แก้ไขกำหนดการปฏิทินวิชาการ" : "เพิ่มกำหนดการใหม่"}
+                </h3>
+                <button onClick={() => setIsCalendarModalOpen(false)} className="text-white hover:text-slate-300">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <form onSubmit={handleSaveCalendar} className="p-6 space-y-4">
+                <div className="space-y-4 text-xs">
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-600">หัวข้อกำหนดการ (Title) *</label>
+                    <input
+                      type="text"
+                      required
+                      value={tempCalendar.title}
+                      onChange={(e) => setTempCalendar({ ...tempCalendar, title: e.target.value })}
+                      className="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50 font-bold"
+                      placeholder="เช่น เปิดภาคเรียนที่ 1 ปีการศึกษา 2570"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <label className="font-bold text-slate-600">วันที่แสดงผล (Date String) *</label>
+                      <input
+                        type="text"
+                        required
+                        value={tempCalendar.date}
+                        onChange={(e) => setTempCalendar({ ...tempCalendar, date: e.target.value })}
+                        className="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50 font-semibold"
+                        placeholder="เช่น 1 พ.ย. 2569 หรือ 1 ก.ค. - 31 ส.ค. 2569"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="font-bold text-slate-600">วันที่ใช้สำหรับจัดเรียง (Sorting Date) *</label>
+                      <input
+                        type="date"
+                        required
+                        value={tempCalendar.rawDate}
+                        onChange={(e) => setTempCalendar({ ...tempCalendar, rawDate: e.target.value })}
+                        className="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50 font-semibold"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <label className="font-bold text-slate-600">หมวดหมู่กำหนดการ (Category) *</label>
+                      <select
+                        value={tempCalendar.category}
+                        onChange={(e) => setTempCalendar({ ...tempCalendar, category: e.target.value })}
+                        className="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50 font-bold"
+                      >
+                        <option value="deadline">รับสมัคร & กำหนดเวลาสิ้นสุด (Deadline)</option>
+                        <option value="academic">กำหนดการเรียนการสอน (Academic)</option>
+                        <option value="activity">กิจกรรม & พิธีการวิทยาลัย (Activity)</option>
+                      </select>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="font-bold text-slate-600">สถานที่ดำเนินงาน (Location)</label>
+                      <input
+                        type="text"
+                        value={tempCalendar.location}
+                        onChange={(e) => setTempCalendar({ ...tempCalendar, location: e.target.value })}
+                        className="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50 font-semibold"
+                        placeholder="เช่น หอประชุมใหญ่ หรือ ระบบบริการออนไลน์"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-600">คำอธิบายเพิ่มเติม (Description)</label>
+                    <textarea
+                      rows={3}
+                      value={tempCalendar.description}
+                      onChange={(e) => setTempCalendar({ ...tempCalendar, description: e.target.value })}
+                      className="w-full p-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50 leading-relaxed font-semibold"
+                      placeholder="เช่น ข้อมูลสรุปของกิจกรรม วิธีการยื่นสมัคร หรือข้อมูลที่มีความสำคัญแก่ผู้เรียน..."
+                    />
+                  </div>
+
+                  <div className="flex items-center space-x-2 bg-slate-50 p-3 rounded-2xl border border-slate-200">
+                    <input
+                      type="checkbox"
+                      id="calendar-is-urgent"
+                      checked={tempCalendar.isUrgent}
+                      onChange={(e) => setTempCalendar({ ...tempCalendar, isUrgent: e.target.checked })}
+                      className="w-4 h-4 text-brand-primary rounded-md focus:ring-blue-500 border-slate-300"
+                    />
+                    <label htmlFor="calendar-is-urgent" className="font-extrabold text-slate-700 cursor-pointer select-none">
+                      ทำเครื่องหมายเป็นกำหนดการเร่งด่วนพิเศษ (แสดงป้ายด่วนมากพร้อมไฟกะพริบ)
+                    </label>
+                  </div>
+                </div>
+
+                <div className="flex justify-end space-x-3 pt-6 border-t border-slate-100">
+                  <button
+                    type="button"
+                    onClick={() => setIsCalendarModalOpen(false)}
+                    className="bg-slate-100 hover:bg-slate-200 text-slate-600 px-5 py-2 rounded-xl font-bold text-xs cursor-pointer"
+                  >
+                    ยกเลิก
+                  </button>
+                  <button
+                    type="submit"
+                    className="bg-brand-primary hover:bg-blue-700 text-white px-6 py-2 rounded-xl font-bold text-xs shadow-md cursor-pointer"
+                  >
+                    {editingCalendar ? "บันทึกการแก้ไข" : "เพิ่มลงในปฏิทิน"}
                   </button>
                 </div>
               </form>

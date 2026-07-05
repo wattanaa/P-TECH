@@ -103,42 +103,58 @@ export default function ContactView() {
             {
     /* Immersive Mock Google Maps card element */
   }
-            <div className="bg-slate-900 text-white rounded-3xl p-6 border border-slate-800 shadow-xl space-y-4 relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-2xl" />
-              <div className="flex justify-between items-center">
+            <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-4 relative overflow-hidden font-sans" id="gps-map-card">
+              <div className="flex justify-between items-center border-b border-slate-100 pb-3">
                 <div className="space-y-1">
-                  <h3 className="text-xs font-extrabold text-amber-300">แผนที่การเดินทาง (GPS)</h3>
-                  <p className="text-[11px] text-slate-400">วิทยาลัยเทคโนโลยีปทุมรัตต์ ร้อยเอ็ด</p>
+                  <h3 className="text-sm font-extrabold text-slate-800">แผนที่การเดินทาง (GPS Map)</h3>
+                  <p className="text-[11px] text-slate-400">ค้นหาพิกัดและนำทางมายังวิทยาลัยได้โดยสะดวก</p>
                 </div>
-                <MapPin className="w-5 h-5 text-amber-400 animate-bounce" />
+                <div className="w-9 h-9 rounded-xl bg-amber-50 flex items-center justify-center text-amber-500 shrink-0">
+                  <MapPin className="w-5 h-5 animate-bounce" />
+                </div>
               </div>
 
-              {
-    /* Decorative schematic radar/map look */
-  }
-              <div className="h-40 bg-slate-800 rounded-2xl relative overflow-hidden border border-slate-700 flex items-center justify-center text-xs text-slate-400">
-                {
-    /* Radial grid circles */
-  }
-                <div className="absolute w-32 h-32 rounded-full border border-slate-700/50 animate-pulse" />
-                <div className="absolute w-56 h-56 rounded-full border border-slate-700/30" />
-                
-                {
-    /* Simulated streets */
-  }
-                <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-slate-700/40 transform -rotate-12" />
-                <div className="absolute left-1/3 top-0 bottom-0 w-0.5 bg-slate-700/40" />
-                
-                {
-    /* College marker */
-  }
-                <div className="absolute top-1/2 left-1/3 transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
-                  <div className="w-4 h-4 bg-brand-primary rounded-full border-2 border-white flex items-center justify-center shadow-lg animate-ping absolute" />
-                  <div className="w-4 h-4 bg-brand-primary rounded-full border-2 border-white flex items-center justify-center shadow-lg relative z-10" />
-                  <span className="bg-slate-900 border border-slate-700 text-[9px] font-bold text-white px-1.5 py-0.5 rounded-md mt-1 shadow-lg shrink-0 whitespace-nowrap">
-                    {collegeInfo.name}
-                  </span>
+              {collegeInfo.googleMapIframe ? (
+                <div className="h-64 rounded-2xl overflow-hidden border border-slate-200 shadow-inner relative group bg-slate-100">
+                  <iframe
+                    src={collegeInfo.googleMapIframe}
+                    width="100%"
+                    height="100%"
+                    style={{ border: 0 }}
+                    allowFullScreen=""
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    title="Google Maps"
+                    className="w-full h-full rounded-2xl no-lightbox"
+                    id="gps-google-map-iframe"
+                  ></iframe>
                 </div>
+              ) : (
+                <div className="h-44 bg-slate-800 rounded-2xl relative overflow-hidden border border-slate-700 flex items-center justify-center text-xs text-slate-400">
+                  <div className="absolute w-32 h-32 rounded-full border border-slate-700/50 animate-pulse" />
+                  <div className="absolute w-56 h-56 rounded-full border border-slate-700/30" />
+                  <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-slate-700/40 transform -rotate-12" />
+                  <div className="absolute left-1/3 top-0 bottom-0 w-0.5 bg-slate-700/40" />
+                  <div className="absolute top-1/2 left-1/3 transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
+                    <div className="w-4 h-4 bg-brand-primary rounded-full border-2 border-white flex items-center justify-center shadow-lg animate-ping absolute" />
+                    <div className="w-4 h-4 bg-brand-primary rounded-full border-2 border-white flex items-center justify-center shadow-lg relative z-10" />
+                    <span className="bg-slate-900 border border-slate-700 text-[9px] font-bold text-white px-1.5 py-0.5 rounded-md mt-1 shadow-lg shrink-0 whitespace-nowrap">
+                      {collegeInfo.name}
+                    </span>
+                  </div>
+                </div>
+              )}
+              
+              <div className="pt-2">
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(collegeInfo.name + " " + collegeInfo.address)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full text-center bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-bold py-2.5 px-4 rounded-xl border border-slate-200 transition-all flex items-center justify-center space-x-2"
+                >
+                  <MapPin className="w-4 h-4 text-slate-500 shrink-0" />
+                  <span>เปิดแผนที่นำทาง (Google Maps App)</span>
+                </a>
               </div>
             </div>
           </div>

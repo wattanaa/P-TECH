@@ -20,7 +20,8 @@ import {
   majors as defaultMajors,
   newsData as defaultNewsData,
   administrators as defaultAdministrators,
-  faqList as defaultFaqList
+  faqList as defaultFaqList,
+  academicCalendar as defaultAcademicCalendar
 } from "../data";
 import { fetchNewsFromGoogleSheet } from "../services/sheetService";
 
@@ -166,6 +167,7 @@ export const DataProvider = ({ children }) => {
   const [heroSlides, setHeroSlides] = useState([]);
   const [adminUsers, setAdminUsers] = useState([]);
   const [navbarMenus, setNavbarMenus] = useState([]);
+  const [academicCalendar, setAcademicCalendar] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const [dbSettings, setDbTypeSettings] = useState(() => {
@@ -227,6 +229,7 @@ export const DataProvider = ({ children }) => {
           await checkAndSeedCollection("administrators", defaultAdministrators.map((a, idx) => ({ ...a, id: `admin-${idx + 1}` })));
           await checkAndSeedCollection("faqList", defaultFaqList.map((f, idx) => ({ ...f, id: `faq-${idx + 1}` })));
           await checkAndSeedCollection("hero_slides", defaultSlides);
+          await checkAndSeedCollection("academic_calendar", defaultAcademicCalendar);
           await checkAndSeedCollection("admin_users", [
             { username: "admin", password: "admin", name: "ผู้ดูแลระบบหลัก" }
           ]);
@@ -339,6 +342,19 @@ export const DataProvider = ({ children }) => {
         handleFirestoreError(error, OperationType.LIST, "navbar_menus");
       });
 
+      const unsubAcademicCalendar = onSnapshot(collection(db, "academic_calendar"), (snap) => {
+        const items = [];
+        snap.forEach((doc) => items.push({ ...doc.data(), id: doc.id }));
+        items.sort((a, b) => {
+          const dateA = a.rawDate || "";
+          const dateB = b.rawDate || "";
+          return dateA.localeCompare(dateB);
+        });
+        setAcademicCalendar(items);
+      }, (error) => {
+        handleFirestoreError(error, OperationType.LIST, "academic_calendar");
+      });
+
       return () => {
         unsubCollege();
         unsubMajors();
@@ -350,6 +366,7 @@ export const DataProvider = ({ children }) => {
         unsubSlides();
         unsubAdminUsers();
         unsubNavbarMenus();
+        unsubAcademicCalendar();
       };
     } else {
       // Local Storage or Google Sheets Sync Mode
@@ -388,6 +405,9 @@ export const DataProvider = ({ children }) => {
         { id: "contact", label: "ติดต่อเรา", targetTab: "contact", order: 4 }
       ]);
       setNavbarMenus(localNavbarMenus);
+
+      const localCalendar = getLocalOrSetDefault("ptc_academic_calendar", defaultAcademicCalendar);
+      setAcademicCalendar(localCalendar.sort((a, b) => (a.rawDate || "").localeCompare(b.rawDate || "")));
 
       if (dbSettings.type === "gsheet") {
         const sheetId = dbSettings.gsheetId || "1wwm30RHJ_icNvMqSo-oFNYfEtPQXQ_NhM69bNQMt4Vk";
@@ -590,6 +610,47 @@ export const DataProvider = ({ children }) => {
         await deleteDoc(doc(db, "faqList", id));
       } catch (err) {
         handleFirestoreError(err, OperationType.DELETE, `faqList/${id}`);
+      }
+    }
+  };
+
+  const addCalendarEvent = async (event) => {
+    const id = `cal-${Date.now()}`;
+    const item = { ...event, id };
+    const updated = [...academicCalendar, item].sort((a, b) => (a.rawDate || "").localeCompare(b.rawDate || ""));
+    setAcademicCalendar(updated);
+    localStorage.setItem("ptc_academic_calendar", JSON.stringify(updated));
+    if (dbSettings.type === "firestore") {
+      try {
+        await setDoc(doc(db, "academic_calendar", id), item);
+      } catch (err) {
+        handleFirestoreError(err, OperationType.WRITE, `academic_calendar/${id}`);
+      }
+    }
+  };
+
+  const updateCalendarEvent = async (id, updatedEvent) => {
+    const updated = academicCalendar.map(e => e.id === id ? { ...e, ...updatedEvent } : e).sort((a, b) => (a.rawDate || "").localeCompare(b.rawDate || ""));
+    setAcademicCalendar(updated);
+    localStorage.setItem("ptc_academic_calendar", JSON.stringify(updated));
+    if (dbSettings.type === "firestore") {
+      try {
+        await updateDoc(doc(db, "academic_calendar", id), updatedEvent);
+      } catch (err) {
+        handleFirestoreError(err, OperationType.WRITE, `academic_calendar/${id}`);
+      }
+    }
+  };
+
+  const deleteCalendarEvent = async (id) => {
+    const updated = academicCalendar.filter(e => e.id !== id);
+    setAcademicCalendar(updated);
+    localStorage.setItem("ptc_academic_calendar", JSON.stringify(updated));
+    if (dbSettings.type === "firestore") {
+      try {
+        await deleteDoc(doc(db, "academic_calendar", id));
+      } catch (err) {
+        handleFirestoreError(err, OperationType.DELETE, `academic_calendar/${id}`);
       }
     }
   };
@@ -937,6 +998,7 @@ export const DataProvider = ({ children }) => {
         heroSlides,
         adminUsers,
         navbarMenus,
+        academicCalendar,
         isLoading,
         updateCollegeInfo,
         addMajor,
@@ -951,6 +1013,9 @@ export const DataProvider = ({ children }) => {
         addFaq,
         updateFaq,
         deleteFaq,
+        addCalendarEvent,
+        updateCalendarEvent,
+        deleteCalendarEvent,
         addHeroSlide,
         updateHeroSlide,
         deleteHeroSlide,

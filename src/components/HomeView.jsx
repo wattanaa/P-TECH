@@ -26,17 +26,30 @@ import {
   HeartHandshake
 } from "lucide-react";
 import { useData } from "../context/DataContext";
+import AcademicCalendar from "./AcademicCalendar";
 export default function HomeView({ setActiveTab, setSelectedNews }) {
   const { collegeInfo, majors, newsData, heroSlides } = useData();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [visibleNewsCount, setVisibleNewsCount] = useState(3);
+
+  const displaySlides = heroSlides?.map((slide, index) => {
+    if (index === 0) {
+      return {
+        ...slide,
+        title: collegeInfo?.heroTitle || "ยินดีต้อนรับสู่ รั้วเทคโนโลยีปทุมรัตต์ (PTC)",
+        bgImage: collegeInfo?.heroImage || slide.bgImage
+      };
+    }
+    return slide;
+  }) || [];
+
   useEffect(() => {
-    if (!heroSlides || heroSlides.length === 0) return;
+    if (!displaySlides || displaySlides.length === 0) return;
     const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
+      setCurrentSlide((prev) => (prev + 1) % displaySlides.length);
     }, 6e3);
     return () => clearInterval(timer);
-  }, [heroSlides?.length]);
+  }, [displaySlides?.length]);
   const statCards = [
     { value: collegeInfo?.stat1Value || `${(/* @__PURE__ */ new Date()).getFullYear() + 543 - parseInt(collegeInfo?.foundedYear || 2548)} ปี`, label: collegeInfo?.stat1Label || "แห่งการก่อตั้งและดูแลนักเรียน", description: collegeInfo?.stat1Desc || "เติบโตอย่างมั่นคงเคียงคู่ท้องถิ่น", icon: Award, color: "text-cyan-500" },
     { value: collegeInfo?.stat2Value || "95%+", label: collegeInfo?.stat2Label || "อัตราได้งานทำหลังจบการศึกษา", description: collegeInfo?.stat2Desc || "ภายใน 6 เดือนหลังสำเร็จหลักสูตร", icon: ShieldCheck, color: "text-emerald-500" },
@@ -68,7 +81,7 @@ export default function HomeView({ setActiveTab, setSelectedNews }) {
       {
     /* Hero Slider */
   }
-      {heroSlides && heroSlides.length > 0 ? (
+      {displaySlides && displaySlides.length > 0 ? (
         <section className="relative h-[480px] md:h-[540px] overflow-hidden bg-slate-950" id="hero-slider">
           <AnimatePresence mode="wait">
             <motion.div
@@ -79,12 +92,12 @@ export default function HomeView({ setActiveTab, setSelectedNews }) {
               transition={{ duration: 0.8 }}
               className="absolute inset-0 bg-cover bg-center"
               style={{
-                backgroundImage: heroSlides[currentSlide]?.mediaType === "video"
+                backgroundImage: displaySlides[currentSlide]?.mediaType === "video"
                   ? "none"
-                  : `linear-gradient(to right, rgba(15, 23, 42, 0.95) 30%, rgba(15, 23, 42, 0.6) 70%, rgba(15, 23, 42, 0.4) 100%), url(${heroSlides[currentSlide]?.bgImage || ""})`
+                  : `linear-gradient(to right, rgba(15, 23, 42, 0.95) 30%, rgba(15, 23, 42, 0.6) 70%, rgba(15, 23, 42, 0.4) 100%), url(${displaySlides[currentSlide]?.bgImage || ""})`
               }}
             >
-              {heroSlides[currentSlide]?.mediaType === "video" && (
+              {displaySlides[currentSlide]?.mediaType === "video" && (
                 <div className="absolute inset-0 overflow-hidden z-0">
                   <video
                     autoPlay
@@ -92,7 +105,7 @@ export default function HomeView({ setActiveTab, setSelectedNews }) {
                     muted
                     playsInline
                     className="w-full h-full object-cover"
-                    src={heroSlides[currentSlide]?.bgImage || ""}
+                    src={displaySlides[currentSlide]?.bgImage || ""}
                   />
                   <div className="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-950/70 to-slate-950/45" />
                 </div>
@@ -105,7 +118,7 @@ export default function HomeView({ setActiveTab, setSelectedNews }) {
                     transition={{ delay: 0.2 }}
                     className="inline-flex items-center bg-cyan-500/10 border border-cyan-400/20 text-cyan-400 px-3.5 py-1 rounded-full text-xs font-semibold tracking-wide"
                   >
-                    {heroSlides[currentSlide]?.badge}
+                    {displaySlides[currentSlide]?.badge}
                   </motion.span>
                   
                   <div className="space-y-2">
@@ -115,7 +128,7 @@ export default function HomeView({ setActiveTab, setSelectedNews }) {
                       transition={{ delay: 0.3 }}
                       className="text-white text-xl md:text-2xl font-bold tracking-tight text-blue-400"
                     >
-                      {heroSlides[currentSlide]?.subtitle}
+                      {displaySlides[currentSlide]?.subtitle}
                     </motion.h2>
                     <motion.h1
                       initial={{ opacity: 0, y: 25 }}
@@ -123,7 +136,7 @@ export default function HomeView({ setActiveTab, setSelectedNews }) {
                       transition={{ delay: 0.4 }}
                       className="text-white text-3xl md:text-5xl font-extrabold tracking-tight leading-tight"
                     >
-                      {heroSlides[currentSlide]?.title}
+                      {displaySlides[currentSlide]?.title}
                     </motion.h1>
                   </div>
 
@@ -133,7 +146,7 @@ export default function HomeView({ setActiveTab, setSelectedNews }) {
                     transition={{ delay: 0.5 }}
                     className="text-slate-300 text-sm md:text-base leading-relaxed"
                   >
-                    {heroSlides[currentSlide]?.description}
+                    {displaySlides[currentSlide]?.description}
                   </motion.p>
 
                   <motion.div
@@ -144,12 +157,12 @@ export default function HomeView({ setActiveTab, setSelectedNews }) {
                   >
                     <button
                       onClick={() => {
-                        setActiveTab(heroSlides[currentSlide]?.ctaTab || "admission");
+                        setActiveTab(displaySlides[currentSlide]?.ctaTab || "admission");
                         window.scrollTo({ top: 0, behavior: "smooth" });
                       }}
                       className="bg-brand-primary hover:bg-blue-700 text-white font-bold px-7 py-3.5 rounded-full shadow-lg shadow-blue-600/20 flex items-center space-x-2 transition-all duration-150 transform hover:-translate-y-0.5"
                     >
-                      <span>{heroSlides[currentSlide]?.cta}</span>
+                      <span>{displaySlides[currentSlide]?.cta}</span>
                       <ArrowRight className="w-4 h-4" />
                     </button>
                     <button
@@ -169,7 +182,7 @@ export default function HomeView({ setActiveTab, setSelectedNews }) {
 
           {/* Slide Indicator circles */}
           <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
-            {heroSlides.map((_, idx) => (
+            {displaySlides.map((_, idx) => (
               <button
                 key={idx}
                 onClick={() => setCurrentSlide(idx)}
@@ -192,7 +205,13 @@ export default function HomeView({ setActiveTab, setSelectedNews }) {
     /* Philosophy & Vision Bento Grid */
   }
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-3xl mx-auto space-y-3 mb-12">
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.6 }}
+          className="text-center max-w-3xl mx-auto space-y-3 mb-12"
+        >
           <span className="text-brand-primary font-bold text-xs uppercase tracking-widest bg-blue-50 px-3 py-1 rounded-full">
             ปรัชญาและวิสัยทัศน์วิทยาลัย
           </span>
@@ -202,11 +221,17 @@ export default function HomeView({ setActiveTab, setSelectedNews }) {
           <p className="text-slate-500 text-sm">
             วิทยาลัยเทคโนโลยีปทุมรัตต์ เป็นศูนย์กลางการศึกษาทางวิชาชีพที่พร้อมเคียงข้างนักศึกษาในเขตอำเภอปทุมรัตต์ จังหวัดร้อยเอ็ด
           </p>
-        </div>
+        </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {collegeInfo?.philosophyImage && (
-            <div className="md:col-span-3 h-64 md:h-80 w-full rounded-2xl overflow-hidden relative shadow-md border border-slate-100 group">
+            <motion.div 
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              className="md:col-span-3 h-64 md:h-80 w-full rounded-2xl overflow-hidden relative shadow-md border border-slate-100 group"
+            >
               <img 
                 src={collegeInfo.philosophyImage} 
                 alt="Philosophy and Campus Life" 
@@ -219,12 +244,18 @@ export default function HomeView({ setActiveTab, setSelectedNews }) {
                   <h3 className="text-white text-lg md:text-xl font-extrabold leading-tight">สร้างบรรยากาศแห่งการเรียนรู้ด้วยเทคโนโลยีและเครื่องมือระดับสากล</h3>
                 </div>
               </div>
-            </div>
+            </motion.div>
           )}
           {
     /* Box 1: Philosophy */
   }
-          <div className="bg-gradient-to-br from-brand-primary to-blue-900 text-white p-8 rounded-2xl shadow-lg border border-blue-900/10 flex flex-col justify-between">
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="bg-gradient-to-br from-brand-primary to-blue-900 text-white p-8 rounded-2xl shadow-lg border border-blue-900/10 flex flex-col justify-between"
+          >
             <div>
               <div className="w-10 h-10 rounded-lg bg-white/15 flex items-center justify-center text-cyan-300 mb-6">
                 <GraduationCap className="w-6 h-6" />
@@ -237,12 +268,18 @@ export default function HomeView({ setActiveTab, setSelectedNews }) {
             <div className="text-xs text-blue-200/80 mt-6 border-t border-white/10 pt-4">
               * เป็นหัวใจหลักในการหล่อหลอมศิษย์ทุกคนของวิทยาลัยฯ
             </div>
-          </div>
+          </motion.div>
 
           {
     /* Box 2: Vision */
   }
-          <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between">
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between"
+          >
             <div>
               <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center text-brand-primary mb-6">
                 <Award className="w-6 h-6" />
@@ -255,12 +292,18 @@ export default function HomeView({ setActiveTab, setSelectedNews }) {
             <div className="text-xs text-slate-400 mt-6 border-t border-slate-200 pt-4">
               * มุ่งสู่ความเป็นสากลและตรงใจผู้ว่าจ้างงาน
             </div>
-          </div>
+          </motion.div>
 
           {
     /* Box 3: Identity & Uniqueness */
   }
-          <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between">
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between"
+          >
             <div>
               <div className="w-10 h-10 rounded-lg bg-cyan-50 flex items-center justify-center text-cyan-600 mb-6">
                 <Users className="w-6 h-6" />
@@ -280,7 +323,7 @@ export default function HomeView({ setActiveTab, setSelectedNews }) {
             <div className="text-xs text-slate-400 mt-6 border-t border-slate-200 pt-4">
               * พลังสร้างบุคลิกภาพที่ดีของนักเรียนเทคโนโลยีปทุมรัตต์
             </div>
-          </div>
+          </motion.div>
         </div>
       </section>
 
@@ -290,7 +333,15 @@ export default function HomeView({ setActiveTab, setSelectedNews }) {
       <section className="bg-slate-50 border-y border-slate-100 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-            {statCards.map((stat, idx) => <div key={idx} className="text-center space-y-2">
+            {statCards.map((stat, idx) => (
+              <motion.div 
+                key={idx} 
+                initial={{ opacity: 0, y: 25 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-80px" }}
+                transition={{ duration: 0.5, delay: idx * 0.1 }}
+                className="text-center space-y-2"
+              >
                 <div className="flex justify-center">
                   <div className={`p-2.5 bg-white rounded-xl shadow-sm ${stat.color}`}>
                     <stat.icon className="w-6 h-6" />
@@ -303,8 +354,122 @@ export default function HomeView({ setActiveTab, setSelectedNews }) {
                   <p className="text-sm font-bold text-slate-700">{stat.label}</p>
                   <p className="text-xs text-slate-400">{stat.description}</p>
                 </div>
-              </div>)}
+              </motion.div>
+            ))}
           </div>
+        </div>
+      </section>
+
+      {/* Academic Programs Section */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" id="academic-programs">
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.6 }}
+          className="text-center max-w-3xl mx-auto space-y-3 mb-12"
+        >
+          <span className="text-brand-primary font-bold text-xs uppercase tracking-widest bg-blue-50 px-3.5 py-1.5 rounded-full border border-blue-100">
+            แผนกวิชาการและสาขาน่าเรียน (Academic Programs)
+          </span>
+          <h2 className="text-2xl md:text-3xl font-extrabold text-brand-secondary tracking-tight">
+            มุ่งเน้นความเป็นเลิศทางวิชาชีพ สู่ตลาดแรงงานยุคดิจิทัล
+          </h2>
+          <p className="text-slate-500 text-sm leading-relaxed">
+            สัมผัสประสบการณ์เรียนรู้ผ่านการลงมือปฏิบัติจริงกับแผนกวิชาหลักที่มีอัตราความต้องการผู้สำเร็จการศึกษาสูงสุดและเทคโนโลยีการเรียนการสอนระดับสากล
+          </p>
+        </motion.div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[
+            {
+              title: "แผนกวิชาช่างยนต์",
+              enTitle: "Automotive Technology",
+              desc: "มุ่งเน้นความเชี่ยวชาญด้านงานซ่อมบำรุงเครื่องยนต์สมัยใหม่ เครื่องยนต์หัวฉีดคอมมอนเรล และปูพื้นฐานเทคโนโลยียานยนต์ไฟฟ้า (EV) ระดับอุตสาหกรรม",
+              icon: Settings,
+              color: "bg-blue-50 text-blue-600 border-blue-100",
+              accentColor: "border-l-4 border-l-blue-500",
+              badge: "ช่างยนต์ EV",
+              highlight: "ทวิภาคีร่วมกับแบรนด์รถยนต์ชั้นนำ"
+            },
+            {
+              title: "แผนกวิชาช่างไฟฟ้ากำลัง",
+              enTitle: "Electrical Power",
+              desc: "เรียนรู้ระบบติดตั้งไฟฟ้าภายในและภายนอกอาคาร การเขียนโปรแกรม PLC ควบคุมมอเตอร์เครื่องจักร ตลอดจนเทคโนโลยีระบบพลังงานแสงอาทิตย์ (Solar Cell)",
+              icon: Zap,
+              color: "bg-amber-50 text-amber-500 border-amber-100",
+              accentColor: "border-l-4 border-l-amber-500",
+              badge: "ระบบสมาร์ทกริด",
+              highlight: "พร้อมเครื่องมือจำลองแล็บมาตรฐานสูง"
+            },
+            {
+              title: "แผนกเทคโนโลยีสารสนเทศ",
+              enTitle: "Information Technology",
+              desc: "สร้างอนาคตสู่การเป็นนักพัฒนา ซ่อมบำรุงระบบฮาร์ดแวร์ ดูแลจัดการเน็ตเวิร์กองค์กร และเทคนิคการเขียนเว็บโปรแกรมมิ่งยุคใหม่เต็มรูปแบบ",
+              icon: Cpu,
+              color: "bg-indigo-50 text-indigo-500 border-indigo-100",
+              accentColor: "border-l-4 border-l-indigo-500",
+              badge: "ไอที & พัฒนาเว็บ",
+              highlight: "สอนโดยวิทยากรผู้เชี่ยวชาญจากบริษัทเทค"
+            },
+            {
+              title: "แผนกวิชาการบัญชี",
+              enTitle: "Accounting & Finance",
+              desc: "ปูพื้นฐานระบบบัญชีการเงินยุคใหม่ การคำนวณภาษี และฝึกปฏิบัติใช้ซอฟต์แวร์วิเคราะห์ข้อมูลการเงินทางธุรกิจเพื่อให้สำเร็จการศึกษาแบบพร้อมทำงานได้ทันที",
+              icon: TrendingUp,
+              color: "bg-emerald-50 text-emerald-500 border-emerald-100",
+              accentColor: "border-l-4 border-l-emerald-500",
+              badge: "นักบัญชีดิจิทัล",
+              highlight: "รับรองความต้องการงานสูงครอบคลุมทุกองค์กร"
+            }
+          ].map((program, idx) => {
+            const IconComp = program.icon;
+            return (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-80px" }}
+                transition={{ duration: 0.5, delay: idx * 0.1 }}
+                className={`bg-white border border-slate-200 hover:border-slate-300 rounded-2xl p-6 shadow-xs hover:shadow-lg transition-all duration-300 flex flex-col justify-between group cursor-pointer ${program.accentColor}`}
+                onClick={() => {
+                  setActiveTab("curriculum");
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }}
+              >
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center border ${program.color} group-hover:scale-105 transition-transform duration-200`}>
+                      <IconComp className="w-6 h-6" />
+                    </div>
+                    <span className="bg-slate-100 text-slate-600 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">
+                      {program.badge}
+                    </span>
+                  </div>
+                  
+                  <div className="space-y-1">
+                    <h3 className="text-lg font-bold text-slate-800 group-hover:text-brand-primary transition-colors">
+                      {program.title}
+                    </h3>
+                    <p className="text-slate-400 text-xs font-medium tracking-wide">
+                      {program.enTitle}
+                    </p>
+                  </div>
+
+                  <p className="text-slate-500 text-xs leading-relaxed">
+                    {program.desc}
+                  </p>
+                </div>
+
+                <div className="mt-6 pt-4 border-t border-slate-100">
+                  <span className="text-[10px] font-bold text-slate-400 block uppercase mb-1">จุดเด่นของแผนก:</span>
+                  <p className="text-[11px] font-semibold text-brand-secondary group-hover:text-brand-primary transition-colors line-clamp-1">
+                    {program.highlight}
+                  </p>
+                </div>
+              </motion.div>
+            );
+          })}
         </div>
       </section>
 
@@ -312,7 +477,13 @@ export default function HomeView({ setActiveTab, setSelectedNews }) {
     /* Director's Welcome & Message Section */
   }
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden grid grid-cols-1 lg:grid-cols-12 gap-8 items-center p-6 md:p-10">
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.7 }}
+          className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden grid grid-cols-1 lg:grid-cols-12 gap-8 items-center p-6 md:p-10"
+        >
           {
     /* Director Photo with prestigious golden-blue frame */
   }
@@ -370,7 +541,7 @@ export default function HomeView({ setActiveTab, setSelectedNews }) {
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
       </section>
 
       {
@@ -388,7 +559,13 @@ export default function HomeView({ setActiveTab, setSelectedNews }) {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(29,78,216,0.15),transparent_50%)] pointer-events-none" />
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12 relative z-10">
-          <div className="text-center max-w-3xl mx-auto space-y-3">
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6 }}
+            className="text-center max-w-3xl mx-auto space-y-3"
+          >
             <span className="text-brand-accent font-extrabold text-xs uppercase tracking-widest bg-amber-500/10 border border-brand-accent/20 px-3.5 py-1.5 rounded-full">
               ระบบบริการสารสนเทศออนไลน์
             </span>
@@ -398,7 +575,7 @@ export default function HomeView({ setActiveTab, setSelectedNews }) {
             <p className="text-slate-400 text-xs md:text-sm">
               เข้าถึงช่องทางบริการดิจิทัล ระบบงานนักศึกษา ระบบช่วยสอน และข้อมูลการเรียนการสอนได้อย่างรวดเร็วตลอด 24 ชั่วโมง
             </p>
-          </div>
+          </motion.div>
 
           {
     /* Quick links portal grid - 6 items */
@@ -494,7 +671,13 @@ export default function HomeView({ setActiveTab, setSelectedNews }) {
     /* Highlight Majors Quick Access */
   }
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-4">
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.6 }}
+          className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-4"
+        >
           <div className="space-y-2">
             <span className="text-brand-primary font-bold text-xs uppercase tracking-widest bg-blue-50 px-3 py-1 rounded-full">
               สายอาชีพที่ตอบโจทย์อนาคต
@@ -507,19 +690,25 @@ export default function HomeView({ setActiveTab, setSelectedNews }) {
             </p>
           </div>
           <button
-    onClick={() => {
-      setActiveTab("curriculum");
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }}
-    className="group inline-flex items-center space-x-1.5 text-sm font-bold text-brand-primary hover:text-blue-800 transition-colors"
-  >
+            onClick={() => {
+              setActiveTab("curriculum");
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+            className="group inline-flex items-center space-x-1.5 text-sm font-bold text-brand-primary hover:text-blue-800 transition-colors"
+          >
             <span>ดูหลักสูตรทั้งหมด</span>
             <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
           </button>
-        </div>
+        </motion.div>
 
         {collegeInfo?.curriculumImage && (
-          <div className="mb-8 rounded-2xl overflow-hidden h-44 md:h-52 relative border border-slate-200 shadow-xs group">
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6 }}
+            className="mb-8 rounded-2xl overflow-hidden h-44 md:h-52 relative border border-slate-200 shadow-xs group"
+          >
             <img 
               src={collegeInfo.curriculumImage} 
               alt="Curriculum Banner" 
@@ -531,17 +720,22 @@ export default function HomeView({ setActiveTab, setSelectedNews }) {
               <h3 className="text-base md:text-lg font-extrabold leading-tight">หลักสูตรวิชาชีพที่รองรับระบบทวิภาคี ฝึกปฏิบัติจริงร่วมกับบริษัทอุตสาหกรรมชั้นนำ</h3>
               <p className="text-slate-300 text-xs mt-1 max-w-lg hidden sm:block">เน้นปั้นนักศึกษาสายอาชีพยุคใหม่ให้มีทักษะพร้อมก้าวสู่ตลาดงานสากล มีเครื่องมือแล็บและวิทยากรผู้เชี่ยวชาญร่วมพัฒนาแผนการเรียน</p>
             </div>
-          </div>
+          </motion.div>
         )}
 
         {
     /* Majors grid - display 4 main types */
   }
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {majors.slice(0, 4).map((major) => <div
-    key={major.id}
-    className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between group"
-  >
+          {majors.slice(0, 4).map((major, idx) => (
+            <motion.div
+              key={major.id}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-80px" }}
+              transition={{ duration: 0.5, delay: idx * 0.1 }}
+              className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between group"
+            >
               <div className="space-y-4">
                 <div className="w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center group-hover:bg-blue-50 transition-colors">
                   {getMajorIcon(major.icon)}
@@ -565,16 +759,17 @@ export default function HomeView({ setActiveTab, setSelectedNews }) {
 
               <div className="mt-6 pt-4 border-t border-slate-200">
                 <button
-    onClick={() => {
-      setActiveTab("curriculum");
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }}
-    className="w-full text-center text-xs font-bold text-slate-600 group-hover:text-brand-primary transition-colors"
-  >
+                  onClick={() => {
+                    setActiveTab("curriculum");
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                  }}
+                  className="w-full text-center text-xs font-bold text-slate-600 group-hover:text-brand-primary transition-colors"
+                >
                   ดูรายละเอียดรายวิชา
                 </button>
               </div>
-            </div>)}
+            </motion.div>
+          ))}
         </div>
       </section>
 
@@ -582,7 +777,13 @@ export default function HomeView({ setActiveTab, setSelectedNews }) {
     /* Latest News & Announcements Highlights */
   }
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" id="news-section">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-4">
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.6 }}
+          className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-4"
+        >
           <div className="space-y-2">
             <span className="text-brand-primary font-bold text-xs uppercase tracking-widest bg-blue-50 px-3 py-1 rounded-full">
               ข่าวสารรอบรั้ววิทยาลัย
@@ -595,36 +796,41 @@ export default function HomeView({ setActiveTab, setSelectedNews }) {
             </p>
           </div>
           <button
-    onClick={() => {
-      setActiveTab("news");
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }}
-    className="group inline-flex items-center space-x-1.5 text-sm font-bold text-brand-primary hover:text-blue-800 transition-colors"
-  >
+            onClick={() => {
+              setActiveTab("news");
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+            className="group inline-flex items-center space-x-1.5 text-sm font-bold text-brand-primary hover:text-blue-800 transition-colors"
+          >
             <span>ข่าววิทยาลัยทั้งหมด</span>
             <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
           </button>
-        </div>
+        </motion.div>
 
         {
     /* Dynamic news posts */
   }
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {(newsData || []).slice(0, visibleNewsCount).map((news) => <article
-    key={news.id}
-    className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:scale-[1.02] hover:border-slate-300 transition-all duration-300 ease-out cursor-pointer flex flex-col h-full group"
-    onClick={() => handleNewsClick(news)}
-  >
+          {(newsData || []).slice(0, visibleNewsCount).map((news, idx) => (
+            <motion.article
+              key={news.id}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-80px" }}
+              transition={{ duration: 0.5, delay: idx * 0.1 }}
+              className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:scale-[1.02] hover:border-slate-300 transition-all duration-300 ease-out cursor-pointer flex flex-col h-full group"
+              onClick={() => handleNewsClick(news)}
+            >
               {
-    /* Image box */
-  }
+                /* Image box */
+              }
               <div className="relative h-48 bg-slate-100 overflow-hidden shrink-0">
                 <img
-    src={news.imageUrl}
-    alt={news.title}
-    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-    referrerPolicy="no-referrer"
-  />
+                  src={news.imageUrl}
+                  alt={news.title}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  referrerPolicy="no-referrer"
+                />
                 <div className="absolute top-4 left-4">
                   <span className="bg-brand-primary text-white text-[10px] font-bold px-3 py-1.5 rounded-full shadow-md">
                     {news.category}
@@ -633,8 +839,8 @@ export default function HomeView({ setActiveTab, setSelectedNews }) {
               </div>
 
               {
-    /* Content box */
-  }
+                /* Content box */
+              }
               <div className="p-6 flex flex-col justify-between flex-grow space-y-4">
                 <div className="space-y-2">
                   <div className="flex items-center space-x-4 text-xs text-slate-400">
@@ -660,7 +866,8 @@ export default function HomeView({ setActiveTab, setSelectedNews }) {
                   <ArrowRight className="w-3.5 h-3.5 ml-1 transform group-hover:translate-x-1 transition-transform" />
                 </div>
               </div>
-            </article>)}
+            </motion.article>
+          ))}
         </div>
 
         {/* Expand/Collapse News Controls */}
@@ -696,7 +903,13 @@ export default function HomeView({ setActiveTab, setSelectedNews }) {
   }
       <section className="bg-slate-50 border-y border-slate-200 py-12" id="industry-partnerships">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-          <div className="text-center max-w-2xl mx-auto space-y-2">
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6 }}
+            className="text-center max-w-2xl mx-auto space-y-2"
+          >
             <span className="text-brand-primary font-bold text-xs uppercase tracking-widest bg-blue-50 px-3 py-1 rounded-full">
               โอกาสทำงาน 100% กับพันธมิตรของเรา
             </span>
@@ -706,7 +919,7 @@ export default function HomeView({ setActiveTab, setSelectedNews }) {
             <p className="text-slate-500 text-xs leading-relaxed">
               วิทยาลัยร่วมมือกับสถานประกอบการและแบรนด์อุตสาหกรรมชั้นนำในระดับประเทศ เพื่อสนับสนุนการฝึกงานระบบทวิภาคี รับประกันความพร้อมและมีอาชีพรองรับทันทีหลังจบการศึกษา
             </p>
-          </div>
+          </motion.div>
 
           {
     /* Partners Grid */
@@ -753,11 +966,18 @@ export default function HomeView({ setActiveTab, setSelectedNews }) {
         </div>
       </section>
 
+      {/* Academic Calendar Component */}
+      <AcademicCalendar />
+
       {
     /* Online Registration CTA Section */
   }
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div 
+        <motion.div 
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.7 }}
           className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-brand-secondary to-blue-950 text-white p-8 md:p-12 shadow-xl border border-blue-900/40"
           style={collegeInfo?.admissionCtaImage ? {
             backgroundImage: `linear-gradient(to right, rgba(15, 23, 42, 0.94) 40%, rgba(15, 23, 42, 0.7) 100%), url(${collegeInfo.admissionCtaImage})`,
@@ -778,26 +998,26 @@ export default function HomeView({ setActiveTab, setSelectedNews }) {
             </p>
             <div className="pt-4 flex flex-wrap gap-4">
               <button
-    onClick={() => {
-      setActiveTab("admission");
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }}
-    className="bg-brand-primary hover:bg-blue-700 text-white font-bold px-8 py-4 rounded-full shadow-lg shadow-blue-500/25 transition-all duration-150 transform hover:-translate-y-0.5"
-  >
+                onClick={() => {
+                  setActiveTab("admission");
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }}
+                className="bg-brand-primary hover:bg-blue-700 text-white font-bold px-8 py-4 rounded-full shadow-lg shadow-blue-500/25 transition-all duration-150 transform hover:-translate-y-0.5"
+              >
                 ยื่นใบสมัครออนไลน์
               </button>
               <button
-    onClick={() => {
-      setActiveTab("about");
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }}
-    className="bg-white/10 hover:bg-white/15 border border-white/20 text-white font-semibold px-6 py-4 rounded-full transition-all duration-150"
-  >
+                onClick={() => {
+                  setActiveTab("about");
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }}
+                className="bg-white/10 hover:bg-white/15 border border-white/20 text-white font-semibold px-6 py-4 rounded-full transition-all duration-150"
+              >
                 คำถามพบบ่อย & ติดต่อวิทยาลัย
               </button>
             </div>
           </div>
-        </div>
+        </motion.div>
       </section>
     </div>;
 }
