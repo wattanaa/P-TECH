@@ -442,9 +442,24 @@ export const DataProvider = ({ children }) => {
             setIsLoading(false);
           });
       } else {
-        const localNews = getLocalOrSetDefault("ptc_news", defaultNewsData);
-        setNewsData(localNews);
-        setIsLoading(false);
+        fetch("/news_dummy.json")
+          .then((res) => {
+            if (!res.ok) {
+              throw new Error(`HTTP error! status: ${res.status}`);
+            }
+            return res.json();
+          })
+          .then((data) => {
+            setNewsData(data);
+          })
+          .catch((err) => {
+            console.error("Failed to fetch news_dummy.json, fallback to hardcoded data:", err);
+            const localNews = getLocalOrSetDefault("ptc_news", defaultNewsData);
+            setNewsData(localNews);
+          })
+          .finally(() => {
+            setIsLoading(false);
+          });
       }
     }
   }, [dbSettings.type]);

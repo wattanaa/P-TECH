@@ -19,7 +19,7 @@ import { useData } from "./context/DataContext";
 import { ArrowUp, X } from "lucide-react";
 
 export default function App() {
-  const { collegeInfo } = useData() || {};
+  const { collegeInfo, t } = useData() || {};
   const [activeTab, setActiveTab] = useState("home");
   const [selectedNews, setSelectedNews] = useState(null);
   const [aboutSection, setAboutSection] = useState("");
@@ -28,11 +28,11 @@ export default function App() {
   const [lightboxImage, setLightboxImage] = useState(null);
   const [showBackToTop, setShowBackToTop] = useState(false);
 
-  // Monitor scroll height to show Back to Top button when scrolling past hero section
+  // Monitor scroll height to show Back to Top button when scrolling past threshold
   useEffect(() => {
     const handleScroll = () => {
-      // 450px corresponds to scrolling past the hero banner of HomeView
-      if (window.scrollY > 450) {
+      // 300px corresponds to scrolling down a short distance on any view
+      if (window.scrollY > 300) {
         setShowBackToTop(true);
       } else {
         setShowBackToTop(false);
@@ -266,8 +266,8 @@ export default function App() {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-            className="fixed bottom-8 right-8 z-[9990] bg-brand-primary hover:bg-blue-700 text-white p-3.5 rounded-full shadow-lg hover:shadow-xl border border-blue-400/20 flex items-center justify-center transition-all focus:outline-none cursor-pointer"
-            title="เลื่อนขึ้นบนสุด"
+            className="fixed bottom-8 right-8 z-[9990] bg-brand-primary hover:bg-brand-accent text-white p-3.5 rounded-full shadow-lg hover:shadow-xl border border-blue-400/20 flex items-center justify-center transition-all focus:outline-none cursor-pointer"
+            title={t ? t("เลื่อนขึ้นบนสุด", "Back to top") : "เลื่อนขึ้นบนสุด"}
             id="back-to-top-btn"
           >
             <ArrowUp className="w-5 h-5" />
