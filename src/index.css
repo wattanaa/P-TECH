@@ -2,8 +2,8 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Sarabun", "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Kanit", "Inter", sans-serif;
+  --font-sans: "Kanit", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Kanit", sans-serif;
   --color-brand-primary: #2b3e9a; /* Deep royal blue from logo */
   --color-brand-secondary: #0f172a; /* Deep dark slate */
   --color-brand-accent: #3b82f6; /* Ocean blue accent */

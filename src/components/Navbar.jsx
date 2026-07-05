@@ -97,7 +97,33 @@ export default function Navbar({ activeTab, setActiveTab }) {
               )}
             </button>
 
-            {/* About us Dropdown */}
+            {/* Other menu items (Curriculum, News, Contact) */}
+            {menuItems.filter(item => item.id !== "home").map((item) => {
+              const isSelected = activeTab === (item.targetTab || item.id);
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => handleNavClick(item.targetTab || item.id)}
+                  className={`relative px-3 py-2 rounded-lg text-xs font-bold transition-all duration-200 flex items-center space-x-1 ${
+                    isSelected
+                      ? "text-brand-primary font-extrabold"
+                      : "text-slate-600 hover:text-brand-primary hover:bg-slate-50"
+                  }`}
+                  id={`nav-${item.id}`}
+                >
+                  <span>{item.label}</span>
+                  {isSelected && (
+                    <motion.div
+                      layoutId="activeTabIndicator"
+                      className="absolute bottom-0 left-3 right-3 h-0.5 bg-brand-primary rounded-full"
+                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                    />
+                  )}
+                </button>
+              );
+            })}
+
+            {/* About us Dropdown (now placed after other menu items) */}
             <div
               className="relative"
               onMouseEnter={() => setIsDropdownOpen(true)}
@@ -161,32 +187,6 @@ export default function Navbar({ activeTab, setActiveTab }) {
               </AnimatePresence>
             </div>
 
-            {/* Other menu items */}
-            {menuItems.filter(item => item.id !== "home").map((item) => {
-              const isSelected = activeTab === (item.targetTab || item.id);
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => handleNavClick(item.targetTab || item.id)}
-                  className={`relative px-3 py-2 rounded-lg text-xs font-bold transition-all duration-200 flex items-center space-x-1 ${
-                    isSelected
-                      ? "text-brand-primary font-extrabold"
-                      : "text-slate-600 hover:text-brand-primary hover:bg-slate-50"
-                  }`}
-                  id={`nav-${item.id}`}
-                >
-                  <span>{item.label}</span>
-                  {isSelected && (
-                    <motion.div
-                      layoutId="activeTabIndicator"
-                      className="absolute bottom-0 left-3 right-3 h-0.5 bg-brand-primary rounded-full"
-                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                    />
-                  )}
-                </button>
-              );
-            })}
-
             <button
               onClick={() => handleNavClick("admission")}
               className="ml-4 bg-brand-primary hover:bg-blue-700 text-white px-5 py-2 rounded-full text-xs font-bold shadow-md shadow-blue-500/10 hover:shadow-lg transition-all duration-200 cursor-pointer"
@@ -237,7 +237,25 @@ export default function Navbar({ activeTab, setActiveTab }) {
               <span>หน้าแรก</span>
             </button>
 
-            {/* About us Accordion */}
+            {/* Other Mobile menu items */}
+            {menuItems.filter(item => item.id !== "home").map((item) => {
+              const isSelected = activeTab === (item.targetTab || item.id);
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => handleNavClick(item.targetTab || item.id)}
+                  className={`w-full text-left flex items-center space-x-2 px-4 py-3 rounded-lg font-bold transition-colors ${
+                    isSelected
+                      ? "bg-blue-50 text-brand-primary border-l-4 border-brand-primary"
+                      : "text-slate-600 hover:bg-slate-50 hover:text-brand-primary"
+                  }`}
+                >
+                  <span>{item.label}</span>
+                </button>
+              );
+            })}
+
+            {/* About us Accordion (now after other menu items) */}
             <div className="space-y-1">
               <button
                 onClick={() => setIsMobileAboutOpen(!isMobileAboutOpen)}
@@ -279,24 +297,6 @@ export default function Navbar({ activeTab, setActiveTab }) {
                 )}
               </AnimatePresence>
             </div>
-
-            {/* Other Mobile menu items */}
-            {menuItems.filter(item => item.id !== "home").map((item) => {
-              const isSelected = activeTab === (item.targetTab || item.id);
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => handleNavClick(item.targetTab || item.id)}
-                  className={`w-full text-left flex items-center space-x-2 px-4 py-3 rounded-lg font-bold transition-colors ${
-                    isSelected
-                      ? "bg-blue-50 text-brand-primary border-l-4 border-brand-primary"
-                      : "text-slate-600 hover:bg-slate-50 hover:text-brand-primary"
-                  }`}
-                >
-                  <span>{item.label}</span>
-                </button>
-              );
-            })}
 
             <div className="pt-4 px-4">
               <button
