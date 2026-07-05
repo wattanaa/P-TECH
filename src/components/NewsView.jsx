@@ -199,17 +199,50 @@ export default function NewsView({ selectedNews, setSelectedNews }) {
 
           {/* Search and Sort box row */}
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="flex items-center space-x-2.5 w-full md:w-auto">
-              <span className="text-xs font-bold text-slate-500 shrink-0">{t("จัดเรียงตาม:", "Sort by:")}</span>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="p-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-primary cursor-pointer font-semibold text-slate-700 shadow-xs"
+            <div className="flex flex-wrap items-center gap-4 w-full md:w-auto" id="sort-controls">
+              {/* Toggle Switch for Newest First vs Oldest First */}
+              <div className="flex items-center space-x-2 bg-slate-50 p-1.5 rounded-2xl border border-slate-200 shadow-xs" id="news-sort-switch-container">
+                <span className="text-xs font-bold text-slate-500 pl-2">{t("เรียงตามวันที่:", "Sort Date:")}</span>
+                <div className="relative flex items-center bg-slate-200/60 p-1 rounded-xl select-none" id="date-sort-switch">
+                  {/* Sliding highlight */}
+                  <div 
+                    className="absolute top-1 bottom-1 rounded-lg bg-white shadow-xs transition-all duration-300 ease-out"
+                    style={{
+                      left: sortBy === "oldest" ? "calc(50% + 2px)" : "4px",
+                      width: "calc(50% - 6px)"
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setSortBy("newest")}
+                    className={`relative z-10 px-3.5 py-1.5 text-xs font-bold rounded-lg transition-colors duration-150 cursor-pointer ${sortBy === "newest" ? "text-brand-primary" : "text-slate-500 hover:text-slate-800"}`}
+                  >
+                    {t("ล่าสุด", "Newest")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSortBy("oldest")}
+                    className={`relative z-10 px-3.5 py-1.5 text-xs font-bold rounded-lg transition-colors duration-150 cursor-pointer ${sortBy === "oldest" ? "text-brand-primary" : "text-slate-500 hover:text-slate-800"}`}
+                  >
+                    {t("เก่าที่สุด", "Oldest")}
+                  </button>
+                </div>
+              </div>
+
+              {/* Toggle popular as a standalone interactive button */}
+              <button
+                type="button"
+                onClick={() => setSortBy(sortBy === "popular" ? "newest" : "popular")}
+                className={`px-4 py-2.5 rounded-2xl text-xs font-bold border transition-all cursor-pointer flex items-center space-x-1.5 ${
+                  sortBy === "popular" 
+                    ? "bg-amber-500 hover:bg-amber-600 border-amber-600 text-white shadow-sm" 
+                    : "bg-white hover:bg-slate-50 border-slate-200 text-slate-600"
+                }`}
+                id="popular-sort-btn"
               >
-                <option value="newest">{t("ข่าวล่าสุด (Newest)", "Newest Articles")}</option>
-                <option value="oldest">{t("ข่าวเก่าที่สุด (Oldest)", "Oldest Articles")}</option>
-                <option value="popular">{t("ยอดเข้าชมสูงสุด (Most Popular)", "Most Popular")}</option>
-              </select>
+                <Eye className="w-3.5 h-3.5" />
+                <span>{t("ยอดเข้าชมสูงสุด", "Most Popular")}</span>
+              </button>
             </div>
 
             <div className="relative w-full md:max-w-md">
@@ -227,62 +260,17 @@ export default function NewsView({ selectedNews, setSelectedNews }) {
 
         {/* News items Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="news-grid">
-          {filteredNews.slice(0, visibleCount).map((news) => {
-            const translated = getNewsTranslated(news);
-            return (
-              <article
-                key={news.id}
-                className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:scale-[1.02] hover:border-slate-300 transition-all duration-300 ease-out cursor-pointer flex flex-col h-full group"
-                onClick={() => handleReadNews(news)}
-              >
-                {/* Image wrapper */}
-                <div className="relative h-48 bg-slate-100 overflow-hidden shrink-0">
-                  <img
-                    src={news.imageUrl}
-                    alt={translated.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    referrerPolicy="no-referrer"
-                  />
-                  <div className="absolute top-4 left-4">
-                    <span className="bg-brand-primary text-white text-[10px] font-bold px-3 py-1.5 rounded-full shadow-md">
-                      {getCategoryLabel(news.category)}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Core info wrapper */}
-                <div className="p-6 flex flex-col justify-between flex-grow space-y-4">
-                  <div className="space-y-2">
-                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-slate-400 font-medium">
-                      <span className="flex items-center space-x-1">
-                        <Calendar className="w-3.5 h-3.5" />
-                        <span>{news.date}</span>
-                      </span>
-                      <span className="flex items-center space-x-1">
-                        <Eye className="w-3.5 h-3.5" />
-                        <span>{t("ชม", "Views:")} {news.views} {t("ครั้ง", "times")}</span>
-                      </span>
-                      <span className="flex items-center space-x-1 text-slate-500 font-semibold">
-                        <BookOpen className="w-3.5 h-3.5" />
-                        <span>{calculateReadingTime(translated.content)}</span>
-                      </span>
-                    </div>
-                    <h3 className="text-sm md:text-base font-bold text-slate-900 group-hover:text-brand-primary transition-colors line-clamp-2 leading-snug">
-                      {translated.title}
-                    </h3>
-                    <p className="text-slate-500 text-xs line-clamp-2 leading-relaxed">
-                      {translated.excerpt}
-                    </p>
-                  </div>
-
-                  <div className="pt-4 border-t border-slate-50 flex items-center text-xs font-bold text-brand-primary group-hover:text-brand-accent transition-colors">
-                    <span>{t("อ่านรายละเอียดข่าวเพิ่มเติม", "Read Full Article")}</span>
-                    <ChevronRight className="w-4 h-4 ml-0.5 transform group-hover:translate-x-0.5 transition-transform" />
-                  </div>
-                </div>
-              </article>
-            );
-          })}
+          {filteredNews.slice(0, visibleCount).map((news) => (
+            <NewsCard
+              key={news.id}
+              news={news}
+              getNewsTranslated={getNewsTranslated}
+              getCategoryLabel={getCategoryLabel}
+              calculateReadingTime={calculateReadingTime}
+              handleReadNews={handleReadNews}
+              t={t}
+            />
+          ))}
         </div>
 
         {/* Empty filter results */}
@@ -433,5 +421,73 @@ export default function NewsView({ selectedNews, setSelectedNews }) {
         )}
       </AnimatePresence>
     </div>
+  );
+}
+
+function NewsCard({ news, getNewsTranslated, getCategoryLabel, calculateReadingTime, handleReadNews, t }) {
+  const [isAnimate, setIsAnimate] = useState(false);
+
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => {
+      setIsAnimate(true);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, []);
+
+  const translated = getNewsTranslated(news);
+
+  return (
+    <article
+      className={`bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:scale-[1.02] hover:border-slate-300 transition-all duration-700 ease-out cursor-pointer flex flex-col h-full group ${
+        isAnimate ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+      }`}
+      onClick={() => handleReadNews(news)}
+    >
+      {/* Image wrapper */}
+      <div className="relative h-48 bg-slate-100 overflow-hidden shrink-0">
+        <img
+          src={news.imageUrl}
+          alt={translated.title}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          referrerPolicy="no-referrer"
+        />
+        <div className="absolute top-4 left-4">
+          <span className="bg-brand-primary text-white text-[10px] font-bold px-3 py-1.5 rounded-full shadow-md">
+            {getCategoryLabel(news.category)}
+          </span>
+        </div>
+      </div>
+
+      {/* Core info wrapper */}
+      <div className="p-6 flex flex-col justify-between flex-grow space-y-4">
+        <div className="space-y-2">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-slate-400 font-medium">
+            <span className="flex items-center space-x-1">
+              <Calendar className="w-3.5 h-3.5" />
+              <span>{news.date}</span>
+            </span>
+            <span className="flex items-center space-x-1">
+              <Eye className="w-3.5 h-3.5" />
+              <span>{t("ชม", "Views:")} {news.views} {t("ครั้ง", "times")}</span>
+            </span>
+            <span className="flex items-center space-x-1 text-slate-500 font-semibold">
+              <BookOpen className="w-3.5 h-3.5" />
+              <span>{calculateReadingTime(translated.content)}</span>
+            </span>
+          </div>
+          <h3 className="text-sm md:text-base font-bold text-slate-900 group-hover:text-brand-primary transition-colors line-clamp-2 leading-snug">
+            {translated.title}
+          </h3>
+          <p className="text-slate-500 text-xs line-clamp-2 leading-relaxed">
+            {translated.excerpt}
+          </p>
+        </div>
+
+        <div className="pt-4 border-t border-slate-50 flex items-center text-xs font-bold text-brand-primary group-hover:text-brand-accent transition-colors">
+          <span>{t("อ่านรายละเอียดข่าวเพิ่มเติม", "Read Full Article")}</span>
+          <ChevronRight className="w-4 h-4 ml-0.5 transform group-hover:translate-x-0.5 transition-transform" />
+        </div>
+      </div>
+    </article>
   );
 }
