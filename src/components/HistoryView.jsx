@@ -40,13 +40,13 @@ export default function HistoryView() {
               จุดเริ่มต้นของเรา
             </span>
             <h2 className="text-2xl md:text-3xl font-extrabold text-brand-secondary tracking-tight">
-              วิทยาลัยเทคโนโลยีปทุมรัตต์
+              {collegeInfo.historyTitle || "วิทยาลัยเทคโนโลยีปทุมรัตต์"}
             </h2>
             <p className="text-slate-600 text-sm md:text-base leading-relaxed">
-              วิทยาลัยเทคโนโลยีปทุมรัตต์ ได้รับการจัดตั้งขึ้นเมื่อปีพุทธศักราช {collegeInfo.foundedYear} โดยผู้บริหารผู้มีวิสัยทัศน์กว้างไกลทางด้านการศึกษาและการพัฒนาสายอาชีพในภาคตะวันออกเฉียงเหนือ มุ่งเน้นเติมเต็มความต้องการกำลังพลทักษะสูงในเขตอำเภอปทุมรัตต์ และจังหวัดร้อยเอ็ด
+              {collegeInfo.historyText1 || `วิทยาลัยเทคโนโลยีปทุมรัตต์ ได้รับการจัดตั้งขึ้นเมื่อปีพุทธศักราช ${collegeInfo.foundedYear} โดยผู้บริหารผู้มีวิสัยทัศน์กว้างไกลทางด้านการศึกษาและการพัฒนาสายอาชีพในภาคตะวันออกเฉียงเหนือ มุ่งเน้นเติมเต็มความต้องการกำลังพลทักษะสูงในเขตอำเภอปทุมรัตต์ และจังหวัดร้อยเอ็ด`}
             </p>
             <p className="text-slate-600 text-sm md:text-base leading-relaxed">
-              ด้วยนวัตกรรมการสอนแบบเน้นงานปฏิบัติจริง ร่วมมืออย่างใกล้ชิดกับสถานประกอบการอุตสาหกรรม ศูนย์บริการรถยนต์สมัยใหม่ และสถาบันการเงินการคลัง ทำให้นักเรียนและนักศึกษาที่จบจากวิทยาลัยเทคโนโลยีปทุมรัตต์เป็นที่ประจักษ์ในตลาดแรงงานว่าเป็นผู้ที่มีทักษะฝีมือยอดเยี่ยม มีความอ่อนน้อมถ่อมตน มีวินัย และพร้อมปฏิบัติหน้าที่ในอุตสาหกรรมยุคดิจิทัลได้อย่างมืออาชีพ
+              {collegeInfo.historyText2 || "ด้วยนวัตกรรมการสอนแบบเน้นงานปฏิบัติจริง ร่วมมืออย่างใกล้ชิดกับสถานประกอบการอุตสาหกรรม ศูนย์บริการรถยนต์สมัยใหม่ และสถาบันการเงินการคลัง ทำให้นักเรียนและนักศึกษาที่จบจากวิทยาลัยเทคโนโลยีปทุมรัตต์เป็นที่ประจักษ์ในตลาดแรงงานว่าเป็นผู้ที่มีทักษะฝีมือยอดเยี่ยม มีความอ่อนน้อมถ่อมตน มีวินัย และพร้อมปฏิบัติหน้าที่ในอุตสาหกรรมยุคดิจิทัลได้อย่างมืออาชีพ"}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 text-slate-500 pt-2">
               <div className="flex items-center space-x-2.5 bg-white border border-slate-200 rounded-2xl p-4 shadow-xs">
@@ -69,14 +69,14 @@ export default function HistoryView() {
           {/* Visual Image/Banner */}
           <div className="relative rounded-3xl overflow-hidden h-72 md:h-96 shadow-lg border border-slate-200" id="visual-about-banner">
             <img
-              src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&auto=format&fit=crop"
-              alt="วิทยาลัยเทคโนโลยีปทุมรัตต์"
+              src={collegeInfo.historyImage || "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&auto=format&fit=crop"}
+              alt={collegeInfo.historyTitle || "วิทยาลัยเทคโนโลยีปทุมรัตต์"}
               className="w-full h-full object-cover"
               referrerPolicy="no-referrer"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-transparent to-transparent flex items-end p-6 md:p-8">
               <p className="text-white font-bold text-base md:text-lg">
-                "ทักษะเยี่ยม เปี่ยมคุณธรรม เลิศล้ำเทคโนโลยี"
+                "{collegeInfo.philosophy || "ทักษะเยี่ยม เปี่ยมคุณธรรม เลิศล้ำเทคโนโลยี"}"
               </p>
             </div>
           </div>
@@ -116,7 +116,7 @@ export default function HistoryView() {
               </span>
               <h3 className="text-lg font-bold text-white">Core Values</h3>
               <p className="text-sm text-slate-300 leading-relaxed pt-2">
-                ซื่อสัตย์ มีระเบียบวินัย ใฝ่รู้คู่คุณธรรม มุ่งเน้นการลงมือปฏิบัติจริงและการแก้ปัญหาอย่างสร้างสรรค์เพื่อความสำเร็จร่วมกัน
+                {collegeInfo.coreValues || "ซื่อสัตย์ มีระเบียบวินัย ใฝ่รู้คู่คุณธรรม มุ่งเน้นการลงมือปฏิบัติจริงและการแก้ปัญหาอย่างสร้างสรรค์เพื่อความสำเร็จร่วมกัน"}
               </p>
             </div>
           </div>

@@ -19,12 +19,13 @@ export default function NewsView({ selectedNews, setSelectedNews }) {
   const { newsData, dbSettings, isLoading } = useData();
   const [activeCategoryFilter, setActiveCategoryFilter] = useState("ทั้งหมด");
   const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState("newest");
   const [localNewsList, setLocalNewsList] = useState(newsData);
   useEffect(() => {
     setLocalNewsList(newsData);
   }, [newsData]);
   const filteredNews = useMemo(() => {
-    return (localNewsList || []).filter((news) => {
+    const list = (localNewsList || []).filter((news) => {
       if (!news) return false;
       const matchesCategory = activeCategoryFilter === "\u0E17\u0E31\u0E49\u0E07\u0E2B\u0E21\u0E14" || news.category === activeCategoryFilter;
       const titleText = String(news.title || "").toLowerCase();
@@ -34,7 +35,22 @@ export default function NewsView({ selectedNews, setSelectedNews }) {
       const matchesSearch = titleText.includes(query) || excerptText.includes(query) || contentText.includes(query);
       return matchesCategory && matchesSearch;
     });
-  }, [activeCategoryFilter, searchQuery, localNewsList]);
+
+    return [...list].sort((a, b) => {
+      if (sortBy === "newest") {
+        const timeA = new Date(a.date || a.submittedAt || 0).getTime();
+        const timeB = new Date(b.date || b.submittedAt || 0).getTime();
+        return (isNaN(timeB) ? 0 : timeB) - (isNaN(timeA) ? 0 : timeA);
+      } else if (sortBy === "oldest") {
+        const timeA = new Date(a.date || a.submittedAt || 0).getTime();
+        const timeB = new Date(b.date || b.submittedAt || 0).getTime();
+        return (isNaN(timeA) ? 0 : timeA) - (isNaN(timeB) ? 0 : timeB);
+      } else if (sortBy === "popular") {
+        return (b.views || 0) - (a.views || 0);
+      }
+      return 0;
+    });
+  }, [activeCategoryFilter, searchQuery, localNewsList, sortBy]);
   const handleReadNews = (news) => {
     setLocalNewsList(
       (prevList) => prevList.map(
@@ -213,18 +229,31 @@ export default function NewsView({ selectedNews, setSelectedNews }) {
               </div>
 
               {
-      /* Search box row */
+      /* Search and Sort box row */
     }
-              <div className="flex justify-end">
+              <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+                <div className="flex items-center space-x-2.5 w-full md:w-auto">
+                  <span className="text-xs font-bold text-slate-500 shrink-0">จัดเรียงตาม:</span>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="p-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-primary cursor-pointer font-semibold text-slate-700 shadow-xs"
+                  >
+                    <option value="newest">ข่าวล่าสุด (Newest)</option>
+                    <option value="oldest">ข่าวเก่าที่สุด (Oldest)</option>
+                    <option value="popular">ยอดเข้าชมสูงสุด (Most Popular)</option>
+                  </select>
+                </div>
+
                 <div className="relative w-full md:max-w-md">
                   <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <input
-      type="text"
-      placeholder="พิมพ์ชื่อเรื่องข่าว หรือคีย์เวิร์ดเพื่อค้นหา..."
-      value={searchQuery}
-      onChange={(e) => setSearchQuery(e.target.value)}
-      className="w-full pl-10 pr-4 py-2.5 text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all"
-    />
+                    type="text"
+                    placeholder="พิมพ์ชื่อเรื่องข่าว หรือคีย์เวิร์ดเพื่อค้นหา..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2.5 text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all"
+                  />
                 </div>
               </div>
             </div>

@@ -48,7 +48,7 @@ function handleFirestoreError(error, operationType, path) {
     path
   };
   console.error("Firestore Error: ", JSON.stringify(errInfo));
-  throw new Error(JSON.stringify(errInfo));
+  // We do not throw an error here to prevent crashing the React lifecycle or breaking listeners.
 }
 
 const DataContext = createContext(void 0);
@@ -418,11 +418,14 @@ export const DataProvider = ({ children }) => {
 
   const updateCollegeInfo = async (info) => {
     setCollegeInfo(info);
+    localStorage.setItem("ptc_college_info", JSON.stringify(info));
     if (dbSettings.type === "firestore") {
-      const collegeRef = doc(db, "college_info", "current");
-      await setDoc(collegeRef, info);
-    } else {
-      localStorage.setItem("ptc_college_info", JSON.stringify(info));
+      try {
+        const collegeRef = doc(db, "college_info", "current");
+        await setDoc(collegeRef, info);
+      } catch (err) {
+        handleFirestoreError(err, OperationType.WRITE, "college_info/current");
+      }
     }
   };
 
@@ -431,30 +434,39 @@ export const DataProvider = ({ children }) => {
     const item = { ...newMajor, id };
     const updated = [...majors, item];
     setMajors(updated);
+    localStorage.setItem("ptc_majors", JSON.stringify(updated));
     if (dbSettings.type === "firestore") {
-      await setDoc(doc(db, "majors", id), item);
-    } else {
-      localStorage.setItem("ptc_majors", JSON.stringify(updated));
+      try {
+        await setDoc(doc(db, "majors", id), item);
+      } catch (err) {
+        handleFirestoreError(err, OperationType.WRITE, `majors/${id}`);
+      }
     }
   };
 
   const updateMajor = async (id, updatedMajor) => {
     const updated = majors.map(m => m.id === id ? { ...m, ...updatedMajor } : m);
     setMajors(updated);
+    localStorage.setItem("ptc_majors", JSON.stringify(updated));
     if (dbSettings.type === "firestore") {
-      await updateDoc(doc(db, "majors", id), updatedMajor);
-    } else {
-      localStorage.setItem("ptc_majors", JSON.stringify(updated));
+      try {
+        await updateDoc(doc(db, "majors", id), updatedMajor);
+      } catch (err) {
+        handleFirestoreError(err, OperationType.WRITE, `majors/${id}`);
+      }
     }
   };
 
   const deleteMajor = async (id) => {
     const updated = majors.filter(m => m.id !== id);
     setMajors(updated);
+    localStorage.setItem("ptc_majors", JSON.stringify(updated));
     if (dbSettings.type === "firestore") {
-      await deleteDoc(doc(db, "majors", id));
-    } else {
-      localStorage.setItem("ptc_majors", JSON.stringify(updated));
+      try {
+        await deleteDoc(doc(db, "majors", id));
+      } catch (err) {
+        handleFirestoreError(err, OperationType.DELETE, `majors/${id}`);
+      }
     }
   };
 
@@ -464,30 +476,39 @@ export const DataProvider = ({ children }) => {
     const item = { ...news, id, views: 0, date };
     const updated = [item, ...newsData];
     setNewsData(updated);
+    localStorage.setItem("ptc_news", JSON.stringify(updated));
     if (dbSettings.type === "firestore") {
-      await setDoc(doc(db, "news", id), item);
-    } else {
-      localStorage.setItem("ptc_news", JSON.stringify(updated));
+      try {
+        await setDoc(doc(db, "news", id), item);
+      } catch (err) {
+        handleFirestoreError(err, OperationType.WRITE, `news/${id}`);
+      }
     }
   };
 
   const updateNews = async (id, updatedNews) => {
     const updated = newsData.map(n => n.id === id ? { ...n, ...updatedNews } : n);
     setNewsData(updated);
+    localStorage.setItem("ptc_news", JSON.stringify(updated));
     if (dbSettings.type === "firestore") {
-      await updateDoc(doc(db, "news", id), updatedNews);
-    } else {
-      localStorage.setItem("ptc_news", JSON.stringify(updated));
+      try {
+        await updateDoc(doc(db, "news", id), updatedNews);
+      } catch (err) {
+        handleFirestoreError(err, OperationType.WRITE, `news/${id}`);
+      }
     }
   };
 
   const deleteNews = async (id) => {
     const updated = newsData.filter(n => n.id !== id);
     setNewsData(updated);
+    localStorage.setItem("ptc_news", JSON.stringify(updated));
     if (dbSettings.type === "firestore") {
-      await deleteDoc(doc(db, "news", id));
-    } else {
-      localStorage.setItem("ptc_news", JSON.stringify(updated));
+      try {
+        await deleteDoc(doc(db, "news", id));
+      } catch (err) {
+        handleFirestoreError(err, OperationType.DELETE, `news/${id}`);
+      }
     }
   };
 
@@ -496,30 +517,39 @@ export const DataProvider = ({ children }) => {
     const item = { ...admin, id };
     const updated = [...administrators, item];
     setAdministrators(updated);
+    localStorage.setItem("ptc_administrators", JSON.stringify(updated));
     if (dbSettings.type === "firestore") {
-      await setDoc(doc(db, "administrators", id), item);
-    } else {
-      localStorage.setItem("ptc_administrators", JSON.stringify(updated));
+      try {
+        await setDoc(doc(db, "administrators", id), item);
+      } catch (err) {
+        handleFirestoreError(err, OperationType.WRITE, `administrators/${id}`);
+      }
     }
   };
 
   const updateAdministrator = async (id, updatedAdmin) => {
     const updated = administrators.map(a => a.id === id ? { ...a, ...updatedAdmin } : a);
     setAdministrators(updated);
+    localStorage.setItem("ptc_administrators", JSON.stringify(updated));
     if (dbSettings.type === "firestore") {
-      await updateDoc(doc(db, "administrators", id), updatedAdmin);
-    } else {
-      localStorage.setItem("ptc_administrators", JSON.stringify(updated));
+      try {
+        await updateDoc(doc(db, "administrators", id), updatedAdmin);
+      } catch (err) {
+        handleFirestoreError(err, OperationType.WRITE, `administrators/${id}`);
+      }
     }
   };
 
   const deleteAdministrator = async (id) => {
     const updated = administrators.filter(a => a.id !== id);
     setAdministrators(updated);
+    localStorage.setItem("ptc_administrators", JSON.stringify(updated));
     if (dbSettings.type === "firestore") {
-      await deleteDoc(doc(db, "administrators", id));
-    } else {
-      localStorage.setItem("ptc_administrators", JSON.stringify(updated));
+      try {
+        await deleteDoc(doc(db, "administrators", id));
+      } catch (err) {
+        handleFirestoreError(err, OperationType.DELETE, `administrators/${id}`);
+      }
     }
   };
 
@@ -528,30 +558,39 @@ export const DataProvider = ({ children }) => {
     const item = { ...faq, id };
     const updated = [...faqList, item];
     setFaqList(updated);
+    localStorage.setItem("ptc_faqList", JSON.stringify(updated));
     if (dbSettings.type === "firestore") {
-      await setDoc(doc(db, "faqList", id), item);
-    } else {
-      localStorage.setItem("ptc_faqList", JSON.stringify(updated));
+      try {
+        await setDoc(doc(db, "faqList", id), item);
+      } catch (err) {
+        handleFirestoreError(err, OperationType.WRITE, `faqList/${id}`);
+      }
     }
   };
 
   const updateFaq = async (id, updatedFaq) => {
     const updated = faqList.map(f => f.id === id ? { ...f, ...updatedFaq } : f);
     setFaqList(updated);
+    localStorage.setItem("ptc_faqList", JSON.stringify(updated));
     if (dbSettings.type === "firestore") {
-      await updateDoc(doc(db, "faqList", id), updatedFaq);
-    } else {
-      localStorage.setItem("ptc_faqList", JSON.stringify(updated));
+      try {
+        await updateDoc(doc(db, "faqList", id), updatedFaq);
+      } catch (err) {
+        handleFirestoreError(err, OperationType.WRITE, `faqList/${id}`);
+      }
     }
   };
 
   const deleteFaq = async (id) => {
     const updated = faqList.filter(f => f.id !== id);
     setFaqList(updated);
+    localStorage.setItem("ptc_faqList", JSON.stringify(updated));
     if (dbSettings.type === "firestore") {
-      await deleteDoc(doc(db, "faqList", id));
-    } else {
-      localStorage.setItem("ptc_faqList", JSON.stringify(updated));
+      try {
+        await deleteDoc(doc(db, "faqList", id));
+      } catch (err) {
+        handleFirestoreError(err, OperationType.DELETE, `faqList/${id}`);
+      }
     }
   };
 
@@ -560,30 +599,39 @@ export const DataProvider = ({ children }) => {
     const item = { ...slide, id };
     const updated = [...heroSlides, item];
     setHeroSlides(updated);
+    localStorage.setItem("ptc_hero_slides", JSON.stringify(updated));
     if (dbSettings.type === "firestore") {
-      await setDoc(doc(db, "hero_slides", id), item);
-    } else {
-      localStorage.setItem("ptc_hero_slides", JSON.stringify(updated));
+      try {
+        await setDoc(doc(db, "hero_slides", id), item);
+      } catch (err) {
+        handleFirestoreError(err, OperationType.WRITE, `hero_slides/${id}`);
+      }
     }
   };
 
   const updateHeroSlide = async (id, updatedSlide) => {
     const updated = heroSlides.map(s => s.id === id ? { ...s, ...updatedSlide } : s);
     setHeroSlides(updated);
+    localStorage.setItem("ptc_hero_slides", JSON.stringify(updated));
     if (dbSettings.type === "firestore") {
-      await updateDoc(doc(db, "hero_slides", id), updatedSlide);
-    } else {
-      localStorage.setItem("ptc_hero_slides", JSON.stringify(updated));
+      try {
+        await updateDoc(doc(db, "hero_slides", id), updatedSlide);
+      } catch (err) {
+        handleFirestoreError(err, OperationType.WRITE, `hero_slides/${id}`);
+      }
     }
   };
 
   const deleteHeroSlide = async (id) => {
     const updated = heroSlides.filter(s => s.id !== id);
     setHeroSlides(updated);
+    localStorage.setItem("ptc_hero_slides", JSON.stringify(updated));
     if (dbSettings.type === "firestore") {
-      await deleteDoc(doc(db, "hero_slides", id));
-    } else {
-      localStorage.setItem("ptc_hero_slides", JSON.stringify(updated));
+      try {
+        await deleteDoc(doc(db, "hero_slides", id));
+      } catch (err) {
+        handleFirestoreError(err, OperationType.DELETE, `hero_slides/${id}`);
+      }
     }
   };
 
@@ -614,11 +662,14 @@ export const DataProvider = ({ children }) => {
     };
     const updated = [newEnrollment, ...enrolledStudents];
     setEnrolledStudents(updated);
+    localStorage.setItem("ptc_enrolled_students", JSON.stringify(updated));
     
     if (dbSettings.type === "firestore") {
-      await setDoc(doc(db, "enrolled_students", id), newEnrollment);
-    } else {
-      localStorage.setItem("ptc_enrolled_students", JSON.stringify(updated));
+      try {
+        await setDoc(doc(db, "enrolled_students", id), newEnrollment);
+      } catch (err) {
+        handleFirestoreError(err, OperationType.WRITE, `enrolled_students/${id}`);
+      }
     }
 
     syncToGoogleSheets("enrollment", newEnrollment);
@@ -628,20 +679,26 @@ export const DataProvider = ({ children }) => {
   const updateEnrollmentStatus = async (id, status) => {
     const updated = enrolledStudents.map(s => s.id === id ? { ...s, status } : s);
     setEnrolledStudents(updated);
+    localStorage.setItem("ptc_enrolled_students", JSON.stringify(updated));
     if (dbSettings.type === "firestore") {
-      await updateDoc(doc(db, "enrolled_students", id), { status });
-    } else {
-      localStorage.setItem("ptc_enrolled_students", JSON.stringify(updated));
+      try {
+        await updateDoc(doc(db, "enrolled_students", id), { status });
+      } catch (err) {
+        handleFirestoreError(err, OperationType.WRITE, `enrolled_students/${id}`);
+      }
     }
   };
 
   const deleteEnrollment = async (id) => {
     const updated = enrolledStudents.filter(s => s.id !== id);
     setEnrolledStudents(updated);
+    localStorage.setItem("ptc_enrolled_students", JSON.stringify(updated));
     if (dbSettings.type === "firestore") {
-      await deleteDoc(doc(db, "enrolled_students", id));
-    } else {
-      localStorage.setItem("ptc_enrolled_students", JSON.stringify(updated));
+      try {
+        await deleteDoc(doc(db, "enrolled_students", id));
+      } catch (err) {
+        handleFirestoreError(err, OperationType.DELETE, `enrolled_students/${id}`);
+      }
     }
   };
 
@@ -655,11 +712,14 @@ export const DataProvider = ({ children }) => {
     };
     const updated = [newMsg, ...contactMessages];
     setContactMessages(updated);
+    localStorage.setItem("ptc_contact_messages", JSON.stringify(updated));
     
     if (dbSettings.type === "firestore") {
-      await setDoc(doc(db, "contact_messages", id), newMsg);
-    } else {
-      localStorage.setItem("ptc_contact_messages", JSON.stringify(updated));
+      try {
+        await setDoc(doc(db, "contact_messages", id), newMsg);
+      } catch (err) {
+        handleFirestoreError(err, OperationType.WRITE, `contact_messages/${id}`);
+      }
     }
 
     syncToGoogleSheets("contact", newMsg);
@@ -668,70 +728,80 @@ export const DataProvider = ({ children }) => {
   const markContactMessageRead = async (id) => {
     const updated = contactMessages.map(m => m.id === id ? { ...m, isRead: true } : m);
     setContactMessages(updated);
+    localStorage.setItem("ptc_contact_messages", JSON.stringify(updated));
     if (dbSettings.type === "firestore") {
-      await updateDoc(doc(db, "contact_messages", id), { isRead: true });
-    } else {
-      localStorage.setItem("ptc_contact_messages", JSON.stringify(updated));
+      try {
+        await updateDoc(doc(db, "contact_messages", id), { isRead: true });
+      } catch (err) {
+        handleFirestoreError(err, OperationType.WRITE, `contact_messages/${id}`);
+      }
     }
   };
 
   const deleteContactMessage = async (id) => {
     const updated = contactMessages.filter(m => m.id !== id);
     setContactMessages(updated);
+    localStorage.setItem("ptc_contact_messages", JSON.stringify(updated));
     if (dbSettings.type === "firestore") {
-      await deleteDoc(doc(db, "contact_messages", id));
-    } else {
-      localStorage.setItem("ptc_contact_messages", JSON.stringify(updated));
+      try {
+        await deleteDoc(doc(db, "contact_messages", id));
+      } catch (err) {
+        handleFirestoreError(err, OperationType.DELETE, `contact_messages/${id}`);
+      }
     }
   };
 
   const resetToDefaultData = async () => {
     if (dbSettings.type === "firestore") {
-      const clearCol = async (colName) => {
-        const snap = await getDocs(collection(db, colName));
-        for (const d of snap.docs) {
-          await deleteDoc(doc(db, colName, d.id));
-        }
-      };
-      await setDoc(doc(db, "college_info", "current"), defaultCollegeInfo);
-      await clearCol("majors");
-      await clearCol("news");
-      await clearCol("enrolled_students");
-      await clearCol("contact_messages");
-      await clearCol("administrators");
-      await clearCol("faqList");
-      await clearCol("hero_slides");
+      try {
+        const clearCol = async (colName) => {
+          const snap = await getDocs(collection(db, colName));
+          for (const d of snap.docs) {
+            await deleteDoc(doc(db, colName, d.id));
+          }
+        };
+        await setDoc(doc(db, "college_info", "current"), defaultCollegeInfo);
+        await clearCol("majors");
+        await clearCol("news");
+        await clearCol("enrolled_students");
+        await clearCol("contact_messages");
+        await clearCol("administrators");
+        await clearCol("faqList");
+        await clearCol("hero_slides");
 
-      for (const item of defaultMajors) {
-        await setDoc(doc(db, "majors", item.id), item);
-      }
-      for (const item of defaultNewsData) {
-        await setDoc(doc(db, "news", item.id), item);
-      }
-      for (const item of initialMockStudents) {
-        await setDoc(doc(db, "enrolled_students", item.id), item);
-      }
-      for (const item of initialMockContactMessages) {
-        await setDoc(doc(db, "contact_messages", item.id), item);
-      }
-      for (const [idx, item] of defaultAdministrators.entries()) {
-        const id = `admin-${idx + 1}`;
-        await setDoc(doc(db, "administrators", id), { ...item, id });
-      }
-      for (const [idx, item] of defaultFaqList.entries()) {
-        const id = `faq-${idx + 1}`;
-        await setDoc(doc(db, "faqList", id), { ...item, id });
-      }
-      for (const item of defaultSlides) {
-        await setDoc(doc(db, "hero_slides", item.id), item);
-      }
-      for (const item of [
-        { id: "home", label: "หน้าแรก", targetTab: "home", order: 1 },
-        { id: "curriculum", label: "หลักสูตรที่เปิดสอน", targetTab: "curriculum", order: 2 },
-        { id: "news", label: "ข่าวสารและกิจกรรม", targetTab: "news", order: 3 },
-        { id: "contact", label: "ติดต่อเรา", targetTab: "contact", order: 4 }
-      ]) {
-        await setDoc(doc(db, "navbar_menus", item.id), item);
+        for (const item of defaultMajors) {
+          await setDoc(doc(db, "majors", item.id), item);
+        }
+        for (const item of defaultNewsData) {
+          await setDoc(doc(db, "news", item.id), item);
+        }
+        for (const item of initialMockStudents) {
+          await setDoc(doc(db, "enrolled_students", item.id), item);
+        }
+        for (const item of initialMockContactMessages) {
+          await setDoc(doc(db, "contact_messages", item.id), item);
+        }
+        for (const [idx, item] of defaultAdministrators.entries()) {
+          const id = `admin-${idx + 1}`;
+          await setDoc(doc(db, "administrators", id), { ...item, id });
+        }
+        for (const [idx, item] of defaultFaqList.entries()) {
+          const id = `faq-${idx + 1}`;
+          await setDoc(doc(db, "faqList", id), { ...item, id });
+        }
+        for (const item of defaultSlides) {
+          await setDoc(doc(db, "hero_slides", item.id), item);
+        }
+        for (const item of [
+          { id: "home", label: "หน้าแรก", targetTab: "home", order: 1 },
+          { id: "curriculum", label: "หลักสูตรที่เปิดสอน", targetTab: "curriculum", order: 2 },
+          { id: "news", label: "ข่าวสารและกิจกรรม", targetTab: "news", order: 3 },
+          { id: "contact", label: "ติดต่อเรา", targetTab: "contact", order: 4 }
+        ]) {
+          await setDoc(doc(db, "navbar_menus", item.id), item);
+        }
+      } catch (err) {
+        handleFirestoreError(err, OperationType.WRITE, "resetToDefaultData");
       }
     } else {
       localStorage.removeItem("ptc_college_info");
@@ -770,10 +840,13 @@ export const DataProvider = ({ children }) => {
     const item = { username, password: user.password, name: user.name };
     const updated = [...adminUsers, item];
     setAdminUsers(updated);
+    localStorage.setItem("ptc_admin_users", JSON.stringify(updated));
     if (dbSettings.type === "firestore") {
-      await setDoc(doc(db, "admin_users", username), item);
-    } else {
-      localStorage.setItem("ptc_admin_users", JSON.stringify(updated));
+      try {
+        await setDoc(doc(db, "admin_users", username), item);
+      } catch (err) {
+        handleFirestoreError(err, OperationType.WRITE, `admin_users/${username}`);
+      }
     }
   };
 
@@ -781,14 +854,17 @@ export const DataProvider = ({ children }) => {
     const key = String(username).trim().toLowerCase();
     const updated = adminUsers.map(u => u.username === key ? { ...u, password: updatedUser.password, name: updatedUser.name } : u);
     setAdminUsers(updated);
+    localStorage.setItem("ptc_admin_users", JSON.stringify(updated));
     if (dbSettings.type === "firestore") {
-      await setDoc(doc(db, "admin_users", key), {
-        username: key,
-        password: updatedUser.password,
-        name: updatedUser.name
-      }, { merge: true });
-    } else {
-      localStorage.setItem("ptc_admin_users", JSON.stringify(updated));
+      try {
+        await setDoc(doc(db, "admin_users", key), {
+          username: key,
+          password: updatedUser.password,
+          name: updatedUser.name
+        }, { merge: true });
+      } catch (err) {
+        handleFirestoreError(err, OperationType.WRITE, `admin_users/${key}`);
+      }
     }
   };
 
@@ -798,10 +874,13 @@ export const DataProvider = ({ children }) => {
       const cleanKey = String(key).trim().toLowerCase();
       const updated = adminUsers.filter(u => u.username !== cleanKey);
       setAdminUsers(updated);
+      localStorage.setItem("ptc_admin_users", JSON.stringify(updated));
       if (dbSettings.type === "firestore") {
-        await deleteDoc(doc(db, "admin_users", cleanKey));
-      } else {
-        localStorage.setItem("ptc_admin_users", JSON.stringify(updated));
+        try {
+          await deleteDoc(doc(db, "admin_users", cleanKey));
+        } catch (err) {
+          handleFirestoreError(err, OperationType.DELETE, `admin_users/${cleanKey}`);
+        }
       }
     }
   };

@@ -25,16 +25,32 @@ export default function CurriculumView({
   setPreSelectedLevel
 }) {
   const { majors } = useData();
-  const [selectedLevelFilter, setSelectedLevelFilter] = useState("\u0E17\u0E31\u0E49\u0E07\u0E2B\u0E21\u0E14");
+  const [selectedLevelFilter, setSelectedLevelFilter] = useState("ทั้งหมด");
   const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState("default");
   const [activeDetailsMajor, setActiveDetailsMajor] = useState(null);
   const filteredMajors = useMemo(() => {
-    return majors.filter((major) => {
-      const matchesLevel = selectedLevelFilter === "\u0E17\u0E31\u0E49\u0E07\u0E2B\u0E21\u0E14" || major.level === selectedLevelFilter;
+    const list = (majors || []).filter((major) => {
+      const matchesLevel = selectedLevelFilter === "ทั้งหมด" || major.level === selectedLevelFilter;
       const matchesSearch = major.name.toLowerCase().includes(searchQuery.toLowerCase()) || major.englishName.toLowerCase().includes(searchQuery.toLowerCase()) || major.description.toLowerCase().includes(searchQuery.toLowerCase()) || major.features.some((f) => f.toLowerCase().includes(searchQuery.toLowerCase())) || major.careerPaths.some((c) => c.toLowerCase().includes(searchQuery.toLowerCase()));
       return matchesLevel && matchesSearch;
     });
-  }, [selectedLevelFilter, searchQuery]);
+
+    return [...list].sort((a, b) => {
+      if (sortBy === "name-asc") {
+        return (a.name || "").localeCompare(b.name || "", "th");
+      } else if (sortBy === "level-voc") {
+        if (a.level === "ปวช." && b.level !== "ปวช.") return -1;
+        if (a.level !== "ปวช." && b.level === "ปวช.") return 1;
+        return 0;
+      } else if (sortBy === "level-high") {
+        if (a.level === "ปวส." && b.level !== "ปวส.") return -1;
+        if (a.level !== "ปวส." && b.level === "ปวส.") return 1;
+        return 0;
+      }
+      return 0;
+    });
+  }, [majors, selectedLevelFilter, searchQuery, sortBy]);
   const handleApplyClick = (major) => {
     setPreSelectedLevel(major.level);
     setPreSelectedMajor(major.name);
@@ -78,31 +94,46 @@ export default function CurriculumView({
     /* Level Filters & Search Row */
   }
       <div className="flex flex-col md:flex-row justify-between items-center bg-white p-4 rounded-2xl border border-slate-200 gap-4 shadow-sm" id="filters-row">
-        {
-    /* Toggle buttons */
-  }
-        <div className="flex space-x-1.5 bg-slate-100 p-1 rounded-xl w-full md:w-auto">
-          {["\u0E17\u0E31\u0E49\u0E07\u0E2B\u0E21\u0E14", "\u0E1B\u0E27\u0E0A.", "\u0E1B\u0E27\u0E2A."].map((level) => <button
-    key={level}
-    onClick={() => setSelectedLevelFilter(level)}
-    className={`flex-1 md:flex-none px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-150 ${selectedLevelFilter === level ? "bg-white text-brand-primary shadow-sm" : "text-slate-500 hover:text-slate-800"}`}
-  >
-              {level === "\u0E17\u0E31\u0E49\u0E07\u0E2B\u0E21\u0E14" ? "\u0E2B\u0E25\u0E31\u0E01\u0E2A\u0E39\u0E15\u0E23\u0E17\u0E31\u0E49\u0E07\u0E2B\u0E21\u0E14" : `\u0E23\u0E30\u0E14\u0E31\u0E1A ${level}`}
-            </button>)}
+        <div className="flex flex-wrap items-center gap-4 w-full md:w-auto">
+          {/* Toggle buttons */}
+          <div className="flex space-x-1.5 bg-slate-100 p-1 rounded-xl w-full md:w-auto">
+            {["ทั้งหมด", "ปวช.", "ปวส."].map((level) => (
+              <button
+                key={level}
+                onClick={() => setSelectedLevelFilter(level)}
+                className={`flex-1 md:flex-none px-4 py-2 rounded-lg text-xs font-bold transition-all duration-150 ${selectedLevelFilter === level ? "bg-white text-brand-primary shadow-sm" : "text-slate-500 hover:text-slate-800"}`}
+              >
+                {level === "ทั้งหมด" ? "หลักสูตรทั้งหมด" : `ระดับ ${level}`}
+              </button>
+            ))}
+          </div>
+
+          {/* Sorting Dropdown */}
+          <div className="flex items-center space-x-2 w-full md:w-auto">
+            <span className="text-xs font-bold text-slate-500 shrink-0">จัดเรียง:</span>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="p-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-primary cursor-pointer font-semibold text-slate-700 shadow-xs"
+            >
+              <option value="default">ค่าเริ่มต้น</option>
+              <option value="name-asc">ชื่อสาขา (ก-ฮ)</option>
+              <option value="level-voc">ระดับ ปวช. ก่อน</option>
+              <option value="level-high">ระดับ ปวส. ก่อน</option>
+            </select>
+          </div>
         </div>
 
-        {
-    /* Search input box */
-  }
+        {/* Search input box */}
         <div className="relative w-full md:max-w-md">
           <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
           <input
-    type="text"
-    placeholder="ค้นหาสาขา, ทักษะ หรืออาชีพ..."
-    value={searchQuery}
-    onChange={(e) => setSearchQuery(e.target.value)}
-    className="w-full pl-10 pr-4 py-2.5 text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all"
-  />
+            type="text"
+            placeholder="ค้นหาสาขา, ทักษะ หรืออาชีพ..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-10 pr-4 py-2.5 text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all"
+          />
         </div>
       </div>
 

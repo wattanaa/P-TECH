@@ -2,12 +2,25 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
+import { useState, useMemo } from "react";
 import { motion } from "motion/react";
 import { Users, Mail, ShieldAlert, BadgeCheck, Contact2 } from "lucide-react";
 import { useData } from "../context/DataContext";
 
 export default function PersonnelView() {
   const { administrators } = useData();
+  const [sortBy, setSortBy] = useState("position");
+
+  const sortedAdministrators = useMemo(() => {
+    if (!administrators) return [];
+    const list = [...administrators];
+    if (sortBy === "name-asc") {
+      return list.sort((a, b) => (a.name || "").localeCompare(b.name || "", "th"));
+    } else if (sortBy === "name-desc") {
+      return list.sort((a, b) => (b.name || "").localeCompare(a.name || "", "th"));
+    }
+    return list;
+  }, [administrators, sortBy]);
 
   return (
     <div className="bg-slate-50/50 min-h-screen py-12 md:py-20 font-sans" id="personnel-view-page">
@@ -28,7 +41,7 @@ export default function PersonnelView() {
         </div>
 
         {/* Executive Committee Section */}
-        <div className="space-y-10" id="section-administration">
+        <div className="space-y-8" id="section-administration">
           <div className="text-center max-w-2xl mx-auto space-y-2">
             <h2 className="text-xl md:text-2xl font-extrabold text-slate-800 flex items-center justify-center space-x-2">
               <BadgeCheck className="w-6 h-6 text-brand-primary" />
@@ -39,9 +52,23 @@ export default function PersonnelView() {
             </p>
           </div>
 
+          {/* Sorting Control */}
+          <div className="flex justify-center items-center space-x-2.5 pb-2">
+            <span className="text-xs font-bold text-slate-500">จัดเรียงลำดับ:</span>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="p-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-primary cursor-pointer font-semibold text-slate-700 shadow-xs"
+            >
+              <option value="position">ลำดับโครงสร้างบริหารเดิม</option>
+              <option value="name-asc">เรียงตามชื่อ ก-ฮ (A-Z)</option>
+              <option value="name-desc">เรียงตามชื่อ ฮ-ก (Z-A)</option>
+            </select>
+          </div>
+
           {/* Administrators Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 max-w-5xl mx-auto pt-4">
-            {administrators && administrators.map((admin, idx) => (
+            {sortedAdministrators && sortedAdministrators.map((admin, idx) => (
               <motion.div
                 key={admin.id || idx}
                 initial={{ opacity: 0, y: 15 }}
@@ -82,7 +109,7 @@ export default function PersonnelView() {
               </motion.div>
             ))}
 
-            {(!administrators || administrators.length === 0) && (
+            {(!sortedAdministrators || sortedAdministrators.length === 0) && (
               <div className="col-span-full bg-slate-100 border border-slate-200 p-8 rounded-2xl text-center space-y-2">
                 <ShieldAlert className="w-8 h-8 text-slate-400 mx-auto" />
                 <p className="text-xs font-bold text-slate-500">ไม่พบรายชื่อผู้บริหารในฐานข้อมูลขณะนี้</p>
