@@ -205,6 +205,22 @@ export default function HomeView({ setActiveTab, setSelectedNews }) {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {collegeInfo?.philosophyImage && (
+            <div className="md:col-span-3 h-64 md:h-80 w-full rounded-2xl overflow-hidden relative shadow-md border border-slate-100 group">
+              <img 
+                src={collegeInfo.philosophyImage} 
+                alt="Philosophy and Campus Life" 
+                className="w-full h-full object-cover group-hover:scale-101 transition-transform duration-500"
+                referrerPolicy="no-referrer"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent flex items-end p-6 md:p-8">
+                <div className="space-y-1">
+                  <p className="text-[10px] text-cyan-300 font-extrabold uppercase tracking-widest">PATHUMRAT TECHNOLOGY COLLEGE</p>
+                  <h3 className="text-white text-lg md:text-xl font-extrabold leading-tight">สร้างบรรยากาศแห่งการเรียนรู้ด้วยเทคโนโลยีและเครื่องมือระดับสากล</h3>
+                </div>
+              </div>
+            </div>
+          )}
           {
     /* Box 1: Philosophy */
   }
@@ -360,7 +376,15 @@ export default function HomeView({ setActiveTab, setSelectedNews }) {
       {
     /* PTC Digital Services Gateway & Quick Links */
   }
-      <section className="bg-slate-900 text-white py-14 border-y border-slate-800 relative overflow-hidden" id="digital-portal-gateway">
+      <section 
+        className="bg-slate-900 text-white py-14 border-y border-slate-800 relative overflow-hidden" 
+        id="digital-portal-gateway"
+        style={collegeInfo?.gatewayImage ? {
+          backgroundImage: `linear-gradient(to bottom, rgba(15, 23, 42, 0.9) 0%, rgba(15, 23, 42, 0.94) 100%), url(${collegeInfo.gatewayImage})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center'
+        } : {}}
+      >
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(29,78,216,0.15),transparent_50%)] pointer-events-none" />
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12 relative z-10">
@@ -493,6 +517,22 @@ export default function HomeView({ setActiveTab, setSelectedNews }) {
             <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
           </button>
         </div>
+
+        {collegeInfo?.curriculumImage && (
+          <div className="mb-8 rounded-2xl overflow-hidden h-44 md:h-52 relative border border-slate-200 shadow-xs group">
+            <img 
+              src={collegeInfo.curriculumImage} 
+              alt="Curriculum Banner" 
+              className="w-full h-full object-cover group-hover:scale-[1.01] transition-transform duration-500"
+              referrerPolicy="no-referrer"
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-brand-secondary/95 via-brand-secondary/40 to-transparent flex flex-col justify-center p-6 md:p-8 text-white">
+              <span className="bg-brand-primary text-white font-extrabold text-[9px] uppercase tracking-widest px-2.5 py-1 rounded-full w-fit mb-2">PTC CURRICULUMS</span>
+              <h3 className="text-base md:text-lg font-extrabold leading-tight">หลักสูตรวิชาชีพที่รองรับระบบทวิภาคี ฝึกปฏิบัติจริงร่วมกับบริษัทอุตสาหกรรมชั้นนำ</h3>
+              <p className="text-slate-300 text-xs mt-1 max-w-lg hidden sm:block">เน้นปั้นนักศึกษาสายอาชีพยุคใหม่ให้มีทักษะพร้อมก้าวสู่ตลาดงานสากล มีเครื่องมือแล็บและวิทยากรผู้เชี่ยวชาญร่วมพัฒนาแผนการเรียน</p>
+            </div>
+          </div>
+        )}
 
         {
     /* Majors grid - display 4 main types */
@@ -671,26 +711,44 @@ export default function HomeView({ setActiveTab, setSelectedNews }) {
           {
     /* Partners Grid */
   }
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 items-center justify-center">
-            {[
-    { name: "CP ALL Public Co., Ltd.", icon: "Building", color: "text-emerald-600", desc: "\u0E18\u0E38\u0E23\u0E01\u0E34\u0E08\u0E04\u0E49\u0E32\u0E1B\u0E25\u0E35\u0E01\u0E2A\u0E21\u0E31\u0E22\u0E43\u0E2B\u0E21\u0E48" },
-    { name: "TOYOTA Motors", icon: "Settings", color: "text-red-600", desc: "\u0E19\u0E27\u0E31\u0E15\u0E01\u0E23\u0E23\u0E21\u0E22\u0E32\u0E19\u0E22\u0E19\u0E15\u0E4C EV" },
-    { name: "Siam Cement Group (SCG)", icon: "Award", color: "text-orange-600", desc: "\u0E01\u0E32\u0E23\u0E08\u0E31\u0E14\u0E01\u0E32\u0E23\u0E23\u0E30\u0E1A\u0E1A\u0E40\u0E21\u0E04\u0E04\u0E32\u0E17\u0E23\u0E2D\u0E19\u0E34\u0E01\u0E2A\u0E4C" },
-    { name: "Western Digital", icon: "Cpu", color: "text-blue-600", desc: "\u0E2E\u0E32\u0E23\u0E4C\u0E14\u0E41\u0E27\u0E23\u0E4C & \u0E44\u0E2D\u0E17\u0E35\u0E40\u0E0B\u0E34\u0E23\u0E4C\u0E1F\u0E40\u0E27\u0E2D\u0E23\u0E4C" },
-    { name: "True Corporation", icon: "Zap", color: "text-rose-600", desc: "\u0E42\u0E04\u0E23\u0E07\u0E02\u0E48\u0E32\u0E22\u0E40\u0E19\u0E47\u0E15\u0E40\u0E27\u0E34\u0E23\u0E4C\u0E01\u0E04\u0E27\u0E32\u0E21\u0E40\u0E23\u0E47\u0E27\u0E2A\u0E39\u0E07" },
-    { name: "Minor International", icon: "TrendingUp", color: "text-amber-600", desc: "\u0E01\u0E32\u0E23\u0E1A\u0E31\u0E0D\u0E0A\u0E35\u0E41\u0E25\u0E30\u0E01\u0E32\u0E23\u0E40\u0E07\u0E34\u0E19\u0E2A\u0E32\u0E01\u0E25" }
-  ].map((partner, index) => <div
-    key={index}
-    className="bg-white border border-slate-200 rounded-xl p-4 text-center space-y-2 hover:shadow-md transition-all duration-200 group h-32 flex flex-col justify-center items-center"
-  >
-                <div className={`p-2 rounded-lg bg-slate-50 group-hover:bg-blue-50 transition-colors ${partner.color}`}>
-                  {partner.icon === "Building" ? <Users className="w-5 h-5" /> : partner.icon === "Settings" ? <Settings className="w-5 h-5" /> : partner.icon === "Award" ? <Award className="w-5 h-5" /> : partner.icon === "Cpu" ? <Cpu className="w-5 h-5" /> : partner.icon === "Zap" ? <Zap className="w-5 h-5" /> : <TrendingUp className="w-5 h-5" />}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            {collegeInfo?.mouImage && (
+              <div className="lg:col-span-4 rounded-3xl overflow-hidden shadow-sm border border-slate-200 group relative h-52 lg:h-64">
+                <img 
+                  src={collegeInfo.mouImage} 
+                  alt="MOU Signing Ceremony" 
+                  className="w-full h-full object-cover group-hover:scale-101 transition-transform duration-500"
+                  referrerPolicy="no-referrer"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/20 to-transparent flex items-end p-5">
+                  <div>
+                    <span className="bg-emerald-500 text-white font-extrabold text-[8px] uppercase tracking-widest px-2 py-0.5 rounded-full">PARTNERSHIP</span>
+                    <p className="text-white text-xs font-bold leading-tight mt-1">ภาพพิธีลงนามความร่วมมือทางวิชาการและเทคโนโลยีกับสถานประกอบการชั้นนำ</p>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="font-bold text-xs text-slate-800 tracking-tight leading-snug">{partner.name}</h4>
-                  <p className="text-[10px] text-slate-400 font-medium">{partner.desc}</p>
-                </div>
-              </div>)}
+              </div>
+            )}
+            <div className={collegeInfo?.mouImage ? "lg:col-span-8 grid grid-cols-2 md:grid-cols-3 gap-4" : "lg:col-span-12 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 items-center justify-center w-full"}>
+              {[
+      { name: "CP ALL Public Co., Ltd.", icon: "Building", color: "text-emerald-600", desc: "\u0E18\u0E38\u0E23\u0E01\u0E34\u0E08\u0E04\u0E49\u0E32\u0E1B\u0E25\u0E35\u0E01\u0E2A\u0E21\u0E31\u0E22\u0E43\u0E2B\u0E21\u0E48" },
+      { name: "TOYOTA Motors", icon: "Settings", color: "text-red-600", desc: "\u0E19\u0E27\u0E31\u0E15\u0E01\u0E23\u0E23\u0E21\u0E22\u0E32\u0E19\u0E22\u0E19\u0E15\u0E4C EV" },
+      { name: "Siam Cement Group (SCG)", icon: "Award", color: "text-orange-600", desc: "\u0E01\u0E32\u0E23\u0E08\u0E31\u0E14\u0E01\u0E32\u0E23\u0E23\u0E30\u0E1A\u0E1A\u0E40\u0E21\u0E04\u0E04\u0E32\u0E17\u0E23\u0E2D\u0E19\u0E34\u0E01\u0E2A\u0E4C" },
+      { name: "Western Digital", icon: "Cpu", color: "text-blue-600", desc: "\u0E2E\u0E32\u0E23\u0E4C\u0E14\u0E41\u0E27\u0E23\u0E4C & \u0E44\u0E2D\u0E17\u0E35\u0E40\u0E0B\u0E34\u0E23\u0E4C\u0E1F\u0E40\u0E27\u0E2D\u0E23\u0E4C" },
+      { name: "True Corporation", icon: "Zap", color: "text-rose-600", desc: "\u0E42\u0E04\u0E23\u0E07\u0E02\u0E48\u0E32\u0E22\u0E40\u0E19\u0E47\u0E15\u0E40\u0E27\u0E34\u0E23\u0E4C\u0E01\u0E04\u0E27\u0E32\u0E21\u0E40\u0E23\u0E47\u0E27\u0E2A\u0E39\u0E07" },
+      { name: "Minor International", icon: "TrendingUp", color: "text-amber-600", desc: "\u0E01\u0E32\u0E23\u0E1A\u0E31\u0E0D\u0E0A\u0E35\u0E41\u0E25\u0E30\u0E01\u0E32\u0E23\u0E40\u0E07\u0E34\u0E19\u0E2A\u0E32\u0E01\u0E25" }
+    ].map((partner, index) => <div
+      key={index}
+      className="bg-white border border-slate-200 rounded-xl p-4 text-center space-y-2 hover:shadow-md transition-all duration-200 group h-32 flex flex-col justify-center items-center"
+    >
+                  <div className={`p-2 rounded-lg bg-slate-50 group-hover:bg-blue-50 transition-colors ${partner.color}`}>
+                    {partner.icon === "Building" ? <Users className="w-5 h-5" /> : partner.icon === "Settings" ? <Settings className="w-5 h-5" /> : partner.icon === "Award" ? <Award className="w-5 h-5" /> : partner.icon === "Cpu" ? <Cpu className="w-5 h-5" /> : partner.icon === "Zap" ? <Zap className="w-5 h-5" /> : <TrendingUp className="w-5 h-5" />}
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-xs text-slate-800 tracking-tight leading-snug">{partner.name}</h4>
+                    <p className="text-[10px] text-slate-400 font-medium">{partner.desc}</p>
+                  </div>
+                </div>)}
+            </div>
           </div>
         </div>
       </section>
@@ -699,7 +757,14 @@ export default function HomeView({ setActiveTab, setSelectedNews }) {
     /* Online Registration CTA Section */
   }
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-brand-secondary to-blue-950 text-white p-8 md:p-12 shadow-xl border border-blue-900/40">
+        <div 
+          className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-brand-secondary to-blue-950 text-white p-8 md:p-12 shadow-xl border border-blue-900/40"
+          style={collegeInfo?.admissionCtaImage ? {
+            backgroundImage: `linear-gradient(to right, rgba(15, 23, 42, 0.94) 40%, rgba(15, 23, 42, 0.7) 100%), url(${collegeInfo.admissionCtaImage})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center'
+          } : {}}
+        >
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(6,182,212,0.15),transparent_40%)] pointer-events-none" />
           <div className="relative z-10 max-w-3xl space-y-6">
             <span className="bg-cyan-500/20 border border-cyan-400/30 text-cyan-300 font-bold text-[10px] uppercase tracking-widest px-3.5 py-1.5 rounded-full">

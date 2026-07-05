@@ -41,7 +41,12 @@ import {
   Image as ImageIcon,
   Sliders,
   Globe,
-  Lock
+  Lock,
+  Compass,
+  Megaphone,
+  Laptop,
+  Briefcase,
+  BookOpen
 } from "lucide-react";
 import { db } from "../firebase";
 import { collection, doc, setDoc, onSnapshot } from "firebase/firestore";
@@ -252,6 +257,7 @@ export default function AdminView() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [isEditingCollege, setIsEditingCollege] = useState(false);
+  const [activeSectionTab, setActiveSectionTab] = useState("general");
   const [tempCollege, setTempCollege] = useState(collegeInfo);
   const [editingMajor, setEditingMajor] = useState(null);
   const [isMajorModalOpen, setIsMajorModalOpen] = useState(false);
@@ -1020,326 +1026,883 @@ export default function AdminView() {
     /* SUB-TAB 2: Manage College Info */
   }
             {activeSubTab === "college" && <div className="space-y-6">
-                <div className="flex justify-between items-center">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-5">
                   <div>
-                    <h2 className="text-lg font-extrabold text-slate-800 font-display">
-                      จัดการข้อมูลทั่วไปและสาส์นผู้อำนวยการ
+                    <h2 className="text-lg font-extrabold text-slate-800 font-display flex items-center gap-2">
+                      <Settings className="w-5 h-5 text-brand-primary" />
+                      <span>จัดการหัวข้อและรูปภาพรายเซกชัน (Homepage Sections & Media Manager)</span>
                     </h2>
                     <p className="text-xs text-slate-500">
-                      ปรับเปลี่ยนที่อยู่, เบอร์โทรศัพท์ติดต่อ, ค่านิยม และสาส์นต้อนรับหน้าแรก
+                      จัดการหัวข้อ รายละเอียด และเพิ่ม/แก้ไขรูปภาพของแต่ละส่วนในเว็บไซต์ให้โดดเด่นน่าดึงดูด
                     </p>
                   </div>
-                  {!isEditingCollege && <button
-                    onClick={() => {
-                      setTempCollege({
-                        directorName: "ดร. สมเกียรติ ปทุมสวัสดิ์",
-                        directorDegree: "Ph.D. in Vocational Education Management",
-                        directorMessage: "วิทยาลัยเทคโนโลยีปทุมรัตต์ มุ่งมั่นยกระดับคุณภาพการศึกษาทางวิชาชีพให้มีคุณภาพได้มาตรฐานสากล...",
-                        directorImage: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=500&auto=format&fit=crop",
-                        stat1Value: "21 ปี",
-                        stat1Label: "แห่งการก่อตั้งและดูแลนักเรียน",
-                        stat1Desc: "เติบโตอย่างมั่นคงเคียงคู่ท้องถิ่น",
-                        stat2Value: "95%+",
-                        stat2Label: "อัตราได้งานทำหลังจบการศึกษา",
-                        stat2Desc: "ภายใน 6 เดือนหลังสำเร็จหลักสูตร",
-                        stat3Value: "4 สาขา",
-                        stat3Label: "ปวช. และ ปวส. ยอดนิยม",
-                        stat3Desc: "หลักสูตรปรับปรุงรองรับอนาคต",
-                        stat4Value: "1,200+",
-                        stat4Label: "ศิษย์เก่าที่ประสบความสำเร็จ",
-                        stat4Desc: "เครือข่ายความร่วมมืออุตสาหกรรม",
-                        historyTitle: "วิทยาลัยเทคโนโลยีปทุมรัตต์",
-                        historyText1: "วิทยาลัยเทคโนโลยีปทุมรัตต์ ได้รับการจัดตั้งขึ้นเมื่อปีพุทธศักราช 2548 โดยผู้บริหารผู้มีวิสัยทัศน์กว้างไกลทางด้านการศึกษาและการพัฒนาสายอาชีพในภาคตะวันออกเฉียงเหนือ มุ่งเน้นเติมเต็มความต้องการกำลังพลทักษะสูงในเขตอำเภอปทุมรัตต์ และจังหวัดร้อยเอ็ด",
-                        historyText2: "ด้วยนวัตกรรมการสอนแบบเน้นงานปฏิบัติจริง ร่วมมืออย่างใกล้ชิดกับสถานประกอบการอุตสาหกรรม ศูนย์บริการรถยนต์สมัยใหม่ และสถาบันการเงินการคลัง ทำให้นักเรียนและนักศึกษาที่จบจากวิทยาลัยเทคโนโลยีปทุมรัตต์เป็นที่ประจักษ์ในตลาดแรงงานว่าเป็นผู้ที่มีทักษะฝีมือยอดเยี่ยม มีความอ่อนน้อมถ่อมตน มีวินัย และพร้อมปฏิบัติหน้าที่ในอุตสาหกรรมยุคดิจิทัลได้อย่างมืออาชีพ",
-                        historyImage: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&auto=format&fit=crop",
-                        coreValues: "ซื่อสัตย์ มีระเบียบวินัย ใฝ่รู้คู่คุณธรรม มุ่งเน้นการลงมือปฏิบัติจริงและการแก้ปัญหาอย่างสร้างสรรค์เพื่อความสำเร็จร่วมกัน",
-                        ...collegeInfo
-                      });
-                      setIsEditingCollege(true);
-                    }}
-                    className="flex items-center space-x-1 bg-brand-primary text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-blue-700 transition-all shadow-sm"
-                  >
-                      <Edit className="w-3.5 h-3.5" />
-                      <span>แก้ไขข้อมูลทั่วไป</span>
-                    </button>}
+                  <div className="flex items-center gap-2">
+                    {!isEditingCollege ? (
+                      <button
+                        onClick={() => {
+                          setTempCollege({ ...collegeInfo });
+                          setIsEditingCollege(true);
+                        }}
+                        className="flex items-center space-x-1.5 bg-brand-primary text-white px-4 py-2.5 rounded-xl text-xs font-bold hover:bg-blue-700 transition-all shadow-sm shrink-0"
+                      >
+                        <Edit className="w-3.5 h-3.5" />
+                        <span>เปิดโหมดแก้ไขข้อมูล</span>
+                      </button>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setIsEditingCollege(false)}
+                          className="bg-slate-100 hover:bg-slate-200 text-slate-600 px-4 py-2.5 rounded-xl text-xs font-bold transition-all"
+                        >
+                          ยกเลิก
+                        </button>
+                        <button
+                          onClick={handleSaveCollege}
+                          className="bg-brand-primary hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition-all shadow-md flex items-center gap-1.5"
+                        >
+                          <Check className="w-4 h-4" />
+                          <span>บันทึกข้อมูลทั้งหมด</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
-                {isEditingCollege ? <form onSubmit={handleSaveCollege} className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-1">
-                        <label className="text-[11px] font-bold text-slate-500">ชื่อวิทยาลัย (ภาษาไทย)</label>
-                        <input
-    type="text"
-    required
-    value={tempCollege.name}
-    onChange={(e) => setTempCollege({ ...tempCollege, name: e.target.value })}
-    className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
-  />
-                      </div>
+                {/* Sub-tabs bar */}
+                <div className="flex overflow-x-auto pb-2 gap-2 scrollbar-none border-b border-slate-100 -mx-4 px-4 md:mx-0 md:px-0">
+                  {[
+                    { id: "general", label: "ข้อมูลพื้นฐาน", icon: Building2 },
+                    { id: "philosophy", label: "ปรัชญาและวิสัยทัศน์", icon: Compass },
+                    { id: "director", label: "สาส์นผู้อำนวยการ", icon: GraduationCap },
+                    { id: "gateway", label: "ระบบบริการออนไลน์", icon: Laptop },
+                    { id: "curriculum", label: "หลักสูตรสายอาชีพ", icon: BookOpen },
+                    { id: "mou", label: "ภาคีเครือข่าย (MOU)", icon: Briefcase },
+                    { id: "admission", label: "พาดหัวรับสมัครเรียน", icon: Megaphone },
+                    { id: "seo", label: "การตั้งค่า SEO & ค้นหา", icon: Globe }
+                  ].map((tab) => {
+                    const TabIcon = tab.icon;
+                    const isActive = activeSectionTab === tab.id;
+                    return (
+                      <button
+                        key={tab.id}
+                        type="button"
+                        onClick={() => setActiveSectionTab(tab.id)}
+                        className={`flex items-center space-x-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap shrink-0 border ${isActive ? "bg-blue-50 text-brand-primary border-blue-200 shadow-xs" : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"}`}
+                      >
+                        <TabIcon className={`w-3.5 h-3.5 ${isActive ? "text-brand-primary" : "text-slate-400"}`} />
+                        <span>{tab.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
 
-                      <div className="space-y-1">
-                        <label className="text-[11px] font-bold text-slate-500">ชื่อวิทยาลัย (ภาษาอังกฤษ)</label>
-                        <input
-    type="text"
-    required
-    value={tempCollege.englishName}
-    onChange={(e) => setTempCollege({ ...tempCollege, englishName: e.target.value })}
-    className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
-  />
-                      </div>
-
-                      <div className="space-y-1 md:col-span-2">
-                        <label className="text-[11px] font-bold text-slate-500">ปรัชญาสถานศึกษา</label>
-                        <input
-    type="text"
-    required
-    value={tempCollege.philosophy}
-    onChange={(e) => setTempCollege({ ...tempCollege, philosophy: e.target.value })}
-    className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
-  />
-                      </div>
-
-                      <div className="space-y-1 md:col-span-2">
-                        <label className="text-[11px] font-bold text-slate-500">วิสัยทัศน์</label>
-                        <textarea
-    rows={3}
-    required
-    value={tempCollege.vision}
-    onChange={(e) => setTempCollege({ ...tempCollege, vision: e.target.value })}
-    className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
-  />
-                      </div>
-
-                      <div className="space-y-1">
-                        <label className="text-[11px] font-bold text-slate-500">อัตลักษณ์</label>
-                        <input
-    type="text"
-    required
-    value={tempCollege.identity}
-    onChange={(e) => setTempCollege({ ...tempCollege, identity: e.target.value })}
-    className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
-  />
-                      </div>
-
-                      <div className="space-y-1">
-                        <label className="text-[11px] font-bold text-slate-500">เอกลักษณ์</label>
-                        <input
-    type="text"
-    required
-    value={tempCollege.uniqueness}
-    onChange={(e) => setTempCollege({ ...tempCollege, uniqueness: e.target.value })}
-    className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
-  />
-                      </div>
-
-                      {/* HOMEPAGE HEADERS SETTINGS */}
-                      <div className="md:col-span-2 border-t border-slate-200 pt-6 mt-2 space-y-4">
-                        <h3 className="text-xs font-extrabold text-slate-800 flex items-center space-x-2">
-                          <Sliders className="w-4 h-4 text-brand-primary" />
-                          <span>แก้ไขหัวข้อหลักและส่วนต่างๆ บนหน้าแรก (Homepage Headers Configuration)</span>
-                        </h3>
-                        <p className="text-[11px] text-slate-500">
-                          ท่านสามารถแก้ไขคำโปรย หัวข้อ พาดหัวหลักของแต่ละส่วนบนหน้าแรก เพื่อปรับปรุงแคมเปญรับสมัครและข่าวสารแบบไดนามิก
-                        </p>
-
+                {/* Active Sub-tab View / Edit Panel */}
+                <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm">
+                  {/* TAB 1: General Info */}
+                  {activeSectionTab === "general" && (
+                    <div className="space-y-6">
+                      {isEditingCollege ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div className="space-y-1">
-                            <label className="text-[11px] font-bold text-slate-500">1. พาดหัววิสัยทัศน์ (ปรัชญาและวิสัยทัศน์)</label>
+                            <label className="text-[11px] font-bold text-slate-500">ชื่อวิทยาลัย (ภาษาไทย)</label>
                             <input
                               type="text"
+                              required
+                              value={tempCollege.name || ""}
+                              onChange={(e) => setTempCollege({ ...tempCollege, name: e.target.value })}
+                              className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[11px] font-bold text-slate-500">ชื่อวิทยาลัย (ภาษาอังกฤษ)</label>
+                            <input
+                              type="text"
+                              required
+                              value={tempCollege.englishName || ""}
+                              onChange={(e) => setTempCollege({ ...tempCollege, englishName: e.target.value })}
+                              className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[11px] font-bold text-slate-500">ปีที่ก่อตั้ง (พ.ศ.)</label>
+                            <input
+                              type="number"
+                              required
+                              value={tempCollege.foundedYear || ""}
+                              onChange={(e) => setTempCollege({ ...tempCollege, foundedYear: e.target.value })}
+                              className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                            />
+                          </div>
+                          <div className="space-y-1 md:col-span-2">
+                            <label className="text-[11px] font-bold text-slate-500">ที่ตั้ง / ที่อยู่ติดต่อ</label>
+                            <input
+                              type="text"
+                              required
+                              value={tempCollege.address || ""}
+                              onChange={(e) => setTempCollege({ ...tempCollege, address: e.target.value })}
+                              className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[11px] font-bold text-slate-500">เบอร์โทรศัพท์ (สำนักงาน)</label>
+                            <input
+                              type="text"
+                              value={tempCollege.phone || ""}
+                              onChange={(e) => setTempCollege({ ...tempCollege, phone: e.target.value })}
+                              className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[11px] font-bold text-slate-500">เบอร์มือถือ</label>
+                            <input
+                              type="text"
+                              value={tempCollege.mobile || ""}
+                              onChange={(e) => setTempCollege({ ...tempCollege, mobile: e.target.value })}
+                              className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[11px] font-bold text-slate-500">อีเมล</label>
+                            <input
+                              type="email"
+                              value={tempCollege.email || ""}
+                              onChange={(e) => setTempCollege({ ...tempCollege, email: e.target.value })}
+                              className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[11px] font-bold text-slate-500">Facebook Page URL</label>
+                            <input
+                              type="text"
+                              value={tempCollege.facebook || ""}
+                              onChange={(e) => setTempCollege({ ...tempCollege, facebook: e.target.value })}
+                              className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                            />
+                          </div>
+                          <div className="space-y-1 md:col-span-2">
+                            <label className="text-[11px] font-bold text-slate-500">โลโก้วิทยาลัย (Logo Image URL หรือ อัปโหลด)</label>
+                            <div className="flex gap-3 items-center">
+                              <input
+                                type="text"
+                                value={tempCollege.logoUrl || ""}
+                                onChange={(e) => setTempCollege({ ...tempCollege, logoUrl: e.target.value })}
+                                className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                                placeholder="ป้อนที่อยู่ URL หรือกดอัปโหลดไฟล์ขวามือ"
+                              />
+                              <label className="bg-blue-50 hover:bg-blue-100 text-blue-700 px-4 py-2.5 rounded-xl text-xs font-bold transition-all border border-blue-200 cursor-pointer shrink-0">
+                                <span>อัพโหลดรูป</span>
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  className="hidden"
+                                  onChange={(e) => handleFileUpload(e, (base64) => setTempCollege({ ...tempCollege, logoUrl: base64 }))}
+                                />
+                              </label>
+                            </div>
+                            {tempCollege.logoUrl && (
+                              <div className="mt-3">
+                                <p className="text-[10px] text-slate-400 font-bold mb-1">แสดงตัวอย่างโลโก้:</p>
+                                <img src={tempCollege.logoUrl} alt="Logo Preview" className="h-16 w-auto object-contain border rounded-lg p-1 bg-slate-50" referrerPolicy="no-referrer" />
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                          <div className="md:col-span-2 space-y-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                              <div>
+                                <span className="text-[10px] text-slate-400 font-bold block uppercase">วิทยาลัย (ภาษาไทย)</span>
+                                <span className="font-semibold text-slate-800">{collegeInfo.name}</span>
+                              </div>
+                              <div>
+                                <span className="text-[10px] text-slate-400 font-bold block uppercase">วิทยาลัย (ภาษาอังกฤษ)</span>
+                                <span className="font-semibold text-slate-800">{collegeInfo.englishName}</span>
+                              </div>
+                              <div>
+                                <span className="text-[10px] text-slate-400 font-bold block uppercase">ปีที่ก่อตั้ง</span>
+                                <span className="font-semibold text-slate-800">พ.ศ. {collegeInfo.foundedYear} ({new Date().getFullYear() + 543 - parseInt(collegeInfo.foundedYear)} ปีแห่งการเปิดสอน)</span>
+                              </div>
+                              <div>
+                                <span className="text-[10px] text-slate-400 font-bold block uppercase">อีเมลทางการ</span>
+                                <span className="font-semibold text-slate-800">{collegeInfo.email}</span>
+                              </div>
+                              <div>
+                                <span className="text-[10px] text-slate-400 font-bold block uppercase">เบอร์สำนักงาน / เบอร์โทรสาร</span>
+                                <span className="font-semibold text-slate-800">{collegeInfo.phone || "-"}</span>
+                              </div>
+                              <div>
+                                <span className="text-[10px] text-slate-400 font-bold block uppercase">เบอร์มือถือรับสาย</span>
+                                <span className="font-semibold text-slate-800">{collegeInfo.mobile || "-"}</span>
+                              </div>
+                            </div>
+                            <div className="text-xs pt-2 border-t border-slate-100">
+                              <span className="text-[10px] text-slate-400 font-bold block uppercase">ที่ตั้งสำนักงานวิทยาลัย</span>
+                              <p className="text-slate-600 leading-relaxed font-medium">{collegeInfo.address}</p>
+                            </div>
+                            <div className="text-xs pt-2 border-t border-slate-100">
+                              <span className="text-[10px] text-slate-400 font-bold block uppercase">ช่องทาง Facebook Page</span>
+                              <span className="font-medium text-brand-primary">{collegeInfo.facebook || "-"}</span>
+                            </div>
+                          </div>
+                          <div className="flex flex-col items-center justify-center p-6 bg-slate-50 border border-slate-100 rounded-2xl">
+                            <span className="text-[10px] text-slate-400 font-bold mb-3 uppercase">โลโก้สถาบันปัจจุบัน</span>
+                            {collegeInfo.logoUrl ? (
+                              <img src={collegeInfo.logoUrl} alt="College Logo" className="h-28 w-auto object-contain p-2 bg-white rounded-xl shadow-xs" referrerPolicy="no-referrer" />
+                            ) : (
+                              <div className="h-28 w-28 rounded-xl bg-slate-200 flex items-center justify-center text-slate-400 text-xs font-bold text-center p-2">ไม่มีภาพโลโก้</div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* TAB 2: Philosophy & Vision */}
+                  {activeSectionTab === "philosophy" && (
+                    <div className="space-y-6">
+                      <div className="bg-purple-50/50 border border-purple-100 rounded-2xl p-4 flex items-start gap-3">
+                        <Compass className="w-5 h-5 text-purple-600 shrink-0 mt-0.5" />
+                        <div>
+                          <h4 className="text-xs font-extrabold text-purple-900">เซกชัน: ปรัชญาและวิสัยทัศน์ (Philosophy & Vision)</h4>
+                          <p className="text-[10px] text-purple-700 leading-relaxed mt-0.5">
+                            จัดการคำขวัญ ปรัชญาสถานศึกษา วิสัยทัศน์ และอัตลักษณ์ รวมถึงอัปโหลดรูปภาพประกอบสวยงามเพื่อนำไปแสดงผลคู่กับ Bento Grid บนหน้าแรก
+                          </p>
+                        </div>
+                      </div>
+
+                      {isEditingCollege ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-1 md:col-span-2">
+                            <label className="text-[11px] font-bold text-slate-500">พาดหัวหลักประวัติและวิสัยทัศน์ (พาดหัวบนหน้าแรก) *</label>
+                            <input
+                              type="text"
+                              required
                               value={tempCollege.philosophyTitle || ""}
                               onChange={(e) => setTempCollege({ ...tempCollege, philosophyTitle: e.target.value })}
                               className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                              placeholder="มุ่งสร้างกำลังคนระดับอาชีพ เพื่อยกระดับสังคมและพัฒนาชาติ"
+                              placeholder="เช่น มุ่งสร้างกำลังคนระดับอาชีพ เพื่อยกระดับสังคมและพัฒนาชาติ"
                             />
                           </div>
-
-                          <div className="space-y-1">
-                            <label className="text-[11px] font-bold text-slate-500">2. พาดหัวสาส์นผู้อำนวยการ (ยินดีต้อนรับสู่รั้ว...)</label>
+                          <div className="space-y-1 md:col-span-2">
+                            <label className="text-[11px] font-bold text-slate-500">ปรัชญาสถานศึกษา *</label>
                             <input
                               type="text"
+                              required
+                              value={tempCollege.philosophy || ""}
+                              onChange={(e) => setTempCollege({ ...tempCollege, philosophy: e.target.value })}
+                              className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                            />
+                          </div>
+                          <div className="space-y-1 md:col-span-2">
+                            <label className="text-[11px] font-bold text-slate-500">วิสัยทัศน์ *</label>
+                            <textarea
+                              rows={3}
+                              required
+                              value={tempCollege.vision || ""}
+                              onChange={(e) => setTempCollege({ ...tempCollege, vision: e.target.value })}
+                              className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[11px] font-bold text-slate-500">เอกลักษณ์วิทยาลัย *</label>
+                            <input
+                              type="text"
+                              required
+                              value={tempCollege.identity || ""}
+                              onChange={(e) => setTempCollege({ ...tempCollege, identity: e.target.value })}
+                              className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[11px] font-bold text-slate-500">อัตลักษณ์ผู้เรียน *</label>
+                            <input
+                              type="text"
+                              required
+                              value={tempCollege.uniqueness || ""}
+                              onChange={(e) => setTempCollege({ ...tempCollege, uniqueness: e.target.value })}
+                              className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                            />
+                          </div>
+                          <div className="space-y-1 md:col-span-2">
+                            <label className="text-[11px] font-bold text-slate-500">รูปภาพประจำเซกชัน (Philosophy Image URL หรือ อัปโหลดเพื่อสร้างความโดดเด่น)</label>
+                            <div className="flex gap-3 items-center">
+                              <input
+                                type="text"
+                                value={tempCollege.philosophyImage || ""}
+                                onChange={(e) => setTempCollege({ ...tempCollege, philosophyImage: e.target.value })}
+                                className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                                placeholder="วางลิงก์รูปภาพ หรือกดอัปโหลดไฟล์"
+                              />
+                              <label className="bg-purple-50 hover:bg-purple-100 text-purple-700 px-4 py-2.5 rounded-xl text-xs font-bold transition-all border border-purple-200 cursor-pointer shrink-0">
+                                <span>อัปโหลดรูป</span>
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  className="hidden"
+                                  onChange={(e) => handleFileUpload(e, (base64) => setTempCollege({ ...tempCollege, philosophyImage: base64 }))}
+                                />
+                              </label>
+                            </div>
+                            {tempCollege.philosophyImage && (
+                              <div className="mt-3">
+                                <p className="text-[10px] text-slate-400 font-bold mb-1">ตัวอย่างภาพหน้าหลักที่อัปโหลด:</p>
+                                <img src={tempCollege.philosophyImage} alt="Philosophy section visual" className="max-h-40 w-auto object-cover rounded-xl border" referrerPolicy="no-referrer" />
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                          <div className="lg:col-span-2 space-y-4 text-xs">
+                            <div>
+                              <span className="text-[10px] text-slate-400 font-bold block uppercase">พาดหัวบนหน้าหลัก</span>
+                              <span className="text-sm font-extrabold text-slate-800 leading-tight block">{collegeInfo.philosophyTitle || "มุ่งสร้างกำลังคนระดับอาชีพ เพื่อยกระดับสังคมและพัฒนาชาติ"}</span>
+                            </div>
+                            <div className="pt-2 border-t border-slate-100">
+                              <span className="text-[10px] text-slate-400 font-bold block uppercase">ปรัชญา (Philosophy)</span>
+                              <p className="font-bold text-blue-600 italic">“{collegeInfo.philosophy}”</p>
+                            </div>
+                            <div className="pt-2 border-t border-slate-100">
+                              <span className="text-[10px] text-slate-400 font-bold block uppercase">วิสัยทัศน์ (Vision)</span>
+                              <p className="text-slate-600 leading-relaxed font-medium">{collegeInfo.vision}</p>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4 pt-2 border-t border-slate-100">
+                              <div>
+                                <span className="text-[10px] text-slate-400 font-bold block uppercase">เอกลักษณ์วิทยาลัย</span>
+                                <span className="font-semibold text-slate-700">{collegeInfo.identity}</span>
+                              </div>
+                              <div>
+                                <span className="text-[10px] text-slate-400 font-bold block uppercase">อัตลักษณ์ผู้เรียน</span>
+                                <span className="font-semibold text-slate-700">{collegeInfo.uniqueness}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex flex-col items-center justify-center p-6 bg-slate-50 border border-slate-100 rounded-2xl">
+                            <span className="text-[10px] text-slate-400 font-bold mb-3 uppercase">รูปภาพประจำส่วนหน้าหลัก</span>
+                            {collegeInfo.philosophyImage ? (
+                              <img src={collegeInfo.philosophyImage} alt="Philosophy visual illustration" className="max-h-44 w-full object-cover rounded-xl shadow-xs" referrerPolicy="no-referrer" />
+                            ) : (
+                              <div className="h-44 w-full rounded-xl border border-dashed border-slate-200 bg-white flex flex-col items-center justify-center text-slate-400 text-xs font-bold text-center p-4">
+                                <Compass className="w-8 h-8 text-slate-300 mb-1.5" />
+                                <span>ไม่ได้อัปโหลดภาพแยกไว้</span>
+                                <span className="text-[9px] font-medium text-slate-400 mt-0.5">(แสดงเฉพาะบento-grid 3 กล่องมาตรฐาน)</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* TAB 3: Director Message */}
+                  {activeSectionTab === "director" && (
+                    <div className="space-y-6">
+                      <div className="bg-amber-50/50 border border-amber-100 rounded-2xl p-4 flex items-start gap-3">
+                        <GraduationCap className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                        <div>
+                          <h4 className="text-xs font-extrabold text-amber-900">เซกชัน: สาส์นต้อนรับจากผู้อำนวยการ (Director's Welcome)</h4>
+                          <p className="text-[10px] text-amber-700 leading-relaxed mt-0.5">
+                            ปรับเปลี่ยนพาดหัว สาส์นต้อนรับผู้มาเยือน ชื่อ-สกุล วุฒิการศึกษา และภาพถ่ายผู้อำนวยการเพื่อเสริมภาพลักษณ์เกียรติประวัติสูงสุดของสถาบัน
+                          </p>
+                        </div>
+                      </div>
+
+                      {isEditingCollege ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-1 md:col-span-2">
+                            <label className="text-[11px] font-bold text-slate-500">พาดหัวยินดีต้อนรับ (พาดหัวบนหน้าแรก) *</label>
+                            <input
+                              type="text"
+                              required
                               value={tempCollege.directorWelcome || ""}
                               onChange={(e) => setTempCollege({ ...tempCollege, directorWelcome: e.target.value })}
                               className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                              placeholder="ยินดีต้อนรับสู่ รั้วเทคโนโลยีปทุมรัตต์ (PTC)"
+                              placeholder="เช่น ยินดีต้อนรับสู่ รั้วเทคโนโลยีปทุมรัตต์ (PTC)"
                             />
                           </div>
-
                           <div className="space-y-1">
-                            <label className="text-[11px] font-bold text-slate-500">3. พาดหัวบริการดิจิทัล (PTC Digital Gateway...)</label>
+                            <label className="text-[11px] font-bold text-slate-500">ชื่อ-นามสกุล ผู้อำนวยการ *</label>
                             <input
                               type="text"
+                              required
+                              value={tempCollege.directorName || ""}
+                              onChange={(e) => setTempCollege({ ...tempCollege, directorName: e.target.value })}
+                              className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[11px] font-bold text-slate-500">วุฒิการศึกษา / ตำแหน่งทางวิชาการ *</label>
+                            <input
+                              type="text"
+                              required
+                              value={tempCollege.directorDegree || ""}
+                              onChange={(e) => setTempCollege({ ...tempCollege, directorDegree: e.target.value })}
+                              className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                            />
+                          </div>
+                          <div className="space-y-1 md:col-span-2">
+                            <label className="text-[11px] font-bold text-slate-500">สาส์นต้อนรับแบบละเอียด *</label>
+                            <textarea
+                              rows={5}
+                              required
+                              value={tempCollege.directorMessage || ""}
+                              onChange={(e) => setTempCollege({ ...tempCollege, directorMessage: e.target.value })}
+                              className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                            />
+                          </div>
+                          <div className="space-y-1 md:col-span-2">
+                            <label className="text-[11px] font-bold text-slate-500">ภาพถ่ายผู้อำนวยการ (Director Image URL หรือ อัปโหลด)</label>
+                            <div className="flex gap-3 items-center">
+                              <input
+                                type="text"
+                                value={tempCollege.directorImage || ""}
+                                onChange={(e) => setTempCollege({ ...tempCollege, directorImage: e.target.value })}
+                                className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                                placeholder="วางลิงก์รูปภาพ หรือกดอัปโหลดไฟล์เพื่อความสะดวก"
+                              />
+                              <label className="bg-amber-50 hover:bg-amber-100 text-amber-700 px-4 py-2.5 rounded-xl text-xs font-bold transition-all border border-amber-200 cursor-pointer shrink-0">
+                                <span>อัปโหลดรูป</span>
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  className="hidden"
+                                  onChange={(e) => handleFileUpload(e, (base64) => setTempCollege({ ...tempCollege, directorImage: base64 }))}
+                                />
+                              </label>
+                            </div>
+                            {tempCollege.directorImage && (
+                              <div className="mt-3">
+                                <p className="text-[10px] text-slate-400 font-bold mb-1">ภาพถ่ายตัวอย่างผู้อำนวยการ:</p>
+                                <img src={tempCollege.directorImage} alt="Director preview" className="max-h-44 w-auto object-contain rounded-xl border" referrerPolicy="no-referrer" />
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                          <div className="flex flex-col items-center justify-center p-6 bg-slate-50 border border-slate-100 rounded-2xl text-center">
+                            <img
+                              src={collegeInfo.directorImage || "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=500&auto=format&fit=crop"}
+                              alt={collegeInfo.directorName}
+                              className="h-48 w-36 object-cover rounded-xl shadow-md border-2 border-white"
+                              referrerPolicy="no-referrer"
+                            />
+                            <h5 className="font-extrabold text-slate-800 text-xs mt-3">{collegeInfo.directorName}</h5>
+                            <span className="text-[10px] text-slate-400 font-medium text-center">{collegeInfo.directorDegree}</span>
+                          </div>
+                          <div className="md:col-span-2 space-y-3 text-xs leading-relaxed">
+                            <div>
+                              <span className="text-[10px] text-slate-400 font-bold uppercase">หัวข้อพาดหัวสาส์น</span>
+                              <h4 className="text-sm font-extrabold text-slate-800">{collegeInfo.directorWelcome || "ยินดีต้อนรับสู่ รั้วเทคโนโลยีปทุมรัตต์ (PTC)"}</h4>
+                            </div>
+                            <div className="pt-2 border-t border-slate-100">
+                              <span className="text-[10px] text-slate-400 font-bold uppercase">สาส์นของผู้อำนวยการ</span>
+                              <p className="text-slate-600 font-medium whitespace-pre-line bg-slate-50 p-4 rounded-xl border border-slate-100 mt-1">{collegeInfo.directorMessage}</p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* TAB 4: Digital Gateway */}
+                  {activeSectionTab === "gateway" && (
+                    <div className="space-y-6">
+                      <div className="bg-cyan-50/50 border border-cyan-100 rounded-2xl p-4 flex items-start gap-3">
+                        <Laptop className="w-5 h-5 text-cyan-600 shrink-0 mt-0.5" />
+                        <div>
+                          <h4 className="text-xs font-extrabold text-cyan-900">เซกชัน: ระบบบริการสารสนเทศออนไลน์ (Digital Gateway & Portal)</h4>
+                          <p className="text-[10px] text-cyan-700 leading-relaxed mt-0.5">
+                            จัดการพาดหัวหลักของส่วนบริการดิจิทัลด่วนของสถาบัน และเพิ่มหรือแก้ไขรูปภาพพื้นหลัง (Background Image) เพื่อเน้นย้ำความล้ำสมัยของเทคโนโลยีสารสนเทศของวิทยาลัย
+                          </p>
+                        </div>
+                      </div>
+
+                      {isEditingCollege ? (
+                        <div className="space-y-4">
+                          <div className="space-y-1">
+                            <label className="text-[11px] font-bold text-slate-500">พาดหัวเซกชันระบบบริการออนไลน์ *</label>
+                            <input
+                              type="text"
+                              required
                               value={tempCollege.gatewayTitle || ""}
                               onChange={(e) => setTempCollege({ ...tempCollege, gatewayTitle: e.target.value })}
                               className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                              placeholder="PTC Digital Gateway & Portal"
+                              placeholder="เช่น PTC Digital Gateway & Portal"
                             />
                           </div>
-
                           <div className="space-y-1">
-                            <label className="text-[11px] font-bold text-slate-500">4. พาดหัวแผนกวิชาหลักสูตร (หลักสูตรปรีชาพากเพียร...)</label>
+                            <label className="text-[11px] font-bold text-slate-500">รูปภาพพื้นหลังเซกชัน (Gateway Background URL หรือ อัปโหลด)</label>
+                            <div className="flex gap-3 items-center">
+                              <input
+                                type="text"
+                                value={tempCollege.gatewayImage || ""}
+                                onChange={(e) => setTempCollege({ ...tempCollege, gatewayImage: e.target.value })}
+                                className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                                placeholder="วางที่อยู่รูปภาพ URL หรือกดอัปโหลด"
+                              />
+                              <label className="bg-cyan-50 hover:bg-cyan-100 text-cyan-700 px-4 py-2.5 rounded-xl text-xs font-bold transition-all border border-cyan-200 cursor-pointer shrink-0">
+                                <span>อัปโหลดรูป</span>
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  className="hidden"
+                                  onChange={(e) => handleFileUpload(e, (base64) => setTempCollege({ ...tempCollege, gatewayImage: base64 }))}
+                                />
+                              </label>
+                            </div>
+                            {tempCollege.gatewayImage && (
+                              <div className="mt-3">
+                                <p className="text-[10px] text-slate-400 font-bold mb-1">ตัวอย่างภาพพื้นหลังที่อัปโหลด:</p>
+                                <img src={tempCollege.gatewayImage} alt="Gateway background preview" className="max-h-40 w-full object-cover rounded-xl border" referrerPolicy="no-referrer" />
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs leading-relaxed">
+                          <div className="md:col-span-2 space-y-3">
+                            <div>
+                              <span className="text-[10px] text-slate-400 font-bold uppercase">พาดหัวเซกชันระบบบริการออนไลน์</span>
+                              <h4 className="text-sm font-extrabold text-slate-800 mt-1">{collegeInfo.gatewayTitle || "PTC Digital Gateway & Portal"}</h4>
+                            </div>
+                            <div className="pt-2 border-t border-slate-100">
+                              <span className="text-[10px] text-slate-400 font-bold block">ลิ้งก์ระบบงาน 24 ชั่วโมง</span>
+                              <ul className="list-disc pl-4 space-y-1 text-slate-500 font-medium mt-1">
+                                <li>ระบบลงทะเบียน & ผลการเรียน (Student Portal)</li>
+                                <li>ตรวจสอบสิทธิ์โควตา & ทุน (LMS Track)</li>
+                                <li>ระบบใบสมัครออนไลน์ (Online Enrollment)</li>
+                                <li>E-Learning Hub & Student Care Support</li>
+                              </ul>
+                            </div>
+                          </div>
+                          <div className="flex flex-col items-center justify-center p-6 bg-slate-50 border border-slate-100 rounded-2xl">
+                            <span className="text-[10px] text-slate-400 font-bold mb-3 uppercase">รูปภาพพื้นหลังเซกชัน</span>
+                            {collegeInfo.gatewayImage ? (
+                              <img src={collegeInfo.gatewayImage} alt="Gateway backdrop visual" className="max-h-40 w-full object-cover rounded-xl shadow-xs" referrerPolicy="no-referrer" />
+                            ) : (
+                              <div className="h-40 w-full rounded-xl border border-dashed border-slate-200 bg-white flex flex-col items-center justify-center text-slate-400 text-xs font-bold text-center p-4">
+                                <Laptop className="w-8 h-8 text-slate-300 mb-1.5" />
+                                <span>ใช้เอฟเฟกต์สีรุ้งโปร่งแสงมาตรฐาน</span>
+                                <span className="text-[9px] font-medium text-slate-400 mt-0.5">(ไม่มีภาพพื้นหลังแบบกำหนดเอง)</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* TAB 5: Curriculum */}
+                  {activeSectionTab === "curriculum" && (
+                    <div className="space-y-6">
+                      <div className="bg-indigo-50/50 border border-indigo-100 rounded-2xl p-4 flex items-start gap-3">
+                        <BookOpen className="w-5 h-5 text-indigo-600 shrink-0 mt-0.5" />
+                        <div>
+                          <h4 className="text-xs font-extrabold text-indigo-900">เซกชัน: พาดหัวหลักสูตรการเรียนการสอน (Curriculum Section)</h4>
+                          <p className="text-[10px] text-indigo-700 leading-relaxed mt-0.5">
+                            จัดการพาดหัวส่วนแผนกและสาขาวิชา และอัปโหลดรูปภาพเพื่อมาเป็นแบนเนอร์แสดงผลเป็นกล่องแรกในหน้าหลัก ส่งเสริมภาพลักษณ์ห้องทดลองเครื่องมือครบครัน
+                          </p>
+                        </div>
+                      </div>
+
+                      {isEditingCollege ? (
+                        <div className="space-y-4">
+                          <div className="space-y-1">
+                            <label className="text-[11px] font-bold text-slate-500">พาดหัวหัวข้อหลักสูตรการเรียนการสอน *</label>
                             <input
                               type="text"
+                              required
                               value={tempCollege.curriculumTitle || ""}
                               onChange={(e) => setTempCollege({ ...tempCollege, curriculumTitle: e.target.value })}
                               className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                              placeholder="หลักสูตรปรีชาพากเพียร ปวช. และ ปวส."
+                              placeholder="เช่น หลักสูตรปรีชาพากเพียร ปวช. และ ปวส."
                             />
                           </div>
-
                           <div className="space-y-1">
-                            <label className="text-[11px] font-bold text-slate-500">5. พาดหัวภาคีเครือข่ายความร่วมมือ (MOU)</label>
+                            <label className="text-[11px] font-bold text-slate-500">รูปภาพประกอบเซกชันหลักสูตร (Curriculum Banner URL หรือ อัปโหลดเพื่อแสดงเป็นกล่องแรกใน Grid)</label>
+                            <div className="flex gap-3 items-center">
+                              <input
+                                type="text"
+                                value={tempCollege.curriculumImage || ""}
+                                onChange={(e) => setTempCollege({ ...tempCollege, curriculumImage: e.target.value })}
+                                className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                                placeholder="ป้อนที่อยู่ลิงก์รูป หรือกดปุ่มอัปโหลด"
+                              />
+                              <label className="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-4 py-2.5 rounded-xl text-xs font-bold transition-all border border-indigo-200 cursor-pointer shrink-0">
+                                <span>อัปโหลดรูป</span>
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  className="hidden"
+                                  onChange={(e) => handleFileUpload(e, (base64) => setTempCollege({ ...tempCollege, curriculumImage: base64 }))}
+                                />
+                              </label>
+                            </div>
+                            {tempCollege.curriculumImage && (
+                              <div className="mt-3">
+                                <p className="text-[10px] text-slate-400 font-bold mb-1">ตัวอย่างภาพแบนเนอร์หลักสูตรที่อัปโหลด:</p>
+                                <img src={tempCollege.curriculumImage} alt="Curriculum preview" className="max-h-40 w-full object-cover rounded-xl border" referrerPolicy="no-referrer" />
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs leading-relaxed">
+                          <div className="md:col-span-2 space-y-3">
+                            <div>
+                              <span className="text-[10px] text-slate-400 font-bold uppercase">พาดหัวหัวข้อหลักสูตร</span>
+                              <h4 className="text-sm font-extrabold text-slate-800 mt-1">{collegeInfo.curriculumTitle || "หลักสูตรปรีชาพากเพียร ปวช. และ ปวส."}</h4>
+                            </div>
+                            <div className="pt-2 border-t border-slate-100">
+                              <span className="text-[10px] text-slate-400 font-bold block">คำแนะนำ:</span>
+                              <p className="text-slate-500 font-medium">รูปภาพที่อัปโหลดจะช่วยนำทางให้นักเรียนหันมาสนใจหลักสูตรทวิภาคี ช่างยนต์ หรือ ช่างไฟฟ้ากำลัง ได้มากขึ้น แนะนำให้อัปโหลดภาพบรรยากาศการเรียนและโรงงานประกอบจริง</p>
+                            </div>
+                          </div>
+                          <div className="flex flex-col items-center justify-center p-6 bg-slate-50 border border-slate-100 rounded-2xl">
+                            <span className="text-[10px] text-slate-400 font-bold mb-3 uppercase">ภาพกล่องนำทางหลักสูตร</span>
+                            {collegeInfo.curriculumImage ? (
+                              <img src={collegeInfo.curriculumImage} alt="Curriculum illustration showcase" className="max-h-40 w-full object-cover rounded-xl shadow-xs" referrerPolicy="no-referrer" />
+                            ) : (
+                              <div className="h-40 w-full rounded-xl border border-dashed border-slate-200 bg-white flex flex-col items-center justify-center text-slate-400 text-xs font-bold text-center p-4">
+                                <BookOpen className="w-8 h-8 text-slate-300 mb-1.5" />
+                                <span>ไม่แสดงกล่องภาพนำสายตา</span>
+                                <span className="text-[9px] font-medium text-slate-400 mt-0.5">(ระบบจะแสดงกล่องแผนกวิชาทั้ง 4 แทน)</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* TAB 6: MOU Partnerships */}
+                  {activeSectionTab === "mou" && (
+                    <div className="space-y-6">
+                      <div className="bg-emerald-50/50 border border-emerald-100 rounded-2xl p-4 flex items-start gap-3">
+                        <Briefcase className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+                        <div>
+                          <h4 className="text-xs font-extrabold text-emerald-900">เซกชัน: ภาคีเครือข่ายความร่วมมืออุตสาหกรรม (MOU Partnerships)</h4>
+                          <p className="text-[10px] text-emerald-700 leading-relaxed mt-0.5">
+                            ปรับเปลี่ยนหัวข้อการร่วมมือของสถานประกอบการอุตสาหกรรม และสามารถอัปโหลดรูปภาพพิธีลงนามความร่วมมือ (MOU Group Photo) เพื่อกระตุ้นยอดสมัครเรียนด้วยความอุ่นใจในการหางานทำ
+                          </p>
+                        </div>
+                      </div>
+
+                      {isEditingCollege ? (
+                        <div className="space-y-4">
+                          <div className="space-y-1">
+                            <label className="text-[11px] font-bold text-slate-500">พาดหัวหัวข้อความร่วมมือ (MOU) *</label>
                             <input
                               type="text"
+                              required
                               value={tempCollege.mouTitle || ""}
                               onChange={(e) => setTempCollege({ ...tempCollege, mouTitle: e.target.value })}
                               className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                              placeholder="ภาคีเครือข่ายความร่วมมือทางวิชาการและอุตสาหกรรม (MOU)"
+                              placeholder="เช่น ภาคีเครือข่ายความร่วมมือทางวิชาการและอุตสาหกรรม (MOU)"
                             />
                           </div>
-
                           <div className="space-y-1">
-                            <label className="text-[11px] font-bold text-slate-500">6. พาดหัวรับสมัครเรียนใหม่ (Banner แสดส้ม)</label>
-                            <input
-                              type="text"
+                            <label className="text-[11px] font-bold text-slate-500">รูปภาพประกอบ MOU / ภาพลงนามร่วม (MOU Banner URL หรือ อัปโหลดภาพถ่ายเซ็นสัญญากลุ่ม)</label>
+                            <div className="flex gap-3 items-center">
+                              <input
+                                type="text"
+                                value={tempCollege.mouImage || ""}
+                                onChange={(e) => setTempCollege({ ...tempCollege, mouImage: e.target.value })}
+                                className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                                placeholder="ป้อนลิงก์ URL หรือกดอัปโหลดจากเครื่อง"
+                              />
+                              <label className="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-4 py-2.5 rounded-xl text-xs font-bold transition-all border border-emerald-200 cursor-pointer shrink-0">
+                                <span>อัปโหลดรูป</span>
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  className="hidden"
+                                  onChange={(e) => handleFileUpload(e, (base64) => setTempCollege({ ...tempCollege, mouImage: base64 }))}
+                                />
+                              </label>
+                            </div>
+                            {tempCollege.mouImage && (
+                              <div className="mt-3">
+                                <p className="text-[10px] text-slate-400 font-bold mb-1">ตัวอย่างรูปถ่ายพิธีลงนามความร่วมมือ:</p>
+                                <img src={tempCollege.mouImage} alt="MOU signature preview" className="max-h-40 w-auto object-cover rounded-xl border" referrerPolicy="no-referrer" />
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs leading-relaxed">
+                          <div className="md:col-span-2 space-y-3">
+                            <div>
+                              <span className="text-[10px] text-slate-400 font-bold uppercase">พาดหัวส่วนความร่วมมือ</span>
+                              <h4 className="text-sm font-extrabold text-slate-800 mt-1">{collegeInfo.mouTitle || "ภาคีเครือข่ายความร่วมมือทางวิชาการและอุตสาหกรรม (MOU)"}</h4>
+                            </div>
+                            <div className="pt-2 border-t border-slate-100">
+                              <span className="text-[10px] text-slate-400 font-bold block">กลุ่มพันธมิตรปัจจุบัน:</span>
+                              <p className="text-slate-500 font-medium">CP ALL, TOYOTA, SCG, Western Digital, True Corporation, Minor International</p>
+                            </div>
+                          </div>
+                          <div className="flex flex-col items-center justify-center p-6 bg-slate-50 border border-slate-100 rounded-2xl">
+                            <span className="text-[10px] text-slate-400 font-bold mb-3 uppercase">ภาพพิธีร่วมมือความสำเร็จ</span>
+                            {collegeInfo.mouImage ? (
+                              <img src={collegeInfo.mouImage} alt="MOU signing preview" className="max-h-40 w-full object-cover rounded-xl shadow-xs" referrerPolicy="no-referrer" />
+                            ) : (
+                              <div className="h-40 w-full rounded-xl border border-dashed border-slate-200 bg-white flex flex-col items-center justify-center text-slate-400 text-xs font-bold text-center p-4">
+                                <Briefcase className="w-8 h-8 text-slate-300 mb-1.5" />
+                                <span>ไม่แสดงรูปภาพพิธีด้านข้าง</span>
+                                <span className="text-[9px] font-medium text-slate-400 mt-0.5">(ระบบจะสยายการ์ดพันธมิตรออกเป็น 6 ช่องเต็ม)</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* TAB 7: Admission CTA */}
+                  {activeSectionTab === "admission" && (
+                    <div className="space-y-6">
+                      <div className="bg-rose-50/50 border border-rose-100 rounded-2xl p-4 flex items-start gap-3">
+                        <Megaphone className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
+                        <div>
+                          <h4 className="text-xs font-extrabold text-rose-900">เซกชัน: แบนเนอร์รับสมัครนักศึกษาใหม่ (Admission CTA Banner)</h4>
+                          <p className="text-[10px] text-rose-700 leading-relaxed mt-0.5">
+                            ปรับเปลี่ยนหัวข้อแคมเปญรับสมัครรับโควตาพิเศษ และอัปโหลดภาพพื้นหลังเพื่อให้ระบบนำมาเกลี่ยสีและผสมผสานเป็นพาดหัวโฆษณาที่สะดุดตาสุดๆ ท้ายหน้าแรก
+                          </p>
+                        </div>
+                      </div>
+
+                      {isEditingCollege ? (
+                        <div className="space-y-4">
+                          <div className="space-y-1">
+                            <label className="text-[11px] font-bold text-slate-500">พาดหัวบนป้ายโฆษณาสมัครเรียน *</label>
+                            <textarea
+                              rows={2}
+                              required
                               value={tempCollege.admissionCtaTitle || ""}
                               onChange={(e) => setTempCollege({ ...tempCollege, admissionCtaTitle: e.target.value })}
                               className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                              placeholder="เปิดรับสมัครนักเรียน นักศึกษาใหม่แล้ววันนี้! สมัครด่วนเพื่อรับโควตาสิทธิพิเศษ"
+                              placeholder="เช่น เปิดรับสมัครนักเรียน นักศึกษาใหม่แล้ววันนี้! สมัครด่วนเพื่อรับโควตาสิทธิพิเศษ"
                             />
                           </div>
+                          <div className="space-y-1">
+                            <label className="text-[11px] font-bold text-slate-500">รูปภาพพื้นหลังแบนเนอร์ (Admission Banner Image URL หรือ อัปโหลดเพื่อแทนที่การเกลี่ยสีเรียบ)</label>
+                            <div className="flex gap-3 items-center">
+                              <input
+                                type="text"
+                                value={tempCollege.admissionCtaImage || ""}
+                                onChange={(e) => setTempCollege({ ...tempCollege, admissionCtaImage: e.target.value })}
+                                className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                                placeholder="ป้อนที่อยู่ URL หรือกดปุ่มอัปโหลดขวามือ"
+                              />
+                              <label className="bg-rose-50 hover:bg-rose-100 text-rose-700 px-4 py-2.5 rounded-xl text-xs font-bold transition-all border border-rose-200 cursor-pointer shrink-0">
+                                <span>อัปโหลดรูป</span>
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  className="hidden"
+                                  onChange={(e) => handleFileUpload(e, (base64) => setTempCollege({ ...tempCollege, admissionCtaImage: base64 }))}
+                                />
+                              </label>
+                            </div>
+                            {tempCollege.admissionCtaImage && (
+                              <div className="mt-3">
+                                <p className="text-[10px] text-slate-400 font-bold mb-1">ตัวอย่างภาพแบนเนอร์รับสมัครที่อัปโหลด:</p>
+                                <img src={tempCollege.admissionCtaImage} alt="Admission background preview" className="max-h-40 w-full object-cover rounded-xl border" referrerPolicy="no-referrer" />
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs leading-relaxed">
+                          <div className="md:col-span-2 space-y-3">
+                            <div>
+                              <span className="text-[10px] text-slate-400 font-bold uppercase">พาดหัวแบนเนอร์สมัครเรียน</span>
+                              <h4 className="text-sm font-extrabold text-slate-800 mt-1">{collegeInfo.admissionCtaTitle || "เปิดรับสมัครนักเรียน นักศึกษาใหม่แล้ววันนี้! สมัครด่วนเพื่อรับโควตาสิทธิพิเศษ"}</h4>
+                            </div>
+                            <div className="pt-2 border-t border-slate-100">
+                              <span className="text-[10px] text-slate-400 font-bold block">คำชี้แจง:</span>
+                              <p className="text-slate-500 font-medium">ภาพที่อัปโหลดจะถูกวางเป็นฉากหลังแบบโปร่งใส เคลือบด้วยโทนสีน้ำเงินเข้มและสีฟ้าระดับหรูหรา เพื่อรักษาระดับสีให้มีค่าความต่าง (Contrast) สูง ทำให้อ่านข้อความง่าย สวยงามตระการตา</p>
+                            </div>
+                          </div>
+                          <div className="flex flex-col items-center justify-center p-6 bg-slate-50 border border-slate-100 rounded-2xl text-center">
+                            <span className="text-[10px] text-slate-400 font-bold mb-3 uppercase">ภาพแบนเนอร์รับสมัครเรียน</span>
+                            {collegeInfo.admissionCtaImage ? (
+                              <img src={collegeInfo.admissionCtaImage} alt="Admission backdrop presentation" className="max-h-40 w-full object-cover rounded-xl shadow-xs" referrerPolicy="no-referrer" />
+                            ) : (
+                              <div className="h-40 w-full rounded-xl border border-dashed border-slate-200 bg-white flex flex-col items-center justify-center text-slate-400 text-xs font-bold text-center p-4">
+                                <Megaphone className="w-8 h-8 text-slate-300 mb-1.5" />
+                                <span>ไม่แสดงภาพกำหนดเอง</span>
+                                <span className="text-[9px] font-medium text-slate-400 mt-0.5">(ระบบจะใช้ฉากหลังไล่เฉดสีแสดส้มดั้งเดิม)</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* TAB 8: SEO Settings */}
+                  {activeSectionTab === "seo" && (
+                    <div className="space-y-6">
+                      <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 flex items-start gap-3">
+                        <Globe className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+                        <div>
+                          <h4 className="text-xs font-extrabold text-slate-900">ตัวสร้างและควบคุมการค้นหา (SEO Configurator)</h4>
+                          <p className="text-[10px] text-slate-500 leading-relaxed mt-0.5">
+                            ควบคุม Meta Tags, Title, Description และคีย์เวิร์ด เพื่อให้ระบบสืบค้นข้อมูลเช่น Google และระบบแชต (เช่น Line, Messenger) นำไปแสดงผลการแชร์ลิงก์อย่างมืออาชีพ
+                          </p>
                         </div>
                       </div>
 
-                      <div className="space-y-1 md:col-span-2">
-                        <label className="text-[11px] font-bold text-slate-500">ที่ตั้ง / ที่อยู่ติดต่อ</label>
-                        <input
-    type="text"
-    required
-    value={tempCollege.address}
-    onChange={(e) => setTempCollege({ ...tempCollege, address: e.target.value })}
-    className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
-  />
-                      </div>
-
-                      <div className="space-y-1">
-                        <label className="text-[11px] font-bold text-slate-500">เบอร์โทรสาร</label>
-                        <input
-    type="text"
-    value={tempCollege.phone}
-    onChange={(e) => setTempCollege({ ...tempCollege, phone: e.target.value })}
-    className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
-  />
-                      </div>
-
-                      <div className="space-y-1">
-                        <label className="text-[11px] font-bold text-slate-500">เบอร์มือถือรับสายหลัก</label>
-                        <input
-    type="text"
-    value={tempCollege.mobile}
-    onChange={(e) => setTempCollege({ ...tempCollege, mobile: e.target.value })}
-    className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
-  />
-                      </div>
-
-                      <div className="space-y-1">
-                        <label className="text-[11px] font-bold text-slate-500">อีเมลทางการ</label>
-                        <input
-    type="email"
-    value={tempCollege.email}
-    onChange={(e) => setTempCollege({ ...tempCollege, email: e.target.value })}
-    className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
-  />
-                      </div>
-
-                      <div className="space-y-1">
-                        <label className="text-[11px] font-bold text-slate-500">Facebook URL</label>
-                        <input
-    type="text"
-    value={tempCollege.facebook}
-    onChange={(e) => setTempCollege({ ...tempCollege, facebook: e.target.value })}
-    className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
-  />
-                      </div>
-
-                      <div className="space-y-1 md:col-span-2">
-                        <label className="text-[11px] font-bold text-slate-500">โลโก้วิทยาลัย (Logo URL หรือ อัพโหลดรูปภาพ)</label>
-                        <div className="flex gap-3 items-center">
-                          <input
-                            type="text"
-                            value={tempCollege.logoUrl || ""}
-                            onChange={(e) => setTempCollege({ ...tempCollege, logoUrl: e.target.value })}
-                            className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                            placeholder="https://... หรืออัพโหลดรูปภาพทางด้านขวา"
-                          />
-                          <label className="bg-blue-50 hover:bg-blue-100 text-blue-700 px-4 py-2.5 rounded-xl text-xs font-bold transition-all border border-blue-200 cursor-pointer shrink-0">
-                            <span>อัพโหลดรูป</span>
-                            <input
-                              type="file"
-                              accept="image/*"
-                              className="hidden"
-                              onChange={(e) => handleFileUpload(e, (base64) => setTempCollege({ ...tempCollege, logoUrl: base64 }))}
-                            />
-                          </label>
-                        </div>
-                      </div>
-
-                      {/* SEO SETTINGS SECTION */}
-                      <div className="md:col-span-2 border-t border-slate-200 pt-6 mt-2 space-y-4">
-                        <h3 className="text-xs font-extrabold text-slate-800 flex items-center space-x-2">
-                          <Globe className="w-4 h-4 text-emerald-600" />
-                          <span>การตั้งค่า Search Engine Optimization (SEO) & Meta Tags</span>
-                        </h3>
-                        <p className="text-[11px] text-slate-500">
-                          ตั้งค่าหัวข้อ คำอธิบาย และคีย์เวิร์ดของเว็บไซต์วิทยาลัยเพื่อให้ปรากฏบน Google Search, Facebook, Line และโซเชียลมีเดียได้อย่างถูกต้องและน่าดึงดูด
-                        </p>
-
+                      {isEditingCollege ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div className="space-y-1 md:col-span-2">
-                            <label className="text-[11px] font-bold text-slate-500">SEO Title (หัวข้อเว็บไซต์เมื่อแสดงในผลลัพธ์การค้นหา) *</label>
+                            <label className="text-[11px] font-bold text-slate-500">SEO Title (หัวข้อผลลัพธ์บน Google) *</label>
                             <input
                               type="text"
+                              required
                               value={tempCollege.seoTitle || ""}
                               onChange={(e) => setTempCollege({ ...tempCollege, seoTitle: e.target.value })}
                               className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                              placeholder="เช่น วิทยาลัยเทคโนโลยีปทุมรัตต์ - ทักษะเยี่ยม เปี่ยมคุณธรรม เลิศล้ำเทคโนโลยี"
+                              placeholder="วิทยาลัยเทคโนโลยีปทุมรัตต์ - ทักษะเยี่ยม เปี่ยมคุณธรรม เลิศล้ำเทคโนโลยี"
                             />
                           </div>
-
                           <div className="space-y-1 md:col-span-2">
-                            <label className="text-[11px] font-bold text-slate-500">SEO Description (คำอธิบายสั้นๆ ของเว็บไซต์) *</label>
+                            <label className="text-[11px] font-bold text-slate-500">SEO Description (คำอธิบายสั้นๆ สำหรับ Google) *</label>
                             <textarea
-                              rows={2}
+                              rows={3}
+                              required
                               value={tempCollege.seoDescription || ""}
                               onChange={(e) => setTempCollege({ ...tempCollege, seoDescription: e.target.value })}
                               className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                              placeholder="เช่น ระบบรับสมัครเรียนออนไลน์และบริการข้อมูลข่าวสารวิทยาลัยเทคโนโลยีปทุมรัตต์ จังหวัดร้อยเอ็ด..."
                             />
                           </div>
-
-                          <div className="space-y-1">
-                            <label className="text-[11px] font-bold text-slate-500">SEO Keywords (คีย์เวิร์ดสำหรับระบบค้นหา - คั่นด้วยจุลภาค) *</label>
+                          <div className="space-y-1 md:col-span-2">
+                            <label className="text-[11px] font-bold text-slate-500">SEO Keywords (คำสืบค้น - คั่นด้วยจุลภาค) *</label>
                             <input
                               type="text"
+                              required
                               value={tempCollege.seoKeywords || ""}
                               onChange={(e) => setTempCollege({ ...tempCollege, seoKeywords: e.target.value })}
                               className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                              placeholder="เช่น สมัครเรียน ปวช, ช่างยนต์, ช่างไฟฟ้ากำลัง, ปทุมรัตต์"
+                              placeholder="เช่น สมัครเรียน ปวช, ช่างยนต์, ช่างไฟฟ้า, บัญชี, ปทุมรัตต์, ร้อยเอ็ด"
                             />
                           </div>
-
-                          <div className="space-y-1">
-                            <label className="text-[11px] font-bold text-slate-500">SEO Open Graph Image (รูปภาพประกอบหน้าเว็บเวลาแชร์ลงโซเชียล URL)</label>
-                            <div className="flex gap-2">
+                          <div className="space-y-1 md:col-span-2">
+                            <label className="text-[11px] font-bold text-slate-500">SEO Open Graph Image (ภาพปกเวลาแชร์ลง Line/Facebook URL หรือ อัปโหลด)</label>
+                            <div className="flex gap-3 items-center">
                               <input
                                 type="text"
                                 value={tempCollege.seoOgImage || ""}
                                 onChange={(e) => setTempCollege({ ...tempCollege, seoOgImage: e.target.value })}
                                 className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                                placeholder="https://... หรืออัพโหลดรูปปกแชร์"
+                                placeholder="ป้อน URL หรือกดอัปโหลดไฟล์"
                               />
-                              <label className="bg-blue-50 hover:bg-blue-100 text-blue-700 px-3 py-2 rounded-xl text-xs font-bold transition-all border border-blue-200 cursor-pointer shrink-0 flex items-center">
-                                <span>อัพโหลด</span>
+                              <label className="bg-slate-50 hover:bg-slate-100 text-slate-700 px-4 py-2.5 rounded-xl text-xs font-bold transition-all border border-slate-200 cursor-pointer shrink-0">
+                                <span>อัปโหลดรูป</span>
                                 <input
                                   type="file"
                                   accept="image/*"
@@ -1350,506 +1913,57 @@ export default function AdminView() {
                             </div>
                           </div>
                         </div>
-                      </div>
-
-                      {/* DIRECTOR SETTINGS SECTION */}
-                      <div className="md:col-span-2 border-t border-slate-200 pt-6 mt-2 space-y-4">
-                        <h3 className="text-xs font-extrabold text-slate-800 flex items-center space-x-2">
-                          <GraduationCap className="w-4 h-4 text-amber-600" />
-                          <span>ข้อมูลและสาส์นต้อนรับจากผู้อำนวยการวิทยาลัย</span>
-                        </h3>
-                        <p className="text-[11px] text-slate-500">
-                          ปรับแต่งข้อมูลผู้อำนวยการ ภาพถ่าย คำวุฒิการศึกษา และสาส์นต้อนรับที่จะปรากฏบนหน้าแรกของวิทยาลัย
-                        </p>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div className="space-y-1">
-                            <label className="text-[11px] font-bold text-slate-500">ชื่อผู้อำนวยการ *</label>
-                            <input
-                              type="text"
-                              required
-                              value={tempCollege.directorName || ""}
-                              onChange={(e) => setTempCollege({ ...tempCollege, directorName: e.target.value })}
-                              className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                              placeholder="ดร. สมเกียรติ ปทุมสวัสดิ์"
-                            />
-                          </div>
-
-                          <div className="space-y-1">
-                            <label className="text-[11px] font-bold text-slate-500">วุฒิการศึกษา / ตำแหน่งย่อย *</label>
-                            <input
-                              type="text"
-                              required
-                              value={tempCollege.directorDegree || ""}
-                              onChange={(e) => setTempCollege({ ...tempCollege, directorDegree: e.target.value })}
-                              className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                              placeholder="Ph.D. in Vocational Education Management"
-                            />
-                          </div>
-
-                          <div className="space-y-1 md:col-span-2">
-                            <label className="text-[11px] font-bold text-slate-500">ภาพถ่ายผู้อำนวยการ (URL หรืออัพโหลดรูปภาพ) *</label>
-                            <div className="flex gap-2">
-                              <input
-                                type="text"
-                                required
-                                value={tempCollege.directorImage || ""}
-                                onChange={(e) => setTempCollege({ ...tempCollege, directorImage: e.target.value })}
-                                className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                                placeholder="https://..."
-                              />
-                              <label className="bg-blue-50 hover:bg-blue-100 text-blue-700 px-3 py-2 rounded-xl text-xs font-bold transition-all border border-blue-200 cursor-pointer shrink-0 flex items-center">
-                                <span>อัพโหลด</span>
-                                <input
-                                  type="file"
-                                  accept="image/*"
-                                  className="hidden"
-                                  onChange={(e) => handleFileUpload(e, (base64) => setTempCollege({ ...tempCollege, directorImage: base64 }))}
-                                />
-                              </label>
-                            </div>
-                          </div>
-
-                          <div className="space-y-1 md:col-span-2">
-                            <label className="text-[11px] font-bold text-slate-500">สาส์นต้อนรับจากผู้อำนวยการ *</label>
-                            <textarea
-                              rows={4}
-                              required
-                              value={tempCollege.directorMessage || ""}
-                              onChange={(e) => setTempCollege({ ...tempCollege, directorMessage: e.target.value })}
-                              className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                              placeholder="กรอกสาส์นต้อนรับผู้อำนวยการ..."
-                            />
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* STATS SETTINGS SECTION */}
-                      <div className="md:col-span-2 border-t border-slate-200 pt-6 mt-2 space-y-4">
-                        <h3 className="text-xs font-extrabold text-slate-800 flex items-center space-x-2">
-                          <Sliders className="w-4 h-4 text-blue-600" />
-                          <span>ตัวเลขสถิติความสำเร็จของวิทยาลัย (Stats Counter Grid)</span>
-                        </h3>
-                        <p className="text-[11px] text-slate-500">
-                          แก้ไขตัวเลขสถิติ 4 ช่องความสำเร็จที่แสดงบนหน้าแรกของวิทยาลัย
-                        </p>
-
+                      ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          {/* Stat 1 */}
-                          <div className="bg-slate-50/50 p-4 rounded-2xl border border-slate-200/60 space-y-3">
-                            <p className="text-[11px] font-extrabold text-blue-600 uppercase border-b border-slate-100 pb-1">สถิติที่ 1 (ตัวเลขการก่อตั้ง)</p>
-                            <div className="space-y-2">
-                              <div className="grid grid-cols-3 gap-2">
-                                <div className="col-span-1 space-y-1">
-                                  <label className="text-[10px] font-bold text-slate-400">ค่าตัวเลข *</label>
-                                  <input
-                                    type="text"
-                                    required
-                                    value={tempCollege.stat1Value || ""}
-                                    onChange={(e) => setTempCollege({ ...tempCollege, stat1Value: e.target.value })}
-                                    className="w-full text-xs p-2 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                                  />
-                                </div>
-                                <div className="col-span-2 space-y-1">
-                                  <label className="text-[10px] font-bold text-slate-400">ป้ายชื่อกำกับ *</label>
-                                  <input
-                                    type="text"
-                                    required
-                                    value={tempCollege.stat1Label || ""}
-                                    onChange={(e) => setTempCollege({ ...tempCollege, stat1Label: e.target.value })}
-                                    className="w-full text-xs p-2 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                                  />
-                                </div>
+                          {/* Google Search engine mockup */}
+                          <div className="space-y-2">
+                            <p className="text-[10px] text-slate-400 font-bold uppercase">ตัวอย่างหน้าแสดงผล Google (Desktop):</p>
+                            <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-xs space-y-1 text-xs">
+                              <div className="text-[10px] text-slate-500 truncate flex items-center space-x-1 font-mono font-sans">
+                                <span>https://pathumrat-tech.ac.th</span>
+                                <span className="text-[9px] text-slate-400">▼</span>
                               </div>
-                              <div className="space-y-1">
-                                <label className="text-[10px] font-bold text-slate-400">คำอธิบายเพิ่มเติม *</label>
-                                <input
-                                  type="text"
-                                  required
-                                  value={tempCollege.stat1Desc || ""}
-                                  onChange={(e) => setTempCollege({ ...tempCollege, stat1Desc: e.target.value })}
-                                  className="w-full text-xs p-2 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                                />
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Stat 2 */}
-                          <div className="bg-slate-50/50 p-4 rounded-2xl border border-slate-200/60 space-y-3">
-                            <p className="text-[11px] font-extrabold text-emerald-600 uppercase border-b border-slate-100 pb-1">สถิติที่ 2 (อัตราการมีงานทำ)</p>
-                            <div className="space-y-2">
-                              <div className="grid grid-cols-3 gap-2">
-                                <div className="col-span-1 space-y-1">
-                                  <label className="text-[10px] font-bold text-slate-400">ค่าตัวเลข *</label>
-                                  <input
-                                    type="text"
-                                    required
-                                    value={tempCollege.stat2Value || ""}
-                                    onChange={(e) => setTempCollege({ ...tempCollege, stat2Value: e.target.value })}
-                                    className="w-full text-xs p-2 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                                  />
-                                </div>
-                                <div className="col-span-2 space-y-1">
-                                  <label className="text-[10px] font-bold text-slate-400">ป้ายชื่อกำกับ *</label>
-                                  <input
-                                    type="text"
-                                    required
-                                    value={tempCollege.stat2Label || ""}
-                                    onChange={(e) => setTempCollege({ ...tempCollege, stat2Label: e.target.value })}
-                                    className="w-full text-xs p-2 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                                  />
-                                </div>
-                              </div>
-                              <div className="space-y-1">
-                                <label className="text-[10px] font-bold text-slate-400">คำอธิบายเพิ่มเติม *</label>
-                                <input
-                                  type="text"
-                                  required
-                                  value={tempCollege.stat2Desc || ""}
-                                  onChange={(e) => setTempCollege({ ...tempCollege, stat2Desc: e.target.value })}
-                                  className="w-full text-xs p-2 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                                />
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Stat 3 */}
-                          <div className="bg-slate-50/50 p-4 rounded-2xl border border-slate-200/60 space-y-3">
-                            <p className="text-[11px] font-extrabold text-cyan-600 uppercase border-b border-slate-100 pb-1">สถิติที่ 3 (สาขาวิชายอดนิยม)</p>
-                            <div className="space-y-2">
-                              <div className="grid grid-cols-3 gap-2">
-                                <div className="col-span-1 space-y-1">
-                                  <label className="text-[10px] font-bold text-slate-400">ค่าตัวเลข *</label>
-                                  <input
-                                    type="text"
-                                    required
-                                    value={tempCollege.stat3Value || ""}
-                                    onChange={(e) => setTempCollege({ ...tempCollege, stat3Value: e.target.value })}
-                                    className="w-full text-xs p-2 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                                  />
-                                </div>
-                                <div className="col-span-2 space-y-1">
-                                  <label className="text-[10px] font-bold text-slate-400">ป้ายชื่อกำกับ *</label>
-                                  <input
-                                    type="text"
-                                    required
-                                    value={tempCollege.stat3Label || ""}
-                                    onChange={(e) => setTempCollege({ ...tempCollege, stat3Label: e.target.value })}
-                                    className="w-full text-xs p-2 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                                  />
-                                </div>
-                              </div>
-                              <div className="space-y-1">
-                                <label className="text-[10px] font-bold text-slate-400">คำอธิบายเพิ่มเติม *</label>
-                                <input
-                                  type="text"
-                                  required
-                                  value={tempCollege.stat3Desc || ""}
-                                  onChange={(e) => setTempCollege({ ...tempCollege, stat3Desc: e.target.value })}
-                                  className="w-full text-xs p-2 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                                />
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Stat 4 */}
-                          <div className="bg-slate-50/50 p-4 rounded-2xl border border-slate-200/60 space-y-3">
-                            <p className="text-[11px] font-extrabold text-purple-600 uppercase border-b border-slate-100 pb-1">สถิติที่ 4 (ศิษย์เก่าสำเร็จความสำเร็จ)</p>
-                            <div className="space-y-2">
-                              <div className="grid grid-cols-3 gap-2">
-                                <div className="col-span-1 space-y-1">
-                                  <label className="text-[10px] font-bold text-slate-400">ค่าตัวเลข *</label>
-                                  <input
-                                    type="text"
-                                    required
-                                    value={tempCollege.stat4Value || ""}
-                                    onChange={(e) => setTempCollege({ ...tempCollege, stat4Value: e.target.value })}
-                                    className="w-full text-xs p-2 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                                  />
-                                </div>
-                                <div className="col-span-2 space-y-1">
-                                  <label className="text-[10px] font-bold text-slate-400">ป้ายชื่อกำกับ *</label>
-                                  <input
-                                    type="text"
-                                    required
-                                    value={tempCollege.stat4Label || ""}
-                                    onChange={(e) => setTempCollege({ ...tempCollege, stat4Label: e.target.value })}
-                                    className="w-full text-xs p-2 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                                  />
-                                </div>
-                              </div>
-                              <div className="space-y-1">
-                                <label className="text-[10px] font-bold text-slate-400">คำอธิบายเพิ่มเติม *</label>
-                                <input
-                                  type="text"
-                                  required
-                                  value={tempCollege.stat4Desc || ""}
-                                  onChange={(e) => setTempCollege({ ...tempCollege, stat4Desc: e.target.value })}
-                                  className="w-full text-xs p-2 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* HISTORY SETTINGS SECTION */}
-                      <div className="md:col-span-2 border-t border-slate-200 pt-6 mt-2 space-y-4">
-                        <h3 className="text-xs font-extrabold text-slate-800 flex items-center space-x-2">
-                          <Award className="w-4 h-4 text-emerald-600" />
-                          <span>เนื้อหาความเป็นมาของวิทยาลัย (History Page Details)</span>
-                        </h3>
-                        <p className="text-[11px] text-slate-500">
-                          ปรับแต่งข้อมูลสำหรับหน้าประวัติความเป็นมาและค่านิยมหลักของวิทยาลัย
-                        </p>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div className="space-y-1 md:col-span-2">
-                            <label className="text-[11px] font-bold text-slate-500">หัวข้อประวัติศาสตร์ *</label>
-                            <input
-                              type="text"
-                              required
-                              value={tempCollege.historyTitle || ""}
-                              onChange={(e) => setTempCollege({ ...tempCollege, historyTitle: e.target.value })}
-                              className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                              placeholder="วิทยาลัยเทคโนโลยีปทุมรัตต์"
-                            />
-                          </div>
-
-                          <div className="space-y-1 md:col-span-2">
-                            <label className="text-[11px] font-bold text-slate-500">เนื้อหาประวัติความเป็นมา ย่อแรก *</label>
-                            <textarea
-                              rows={3}
-                              required
-                              value={tempCollege.historyText1 || ""}
-                              onChange={(e) => setTempCollege({ ...tempCollege, historyText1: e.target.value })}
-                              className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                              placeholder="กรอกเนื้อหาย่อหน้าที่หนึ่ง..."
-                            />
-                          </div>
-
-                          <div className="space-y-1 md:col-span-2">
-                            <label className="text-[11px] font-bold text-slate-500">เนื้อหาประวัติความเป็นมา ย่อสอง *</label>
-                            <textarea
-                              rows={3}
-                              required
-                              value={tempCollege.historyText2 || ""}
-                              onChange={(e) => setTempCollege({ ...tempCollege, historyText2: e.target.value })}
-                              className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                              placeholder="กรอกเนื้อหาย่อหน้าที่สอง..."
-                            />
-                          </div>
-
-                          <div className="space-y-1 md:col-span-2">
-                            <label className="text-[11px] font-bold text-slate-500">ภาพแบนเนอร์หน้าประวัติความเป็นมา (URL หรืออัพโหลดรูปภาพ) *</label>
-                            <div className="flex gap-2">
-                              <input
-                                type="text"
-                                required
-                                value={tempCollege.historyImage || ""}
-                                onChange={(e) => setTempCollege({ ...tempCollege, historyImage: e.target.value })}
-                                className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                                placeholder="https://..."
-                              />
-                              <label className="bg-blue-50 hover:bg-blue-100 text-blue-700 px-3 py-2 rounded-xl text-xs font-bold transition-all border border-blue-200 cursor-pointer shrink-0 flex items-center">
-                                <span>อัพโหลด</span>
-                                <input
-                                  type="file"
-                                  accept="image/*"
-                                  className="hidden"
-                                  onChange={(e) => handleFileUpload(e, (base64) => setTempCollege({ ...tempCollege, historyImage: base64 }))}
-                                />
-                              </label>
-                            </div>
-                          </div>
-
-                          <div className="space-y-1 md:col-span-2">
-                            <label className="text-[11px] font-bold text-slate-500">ค่านิยมหลักของวิทยาลัย *</label>
-                            <textarea
-                              rows={2}
-                              required
-                              value={tempCollege.coreValues || ""}
-                              onChange={(e) => setTempCollege({ ...tempCollege, coreValues: e.target.value })}
-                              className="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                              placeholder="ซื่อสัตย์ มีระเบียบวินัย ใฝ่รู้คู่คุณธรรม..."
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex space-x-3 justify-end pt-4 border-t border-slate-100">
-                      <button
-    type="button"
-    onClick={() => setIsEditingCollege(false)}
-    className="bg-slate-100 hover:bg-slate-200 text-slate-600 px-5 py-2.5 rounded-xl text-xs font-bold transition-all"
-  >
-                        ยกเลิก
-                      </button>
-                      <button
-    type="submit"
-    className="bg-brand-primary hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl text-xs font-bold transition-all shadow-md"
-  >
-                        บันทึกการแก้ไข
-                      </button>
-                    </div>
-                  </form> : <div className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50 p-6 rounded-2xl border border-slate-100">
-                      <div className="space-y-3">
-                        <div>
-                          <p className="text-[10px] text-slate-400 font-bold uppercase">วิทยาลัย</p>
-                          <p className="text-sm font-extrabold text-slate-800">{collegeInfo.name}</p>
-                          <p className="text-[11px] text-slate-500">{collegeInfo.englishName}</p>
-                        </div>
-                        <div>
-                          <p className="text-[10px] text-slate-400 font-bold uppercase">ปีที่ก่อตั้ง</p>
-                          <p className="text-xs font-semibold text-slate-700">พ.ศ. {collegeInfo.foundedYear}</p>
-                        </div>
-                        <div>
-                          <p className="text-[10px] text-slate-400 font-bold uppercase">ที่ตั้งสำนักงาน</p>
-                          <p className="text-xs font-medium text-slate-600 leading-relaxed">{collegeInfo.address}</p>
-                        </div>
-                      </div>
-
-                      <div className="space-y-3">
-                        <div>
-                          <p className="text-[10px] text-slate-400 font-bold uppercase">ปรัชญา</p>
-                          <p className="text-xs font-bold text-brand-primary">“{collegeInfo.philosophy}”</p>
-                        </div>
-                        <div>
-                          <p className="text-[10px] text-slate-400 font-bold uppercase">วิสัยทัศน์</p>
-                          <p className="text-xs font-medium text-slate-600 leading-relaxed">{collegeInfo.vision}</p>
-                        </div>
-                        <div className="grid grid-cols-2 gap-2 pt-1">
-                          <div>
-                            <p className="text-[10px] text-slate-400 font-bold uppercase">อัตลักษณ์</p>
-                            <p className="text-xs font-semibold text-slate-700">{collegeInfo.identity}</p>
-                          </div>
-                          <div>
-                            <p className="text-[10px] text-slate-400 font-bold uppercase">เอกลักษณ์</p>
-                            <p className="text-xs font-semibold text-slate-700">{collegeInfo.uniqueness}</p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Section Titles View */}
-                    <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100 space-y-4">
-                      <h3 className="text-xs font-bold text-slate-700 border-b border-slate-200 pb-2 flex items-center space-x-1.5">
-                        <Sliders className="w-4 h-4 text-brand-primary" />
-                        <span>หัวข้อพาดหัวหน้าแรก (Homepage Section Titles) ที่เปิดใช้งาน</span>
-                      </h3>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                        <div className="bg-white p-3 rounded-xl border border-slate-100 space-y-1 shadow-xs">
-                          <p className="text-[9px] text-slate-400 font-bold uppercase">1. พาดหัววิสัยทัศน์</p>
-                          <p className="text-xs font-semibold text-slate-700">{collegeInfo.philosophyTitle || "มุ่งสร้างกำลังคนระดับอาชีพ เพื่อยกระดับสังคมและพัฒนาชาติ"}</p>
-                        </div>
-                        <div className="bg-white p-3 rounded-xl border border-slate-100 space-y-1 shadow-xs">
-                          <p className="text-[9px] text-slate-400 font-bold uppercase">2. พาดหัวสาส์นผู้อำนวยการ</p>
-                          <p className="text-xs font-semibold text-slate-700">{collegeInfo.directorWelcome || "ยินดีต้อนรับสู่ รั้วเทคโนโลยีปทุมรัตต์ (PTC)"}</p>
-                        </div>
-                        <div className="bg-white p-3 rounded-xl border border-slate-100 space-y-1 shadow-xs">
-                          <p className="text-[9px] text-slate-400 font-bold uppercase">3. พาดหัวบริการดิจิทัล</p>
-                          <p className="text-xs font-semibold text-slate-700">{collegeInfo.gatewayTitle || "PTC Digital Gateway & Portal"}</p>
-                        </div>
-                        <div className="bg-white p-3 rounded-xl border border-slate-100 space-y-1 shadow-xs">
-                          <p className="text-[9px] text-slate-400 font-bold uppercase">4. พาดหัวแผนกวิชาหลักสูตร</p>
-                          <p className="text-xs font-semibold text-slate-700">{collegeInfo.curriculumTitle || "หลักสูตรปรีชาพากเพียร ปวช. และ ปวส."}</p>
-                        </div>
-                        <div className="bg-white p-3 rounded-xl border border-slate-100 space-y-1 shadow-xs">
-                          <p className="text-[9px] text-slate-400 font-bold uppercase">5. พาดหัวภาคีความร่วมมือ (MOU)</p>
-                          <p className="text-xs font-semibold text-slate-700">{collegeInfo.mouTitle || "ภาคีเครือข่ายความร่วมมือทางวิชาการและอุตสาหกรรม (MOU)"}</p>
-                        </div>
-                        <div className="bg-white p-3 rounded-xl border border-slate-100 space-y-1 shadow-xs">
-                          <p className="text-[9px] text-slate-400 font-bold uppercase">6. พาดหัวรับสมัครเรียนใหม่</p>
-                          <p className="text-xs font-semibold text-slate-700">{collegeInfo.admissionCtaTitle || "เปิดรับสมัครนักเรียน นักศึกษาใหม่แล้ววันนี้! สมัครด่วนเพื่อรับโควตาสิทธิพิเศษ"}</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Contact Info View */}
-                    <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100 space-y-4">
-                      <h3 className="text-xs font-bold text-slate-700 border-b border-slate-200 pb-2">ช่องทางการติดต่อวิทยาลัย</h3>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-slate-600">
-                        <div className="flex items-center space-x-2">
-                          <Phone className="w-4 h-4 text-blue-500 shrink-0" />
-                          <span>เบอร์โทร: {collegeInfo.phone}</span>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Phone className="w-4 h-4 text-emerald-500 shrink-0" />
-                          <span>เบอร์มือถือ: {collegeInfo.mobile}</span>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Mail className="w-4 h-4 text-red-500 shrink-0" />
-                          <span>อีเมล: {collegeInfo.email}</span>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Users className="w-4 h-4 text-indigo-500 shrink-0" />
-                          <span>Facebook: {collegeInfo.facebook}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* SEO REAL-TIME PREVIEWS */}
-                    <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100 space-y-4">
-                      <div>
-                        <h3 className="text-xs font-extrabold text-slate-700 border-b border-slate-200 pb-2 flex items-center space-x-2">
-                          <Globe className="w-4 h-4 text-emerald-600 shrink-0" />
-                          <span>ตัวอย่างผลลัพธ์ในระบบสืบค้นและโซเชียลมีเดีย (SEO Preview)</span>
-                        </h3>
-                        <p className="text-[10px] text-slate-400 mt-1">
-                          ลักษณะที่เว็บไซต์จะถูกแสดงผลบน Google Search Engine และแอปพลิเคชันส่งข่าวสารต่างๆ
-                        </p>
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {/* Google Result Preview */}
-                        <div className="space-y-1.5">
-                          <p className="text-[9px] text-slate-500 font-extrabold uppercase">ตัวอย่างบน Google Search (Desktop)</p>
-                          <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-xs space-y-1">
-                            <div className="text-[10px] text-slate-500 truncate flex items-center space-x-1 font-mono">
-                              <span>https://pathumrat-tech.ac.th</span>
-                              <span className="text-[9px] text-slate-400">▼</span>
-                            </div>
-                            <h4 className="text-blue-800 text-xs font-semibold hover:underline cursor-pointer truncate font-sans">
-                              {collegeInfo.seoTitle || `${collegeInfo.name} | ${collegeInfo.philosophy}`}
-                            </h4>
-                            <p className="text-slate-600 text-[10px] leading-relaxed line-clamp-2">
-                              {collegeInfo.seoDescription || collegeInfo.vision}
-                            </p>
-                          </div>
-                        </div>
-
-                        {/* Facebook / Line Share Card Preview */}
-                        <div className="space-y-1.5">
-                          <p className="text-[9px] text-slate-500 font-extrabold uppercase">ตัวอย่างบนโซเชียลมีเดีย (Facebook/Line Share Card)</p>
-                          <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-xs flex flex-col">
-                            <div className="aspect-[1.91/1] w-full bg-slate-100 overflow-hidden relative border-b border-slate-100 flex items-center justify-center">
-                              {collegeInfo.seoOgImage || collegeInfo.logoUrl ? (
-                                <img 
-                                  src={collegeInfo.seoOgImage || collegeInfo.logoUrl} 
-                                  alt="SEO Share Preview" 
-                                  className="w-full h-full object-cover"
-                                  referrerPolicy="no-referrer"
-                                />
-                              ) : (
-                                <span className="text-slate-400 text-[9px] font-semibold">ไม่มีภาพปกแชร์พิเศษ (ดึงโลโก้วิทยาลัยแทน)</span>
-                              )}
-                            </div>
-                            <div className="p-2 bg-slate-50 space-y-0.5">
-                              <p className="text-slate-400 text-[8px] uppercase font-mono tracking-wider">pathumrat-tech.ac.th</p>
-                              <h5 className="text-slate-800 font-bold text-[10px] truncate">
+                              <h4 className="text-blue-800 font-semibold hover:underline cursor-pointer truncate font-sans">
                                 {collegeInfo.seoTitle || `${collegeInfo.name} | ${collegeInfo.philosophy}`}
-                              </h5>
-                              <p className="text-slate-500 text-[9px] line-clamp-1">
+                              </h4>
+                              <p className="text-slate-600 text-[10px] leading-relaxed line-clamp-2">
                                 {collegeInfo.seoDescription || collegeInfo.vision}
                               </p>
                             </div>
                           </div>
+
+                          {/* Social media card mockup */}
+                          <div className="space-y-2">
+                            <p className="text-[10px] text-slate-400 font-bold uppercase">ตัวอย่างเมื่อแชร์ลงแชต (Line/Facebook):</p>
+                            <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-xs flex flex-col text-xs">
+                              <div className="aspect-[1.91/1] w-full bg-slate-100 overflow-hidden relative border-b flex items-center justify-center">
+                                {collegeInfo.seoOgImage || collegeInfo.logoUrl ? (
+                                  <img 
+                                    src={collegeInfo.seoOgImage || collegeInfo.logoUrl} 
+                                    alt="SEO Preview" 
+                                    className="w-full h-full object-cover"
+                                    referrerPolicy="no-referrer"
+                                  />
+                                ) : (
+                                  <span className="text-slate-400 text-[9px] font-semibold">ไม่มีภาพปกแชร์พิเศษ (ดึงภาพโลโก้แทน)</span>
+                                )}
+                              </div>
+                              <div className="p-3 bg-slate-50 space-y-1">
+                                <p className="text-slate-400 text-[8px] uppercase font-mono tracking-wider font-sans">pathumrat-tech.ac.th</p>
+                                <h5 className="text-slate-800 font-bold text-[10px] truncate font-sans">
+                                  {collegeInfo.seoTitle || `${collegeInfo.name} | ${collegeInfo.philosophy}`}
+                                </h5>
+                                <p className="text-slate-500 text-[9px] line-clamp-1 font-sans">
+                                  {collegeInfo.seoDescription || collegeInfo.vision}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
                         </div>
-                      </div>
+                      )}
                     </div>
-                  </div>}
+                  )}
+                </div>
               </div>}
 
             {
