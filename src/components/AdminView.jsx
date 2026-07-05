@@ -28,6 +28,7 @@ import {
   ShieldCheck,
   Award,
   Eye,
+  EyeOff,
   GraduationCap,
   Database,
   FileSpreadsheet,
@@ -108,6 +109,10 @@ export default function AdminView() {
   // --- SECURITY ENHANCEMENTS STATE & LOGIC ---
   const [lockoutTimeLeft, setLockoutTimeLeft] = useState(0);
   const [securityLogs, setSecurityLogs] = useState([]);
+  const [visiblePasswords, setVisiblePasswords] = useState({});
+  const isUsingDefaultPassword = adminUsers.some(
+    (u) => u.username.toLowerCase() === "admin" && u.password === "admin"
+  );
   const [securitySubTab, setSecuritySubTab] = useState("users"); // "users" or "logs"
 
   // 1. Audit Log Action Writer
@@ -228,8 +233,8 @@ export default function AdminView() {
       (u) => u.username.trim().toLowerCase() === uInput && u.password === pInput
     );
     
-    if (foundUser || (uInput === "admin" && pInput === "admin")) {
-      const adminName = foundUser ? foundUser.name : "ผู้ดูแลระบบหลัก";
+    if (foundUser) {
+      const adminName = foundUser.name;
       sessionStorage.setItem("ptc_admin_authenticated", "true");
       sessionStorage.setItem("ptc_admin_username", uInput);
       sessionStorage.setItem("ptc_admin_name", adminName);
@@ -435,11 +440,27 @@ export default function AdminView() {
       alert("กรุณากรอกข้อมูลให้ครบถ้วนทุกช่อง");
       return;
     }
+
+    if (tempAdminUser.password.trim().length < 6) {
+      alert("เพื่อความปลอดภัยตามหลัก CIA Triad (Confidentiality) รหัสผ่านต้องมีความยาวอย่างน้อย 6 ตัวอักษร");
+      return;
+    }
     
     if (editingAdminUser) {
+      const isSelf = editingAdminUser.username.toLowerCase() === (sessionStorage.getItem("ptc_admin_username") || "").toLowerCase();
+      const isPasswordChanged = editingAdminUser.password !== tempAdminUser.password;
+
       updateAdminUser(editingAdminUser.username, tempAdminUser);
       triggerToast("แก้ไขบัญชีผู้ดูแลระบบสำเร็จ!");
       logAdminAction("จัดการผู้ดูแลระบบ", `แก้ไขข้อมูลสิทธิ์สำหรับ ID: ${tempAdminUser.username} (${tempAdminUser.name})`);
+
+      if (isSelf && isPasswordChanged) {
+        setTimeout(() => {
+          sessionStorage.clear();
+          setIsAuthenticated(false);
+          alert("เนื่องจากคุณได้เปลี่ยนรหัสผ่านของบัญชีตนเอง เพื่อความปลอดภัยตามหลักการ CIA Triad กรุณาเข้าสู่ระบบใหม่อีกครั้งด้วยรหัสผ่านใหม่");
+        }, 1500);
+      }
     } else {
       const exists = adminUsers.some(
         (u) => u.username.toLowerCase() === tempAdminUser.username.trim().toLowerCase()
@@ -988,6 +1009,26 @@ export default function AdminView() {
     /* Right Side Working stage */
   }
           <div className="lg:col-span-9 bg-white border border-slate-200 rounded-3xl p-6 md:p-8 shadow-sm min-h-[500px]">
+            {isUsingDefaultPassword && (
+              <div className="mb-6 p-5 bg-amber-50/75 border border-amber-200 rounded-3xl flex items-start space-x-3 text-amber-800 shadow-sm" id="default-password-warning">
+                <ShieldAlert className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                <div className="space-y-1 text-xs">
+                  <p className="font-extrabold text-amber-900 flex items-center space-x-1.5">
+                    <span>แจ้งเตือนช่องโหว่ความปลอดภัย (CIA Triad - Confidentiality)</span>
+                  </p>
+                  <p className="text-amber-700 leading-relaxed font-medium">
+                    ระบบตรวจพบว่า บัญชีผู้ดูแลระบบหลักยังคงใช้รหัสผ่านเริ่มต้น <strong className="font-mono bg-amber-100 px-1.5 py-0.5 rounded text-amber-950 font-bold">"admin"</strong> อยู่ ซึ่งมีความเสี่ยงสูงต่อการถูกเจาะระบบ (Unauthorized Access)
+                  </p>
+                  <button
+                    onClick={() => setActiveSubTab("admin_users")}
+                    className="mt-2 bg-amber-600 hover:bg-amber-700 text-white px-3.5 py-1.5 rounded-xl font-bold text-[10px] transition-colors cursor-pointer inline-flex items-center space-x-1 shadow-sm"
+                  >
+                    <span>คลิกเพื่อไปเปลี่ยนรหัสผ่านทันที</span>
+                    <ChevronRight className="w-3 h-3" />
+                  </button>
+                </div>
+              </div>
+            )}
             {
     /* SUB-TAB 1: Overview and Statistics */
   }
@@ -2868,9 +2909,26 @@ export default function AdminView() {
                                 </span>
                               </td>
                               <td className="p-4">
-                                <span className="font-mono tracking-widest text-slate-400">
-                                  {user.password}
-                                </span>
+                                <div className="flex items-center space-x-2">
+                                  <span className="font-mono text-slate-700 tracking-wider">
+                                    {visiblePasswords[user.username] ? user.password : "••••••••"}
+                                  </span>
+                                  <button
+                                    type="button"
+                                    onClick={() => setVisiblePasswords({
+                                      ...visiblePasswords,
+                                      [user.username]: !visiblePasswords[user.username]
+                                    })}
+                                    className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-md transition-all cursor-pointer"
+                                    title={visiblePasswords[user.username] ? "ซ่อนรหัสผ่าน" : "แสดงรหัสผ่าน"}
+                                  >
+                                    {visiblePasswords[user.username] ? (
+                                      <EyeOff className="w-3.5 h-3.5" />
+                                    ) : (
+                                      <Eye className="w-3.5 h-3.5" />
+                                    )}
+                                  </button>
+                                </div>
                               </td>
                               <td className="p-4 text-right pr-6">
                                 <div className="flex space-x-2 justify-end">
