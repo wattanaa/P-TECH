@@ -5,7 +5,7 @@
 import { GraduationCap, Phone, Mail, MapPin, Facebook, Globe, Award, ShieldCheck } from "lucide-react";
 import { useData } from "../context/DataContext";
 export default function Footer({ setActiveTab }) {
-  const { collegeInfo } = useData();
+  const { collegeInfo, t, currentLang } = useData();
   const currentYear = (/* @__PURE__ */ new Date()).getFullYear();
   const handleLinkClick = (tabId) => {
     setActiveTab(tabId);
@@ -20,15 +20,15 @@ export default function Footer({ setActiveTab }) {
           <div className="flex items-center space-x-3">
             <Award className="w-8 h-8 text-cyan-400 shrink-0" />
             <div>
-              <p className="text-white font-semibold text-sm">การรับรองคุณภาพมาตรฐาน</p>
-              <p className="text-xs text-slate-400">ผ่านการประเมินคุณภาพการศึกษาทางวิชาชีพจากกระทรวงศึกษาธิการ</p>
+              <p className="text-white font-semibold text-sm">{t("การรับรองคุณภาพมาตรฐาน", "Accredited Quality Standards")}</p>
+              <p className="text-xs text-slate-400">{t("ผ่านการประเมินคุณภาพการศึกษาทางวิชาชีพจากกระทรวงศึกษาธิการ", "Certified by the Ministry of Education for high academic standards")}</p>
             </div>
           </div>
           <div className="flex items-center space-x-3">
             <ShieldCheck className="w-8 h-8 text-green-500 shrink-0" />
             <div>
-              <p className="text-white font-semibold text-sm">หลักสูตรตรงความต้องการตลาด</p>
-              <p className="text-xs text-slate-400">เรียนรู้ทักษะที่ใช้ได้จริงพร้อมฝึกงานในบริษัทระดับประเทศ</p>
+              <p className="text-white font-semibold text-sm">{t("หลักสูตรตรงความต้องการตลาด", "Market-Driven Curriculum")}</p>
+              <p className="text-xs text-slate-400">{t("เรียนรู้ทักษะที่ใช้ได้จริงพร้อมฝึกงานในบริษัทระดับประเทศ", "Learn practical skills and complete internships in nationwide corporations")}</p>
             </div>
           </div>
         </div>
@@ -45,15 +45,15 @@ export default function Footer({ setActiveTab }) {
                 <GraduationCap className="w-6 h-6 text-cyan-300" />
               </div>
               <div>
-                <h3 className="text-white font-bold text-md leading-tight">{collegeInfo.name}</h3>
+                <h3 className="text-white font-bold text-md leading-tight">{t(collegeInfo.name, collegeInfo.englishName)}</h3>
                 <p className="text-xs text-slate-400">Pathumrat Technology College</p>
               </div>
             </div>
             <p className="text-sm text-slate-400 leading-relaxed">
-              "{collegeInfo.philosophy}"
+              "{currentLang === "th" ? collegeInfo.philosophy : "Excellent Skills, Rich Morals, Supreme Technology"}"
             </p>
             <p className="text-xs text-slate-500 leading-relaxed">
-              วิทยาลัยมุ่งเน้นสร้างแรงงานวิชาชีพที่มีทักษะขั้นสูง ซื่อสัตย์ มีระเบียบวินัย และสามารถใช้เทคโนโลยีสมัยใหม่พัฒนาตนเองและท้องถิ่นได้อย่างยั่งยืน
+              {t("วิทยาลัยมุ่งเน้นสร้างแรงงานวิชาชีพที่มีทักษะขั้นสูง ซื่อสัตย์ มีระเบียบวินัย และสามารถใช้เทคโนโลยีสมัยใหม่พัฒนาตนเองและท้องถิ่นได้อย่างยั่งยืน", "PTC cultivates high-skilled vocational personnel equipped with discipline and technological adaptability for sustainable community growth.")}
             </p>
           </div>
 
@@ -62,7 +62,7 @@ export default function Footer({ setActiveTab }) {
   }
           <div>
             <h4 className="text-white font-bold text-sm uppercase tracking-wider mb-4 border-l-4 border-brand-primary pl-3">
-              ลิงก์ที่เป็นประโยชน์
+              {t("ลิงก์ที่เป็นประโยชน์", "Useful Links")}
             </h4>
             <ul className="space-y-2 text-sm">
               <li>
@@ -70,7 +70,7 @@ export default function Footer({ setActiveTab }) {
                   onClick={() => handleLinkClick("home")}
                   className="hover:text-cyan-400 transition-colors duration-150 text-left cursor-pointer"
                 >
-                  หน้าแรกวิทยาลัย
+                  {t("หน้าแรกวิทยาลัย", "College Home")}
                 </button>
               </li>
               <li>
@@ -78,7 +78,7 @@ export default function Footer({ setActiveTab }) {
                   onClick={() => handleLinkClick("history")}
                   className="hover:text-cyan-400 transition-colors duration-150 text-left cursor-pointer"
                 >
-                  ประวัติความเป็นมาของวิทยาลัย
+                  {t("ประวัติความเป็นมาของวิทยาลัย", "Our History")}
                 </button>
               </li>
               <li>
@@ -86,7 +86,7 @@ export default function Footer({ setActiveTab }) {
                   onClick={() => handleLinkClick("personnel")}
                   className="hover:text-cyan-400 transition-colors duration-150 text-left cursor-pointer"
                 >
-                  ทำเนียบคณะผู้บริหารสถานศึกษา
+                  {t("ทำเนียบคณะผู้บริหารสถานศึกษา", "Our Personnel List")}
                 </button>
               </li>
               <li>
@@ -94,7 +94,7 @@ export default function Footer({ setActiveTab }) {
                   onClick={() => handleLinkClick("curriculum")}
                   className="hover:text-cyan-400 transition-colors duration-150 text-left cursor-pointer"
                 >
-                  หลักสูตรประกาศนียบัตรวิชาชีพ
+                  {t("หลักสูตรประกาศนียบัตรวิชาชีพ", "Vocational Curriculum")}
                 </button>
               </li>
               <li>
@@ -102,7 +102,7 @@ export default function Footer({ setActiveTab }) {
                   onClick={() => handleLinkClick("news")}
                   className="hover:text-cyan-400 transition-colors duration-150 text-left cursor-pointer"
                 >
-                  ข่าวสารและกิจกรรมประกาศ
+                  {t("ข่าวสารและกิจกรรมประกาศ", "News & Events")}
                 </button>
               </li>
               <li>
@@ -110,7 +110,7 @@ export default function Footer({ setActiveTab }) {
                   onClick={() => handleLinkClick("admission")}
                   className="hover:text-cyan-400 transition-colors duration-150 text-left cursor-pointer"
                 >
-                  แบบฟอร์มสมัครเรียนออนไลน์
+                  {t("แบบฟอร์มสมัครเรียนออนไลน์", "Online Application Form")}
                 </button>
               </li>
             </ul>
@@ -121,15 +121,15 @@ export default function Footer({ setActiveTab }) {
   }
           <div>
             <h4 className="text-white font-bold text-sm uppercase tracking-wider mb-4 border-l-4 border-brand-primary pl-3">
-              หลักสูตรหลักของเรา
+              {t("หลักสูตรหลักของเรา", "Our Main Courses")}
             </h4>
             <ul className="space-y-2 text-sm text-slate-400">
-              <li>• แผนกช่างยนต์ (ปวช. / ปวส.)</li>
-              <li>• แผนกช่างไฟฟ้ากำลัง (ปวช. / ปวส.)</li>
-              <li>• แผนกเทคโนโลยีสารสนเทศ (ปวช. / ปวส.)</li>
-              <li>• แผนกการบัญชีและการเงิน (ปวช. / ปวส.)</li>
+              <li>{t("• แผนกช่างยนต์ (ปวช. / ปวส.)", "• Automotive (Cert. & Diploma)")}</li>
+              <li>{t("• แผนกช่างไฟฟ้ากำลัง (ปวช. / ปวส.)", "• Electrical Power (Cert. & Diploma)")}</li>
+              <li>{t("• แผนกเทคโนโลยีสารสนเทศ (ปวช. / ปวส.)", "• Information Technology (Cert. & Diploma)")}</li>
+              <li>{t("• แผนกการบัญชีและการเงิน (ปวช. / ปวส.)", "• Accounting & Finance (Cert. & Diploma)")}</li>
               <li className="text-xs text-cyan-400 mt-2 font-semibold">
-                * พัฒนาหลักสูตรร่วมกับสถานประกอบการเพื่อการมีงานทำ 100%
+                * {t("พัฒนาหลักสูตรร่วมกับสถานประกอบการเพื่อการมีงานทำ 100%", "Developed with corporate partners for 100% employment rate")}
               </li>
             </ul>
           </div>
@@ -139,12 +139,12 @@ export default function Footer({ setActiveTab }) {
   }
           <div className="space-y-3">
             <h4 className="text-white font-bold text-sm uppercase tracking-wider mb-4 border-l-4 border-brand-primary pl-3">
-              ติดต่อสอบถาม
+              {t("ติดต่อสอบถาม", "Contact Us")}
             </h4>
             <div className="flex items-start space-x-2.5 text-sm">
               <MapPin className="w-5 h-5 text-cyan-400 shrink-0 mt-0.5" />
               <span className="text-slate-400 leading-relaxed text-xs">
-                {collegeInfo.address}
+                {currentLang === "th" ? collegeInfo.address : "Pathumrat Sub-district, Pathumrat District, Roi Et Province, 45190"}
               </span>
             </div>
             <div className="flex items-center space-x-2.5 text-sm">
@@ -191,12 +191,12 @@ export default function Footer({ setActiveTab }) {
             title="ระบบจัดการหลังบ้าน"
             id="footer-admin-gate"
           >
-            © 2026 วิทยาลัยเทคโนโลยีปทุมรัตต์
+            {t("© 2026 วิทยาลัยเทคโนโลยีปทุมรัตต์", "© 2026 Pathumrat Technology College")}
           </p>
           <div className="flex space-x-4">
-            <span className="hover:text-slate-400">นโยบายความเป็นส่วนตัว</span>
+            <span className="hover:text-slate-400">{t("นโยบายความเป็นส่วนตัว", "Privacy Policy")}</span>
             <span>•</span>
-            <span className="hover:text-slate-400">แผนผังเว็บไซต์</span>
+            <span className="hover:text-slate-400">{t("แผนผังเว็บไซต์", "Sitemap")}</span>
           </div>
         </div>
       </div>

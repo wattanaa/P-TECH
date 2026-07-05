@@ -14,6 +14,7 @@ import HistoryView from "./components/HistoryView";
 import PersonnelView from "./components/PersonnelView";
 import AdminView from "./components/AdminView";
 import ContactView from "./components/ContactView";
+import AcademicCalendar from "./components/AcademicCalendar";
 import { useData } from "./context/DataContext";
 import { ArrowUp, X } from "lucide-react";
 
@@ -126,6 +127,9 @@ export default function App() {
         title = `ข่าวสารและกิจกรรมประกาศ | ${collegeInfo?.name || "วิทยาลัยเทคโนโลยีปทุมรัตต์"}`;
         desc = `ศูนย์ข้อมูลข่าวสาร กิจกรรมเพื่อนักเรียน และประกาศทางการของวิทยาลัยเทคโนโลยีปทุมรัตต์`;
       }
+    } else if (activeTab === "calendar") {
+      title = `ปฏิทินการศึกษาและกิจกรรม | ${collegeInfo?.name || "วิทยาลัยเทคโนโลยีปทุมรัตต์"}`;
+      desc = `ติดตามกำหนดการเรียนการสอน กำหนดการรับสมัคร และกิจกรรมสร้างสรรค์ตลอดปีการศึกษา ของวิทยาลัยเทคโนโลยีปทุมรัตต์`;
     } else if (activeTab === "admission") {
       title = `ระบบผู้สมัครเรียนออนไลน์ | ${collegeInfo?.name || "วิทยาลัยเทคโนโลยีปทุมรัตต์"}`;
       desc = `ระบบรับสมัครเรียนออนไลน์สำหรับนักเรียนใหม่ ประจำปีการศึกษาปัจจุบัน สะดวกรวดเร็วและปลอดภัย`;
@@ -199,6 +203,8 @@ export default function App() {
           selectedNews={selectedNews}
           setSelectedNews={setSelectedNews}
         />;
+      case "calendar":
+        return <AcademicCalendar />;
       case "admission":
         return <AdmissionView
           preSelectedMajor={preSelectedMajor}

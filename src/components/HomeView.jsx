@@ -26,9 +26,8 @@ import {
   HeartHandshake
 } from "lucide-react";
 import { useData } from "../context/DataContext";
-import AcademicCalendar from "./AcademicCalendar";
 export default function HomeView({ setActiveTab, setSelectedNews }) {
-  const { collegeInfo, majors, newsData, heroSlides } = useData();
+  const { collegeInfo, majors, newsData, heroSlides, t, currentLang } = useData();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [visibleNewsCount, setVisibleNewsCount] = useState(3);
 
@@ -36,8 +35,22 @@ export default function HomeView({ setActiveTab, setSelectedNews }) {
     if (index === 0) {
       return {
         ...slide,
-        title: collegeInfo?.heroTitle || "ยินดีต้อนรับสู่ รั้วเทคโนโลยีปทุมรัตต์ (PTC)",
-        bgImage: collegeInfo?.heroImage || slide.bgImage
+        title: currentLang === "th" ? (collegeInfo?.heroTitle || "ยินดีต้อนรับสู่ รั้วเทคโนโลยีปทุมรัตต์ (PTC)") : "Welcome to Pathumrat Technology College (PTC)",
+        bgImage: collegeInfo?.heroImage || slide.bgImage,
+        subtitle: currentLang === "th" ? slide.subtitle : "A leading vocational institute striving for global standards",
+        badge: currentLang === "th" ? slide.badge : "Welcome to PTC College",
+        description: currentLang === "th" ? slide.description : "Focusing on creating professional practitioners and innovators equipped with modern tech skills.",
+        cta: currentLang === "th" ? slide.cta : "Explore Our Curriculum"
+      };
+    }
+    if (index === 1) {
+      return {
+        ...slide,
+        title: currentLang === "th" ? slide.title : "Creating Innovators & Professional Practitioners",
+        subtitle: currentLang === "th" ? slide.subtitle : "Engineering Technology & Digital Business",
+        badge: currentLang === "th" ? slide.badge : "Accepting Applications for Academic Year 2027!",
+        description: currentLang === "th" ? slide.description : "Automotive, Electrical, IT, and Accounting with IoT, EV, and AI innovations.",
+        cta: currentLang === "th" ? slide.cta : "View Available Courses"
       };
     }
     return slide;
@@ -50,11 +63,12 @@ export default function HomeView({ setActiveTab, setSelectedNews }) {
     }, 6e3);
     return () => clearInterval(timer);
   }, [displaySlides?.length]);
+
   const statCards = [
-    { value: collegeInfo?.stat1Value || `${(/* @__PURE__ */ new Date()).getFullYear() + 543 - parseInt(collegeInfo?.foundedYear || 2548)} ปี`, label: collegeInfo?.stat1Label || "แห่งการก่อตั้งและดูแลนักเรียน", description: collegeInfo?.stat1Desc || "เติบโตอย่างมั่นคงเคียงคู่ท้องถิ่น", icon: Award, color: "text-cyan-500" },
-    { value: collegeInfo?.stat2Value || "95%+", label: collegeInfo?.stat2Label || "อัตราได้งานทำหลังจบการศึกษา", description: collegeInfo?.stat2Desc || "ภายใน 6 เดือนหลังสำเร็จหลักสูตร", icon: ShieldCheck, color: "text-emerald-500" },
-    { value: collegeInfo?.stat3Value || "4 สาขา", label: collegeInfo?.stat3Label || "ปวช. และ ปวส. ยอดนิยม", description: collegeInfo?.stat3Desc || "หลักสูตรปรับปรุงรองรับอนาคต", icon: BookOpen, color: "text-blue-500" },
-    { value: collegeInfo?.stat4Value || "1,200+", label: collegeInfo?.stat4Label || "ศิษย์เก่าที่ประสบความสำเร็จ", description: collegeInfo?.stat4Desc || "เครือข่ายความร่วมมืออุตสาหกรรม", icon: Users, color: "text-purple-500" }
+    { value: currentLang === "th" ? (collegeInfo?.stat1Value || `${(/* @__PURE__ */ new Date()).getFullYear() + 543 - parseInt(collegeInfo?.foundedYear || 2548)} ปี`) : "21 Years", label: currentLang === "th" ? (collegeInfo?.stat1Label || "แห่งการก่อตั้งและดูแลนักเรียน") : "Since Founding", description: currentLang === "th" ? (collegeInfo?.stat1Desc || "เติบโตอย่างมั่นคงเคียงคู่ท้องถิ่น") : "Growing alongside the community", icon: Award, color: "text-cyan-500" },
+    { value: collegeInfo?.stat2Value || "95%+", label: currentLang === "th" ? (collegeInfo?.stat2Label || "อัตราได้งานทำหลังจบการศึกษา") : "Employment Rate", description: currentLang === "th" ? (collegeInfo?.stat2Desc || "ภายใน 6 เดือนหลังสำเร็จหลักสูตร") : "Within 6 months after graduation", icon: ShieldCheck, color: "text-emerald-500" },
+    { value: collegeInfo?.stat3Value || "4 สาขา", label: currentLang === "th" ? (collegeInfo?.stat3Label || "ปวช. และ ปวส. ยอดนิยม") : "Specialized Majors", description: currentLang === "th" ? (collegeInfo?.stat3Desc || "หลักสูตรปรับปรุงรองรับอนาคต") : "Vocational & high-vocational choices", icon: BookOpen, color: "text-blue-500" },
+    { value: collegeInfo?.stat4Value || "1,200+", label: currentLang === "th" ? (collegeInfo?.stat4Label || "ศิษย์เก่าที่ประสบความสำเร็จ") : "Successful Alumni", description: currentLang === "th" ? (collegeInfo?.stat4Desc || "เครือข่ายความร่วมมืออุตสาหกรรม") : "Robust corporate partnerships", icon: Users, color: "text-purple-500" }
   ];
   const handleNewsClick = (news) => {
     setSelectedNews(news);
@@ -213,13 +227,13 @@ export default function HomeView({ setActiveTab, setSelectedNews }) {
           className="text-center max-w-3xl mx-auto space-y-3 mb-12"
         >
           <span className="text-brand-primary font-bold text-xs uppercase tracking-widest bg-blue-50 px-3 py-1 rounded-full">
-            ปรัชญาและวิสัยทัศน์วิทยาลัย
+            {t("ปรัชญาและวิสัยทัศน์วิทยาลัย", "Philosophy & Vision")}
           </span>
           <h2 className="text-2xl md:text-3xl font-extrabold text-brand-secondary tracking-tight">
-            {collegeInfo?.philosophyTitle || "มุ่งสร้างกำลังคนระดับอาชีพ เพื่อยกระดับสังคมและพัฒนาชาติ"}
+            {currentLang === "th" ? (collegeInfo?.philosophyTitle || "มุ่งสร้างกำลังคนระดับอาชีพ เพื่อยกระดับสังคมและพัฒนาชาติ") : "Striving to build a professional workforce to elevate society and develop the nation"}
           </h2>
           <p className="text-slate-500 text-sm">
-            วิทยาลัยเทคโนโลยีปทุมรัตต์ เป็นศูนย์กลางการศึกษาทางวิชาชีพที่พร้อมเคียงข้างนักศึกษาในเขตอำเภอปทุมรัตต์ จังหวัดร้อยเอ็ด
+            {t("วิทยาลัยเทคโนโลยีปทุมรัตต์ เป็นศูนย์กลางการศึกษาทางวิชาชีพที่พร้อมเคียงข้างนักศึกษาในเขตอำเภอปทุมรัตต์ จังหวัดร้อยเอ็ด", "Pathumrat Technology College is a premier vocational institution supporting students in Roi Et province.")}
           </p>
         </motion.div>
 
@@ -241,7 +255,9 @@ export default function HomeView({ setActiveTab, setSelectedNews }) {
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent flex items-end p-6 md:p-8">
                 <div className="space-y-1">
                   <p className="text-[10px] text-cyan-300 font-extrabold uppercase tracking-widest">PATHUMRAT TECHNOLOGY COLLEGE</p>
-                  <h3 className="text-white text-lg md:text-xl font-extrabold leading-tight">สร้างบรรยากาศแห่งการเรียนรู้ด้วยเทคโนโลยีและเครื่องมือระดับสากล</h3>
+                  <h3 className="text-white text-lg md:text-xl font-extrabold leading-tight">
+                    {t("สร้างบรรยากาศแห่งการเรียนรู้ด้วยเทคโนโลยีและเครื่องมือระดับสากล", "Creating learning environments powered by world-class technology & tools")}
+                  </h3>
                 </div>
               </div>
             </motion.div>
@@ -260,13 +276,13 @@ export default function HomeView({ setActiveTab, setSelectedNews }) {
               <div className="w-10 h-10 rounded-lg bg-white/15 flex items-center justify-center text-cyan-300 mb-6">
                 <GraduationCap className="w-6 h-6" />
               </div>
-              <h3 className="text-xl font-bold mb-3 text-cyan-300">ปรัชญา (Philosophy)</h3>
+              <h3 className="text-xl font-bold mb-3 text-cyan-300">{t("ปรัชญา (Philosophy)", "Philosophy")}</h3>
               <p className="text-blue-100 font-medium text-lg leading-relaxed font-display">
-                "{collegeInfo.philosophy}"
+                "{currentLang === "th" ? collegeInfo.philosophy : "Excellent Skills, Rich Morals, Supreme Technology"}"
               </p>
             </div>
             <div className="text-xs text-blue-200/80 mt-6 border-t border-white/10 pt-4">
-              * เป็นหัวใจหลักในการหล่อหลอมศิษย์ทุกคนของวิทยาลัยฯ
+              * {t("เป็นหัวใจหลักในการหล่อหลอมศิษย์ทุกคนของวิทยาลัยฯ", "The core heartbeat of all PTC students")}
             </div>
           </motion.div>
 
@@ -284,13 +300,13 @@ export default function HomeView({ setActiveTab, setSelectedNews }) {
               <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center text-brand-primary mb-6">
                 <Award className="w-6 h-6" />
               </div>
-              <h3 className="text-xl font-bold mb-3 text-brand-secondary">วิสัยทัศน์ (Vision)</h3>
+              <h3 className="text-xl font-bold mb-3 text-brand-secondary">{t("วิสัยทัศน์ (Vision)", "Vision")}</h3>
               <p className="text-slate-600 text-sm leading-relaxed">
-                {collegeInfo.vision}
+                {currentLang === "th" ? collegeInfo.vision : "Committed to delivering high-quality vocational education up to international standards, producing graduates with strong ethics, aligned with the modern job market."}
               </p>
             </div>
             <div className="text-xs text-slate-400 mt-6 border-t border-slate-200 pt-4">
-              * มุ่งสู่ความเป็นสากลและตรงใจผู้ว่าจ้างงาน
+              * {t("มุ่งสู่ความเป็นสากลและตรงใจผู้ว่าจ้างงาน", "Striving towards international standards and job-readiness")}
             </div>
           </motion.div>
 
@@ -308,15 +324,19 @@ export default function HomeView({ setActiveTab, setSelectedNews }) {
               <div className="w-10 h-10 rounded-lg bg-cyan-50 flex items-center justify-center text-cyan-600 mb-6">
                 <Users className="w-6 h-6" />
               </div>
-              <h3 className="text-xl font-bold mb-4 text-brand-secondary">เอกลักษณ์ & อัตลักษณ์</h3>
+              <h3 className="text-xl font-bold mb-4 text-brand-secondary">{t("เอกลักษณ์ & อัตลักษณ์", "Identity & Uniqueness")}</h3>
               <div className="space-y-4 text-sm">
                 <div>
-                  <span className="font-bold text-slate-500 text-xs block uppercase">เอกลักษณ์วิทยาลัย:</span>
-                  <p className="text-slate-700 font-semibold">{collegeInfo.identity}</p>
+                  <span className="font-bold text-slate-500 text-xs block uppercase">{t("เอกลักษณ์วิทยาลัย:", "College Identity:")}</span>
+                  <p className="text-slate-700 font-semibold">
+                    {currentLang === "th" ? collegeInfo.identity : "Excellent Vocational Skills and Community Service"}
+                  </p>
                 </div>
                 <div>
-                  <span className="font-bold text-slate-500 text-xs block uppercase">อัตลักษณ์ผู้เรียน:</span>
-                  <p className="text-slate-700 font-semibold">{collegeInfo.uniqueness}</p>
+                  <span className="font-bold text-slate-500 text-xs block uppercase">{t("อัตลักษณ์ผู้เรียน:", "Student Uniqueness:")}</span>
+                  <p className="text-slate-700 font-semibold">
+                    {currentLang === "th" ? collegeInfo.uniqueness : "Polite, Honest, Responsible, and Disciplined"}
+                  </p>
                 </div>
               </div>
             </div>
@@ -370,57 +390,57 @@ export default function HomeView({ setActiveTab, setSelectedNews }) {
           className="text-center max-w-3xl mx-auto space-y-3 mb-12"
         >
           <span className="text-brand-primary font-bold text-xs uppercase tracking-widest bg-blue-50 px-3.5 py-1.5 rounded-full border border-blue-100">
-            แผนกวิชาการและสาขาน่าเรียน (Academic Programs)
+            {t("แผนกวิชาการและสาขาน่าเรียน (Academic Programs)", "Academic Programs & Majors")}
           </span>
           <h2 className="text-2xl md:text-3xl font-extrabold text-brand-secondary tracking-tight">
-            มุ่งเน้นความเป็นเลิศทางวิชาชีพ สู่ตลาดแรงงานยุคดิจิทัล
+            {t("มุ่งเน้นความเป็นเลิศทางวิชาชีพ สู่ตลาดแรงงานยุคดิจิทัล", "Excellence in Vocational Training for the Digital Era")}
           </h2>
           <p className="text-slate-500 text-sm leading-relaxed">
-            สัมผัสประสบการณ์เรียนรู้ผ่านการลงมือปฏิบัติจริงกับแผนกวิชาหลักที่มีอัตราความต้องการผู้สำเร็จการศึกษาสูงสุดและเทคโนโลยีการเรียนการสอนระดับสากล
+            {t("สัมผัสประสบการณ์เรียนรู้ผ่านการลงมือปฏิบัติจริงกับแผนกวิชาหลักที่มีอัตราความต้องการผู้สำเร็จการศึกษาสูงสุดและเทคโนโลยีการเรียนการสอนระดับสากล", "Gain real hands-on experience with our highly-demanded majors and world-class educational technology.")}
           </p>
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {[
             {
-              title: "แผนกวิชาช่างยนต์",
+              title: currentLang === "th" ? "แผนกวิชาช่างยนต์" : "Automotive Department",
               enTitle: "Automotive Technology",
-              desc: "มุ่งเน้นความเชี่ยวชาญด้านงานซ่อมบำรุงเครื่องยนต์สมัยใหม่ เครื่องยนต์หัวฉีดคอมมอนเรล และปูพื้นฐานเทคโนโลยียานยนต์ไฟฟ้า (EV) ระดับอุตสาหกรรม",
+              desc: currentLang === "th" ? "มุ่งเน้นความเชี่ยวชาญด้านงานซ่อมบำรุงเครื่องยนต์สมัยใหม่ เครื่องยนต์หัวฉีดคอมมอนเรล และปูพื้นฐานเทคโนโลยียานยนต์ไฟฟ้า (EV) ระดับอุตสาหกรรม" : "Specializing in modern engine maintenance, common-rail injection systems, and industrial electric vehicle (EV) tech.",
               icon: Settings,
               color: "bg-blue-50 text-blue-600 border-blue-100",
               accentColor: "border-l-4 border-l-blue-500",
-              badge: "ช่างยนต์ EV",
-              highlight: "ทวิภาคีร่วมกับแบรนด์รถยนต์ชั้นนำ"
+              badge: currentLang === "th" ? "ช่างยนต์ EV" : "EV Automotive",
+              highlight: currentLang === "th" ? "ทวิภาคีร่วมกับแบรนด์รถยนต์ชั้นนำ" : "Bilateral education with leading automotive brands"
             },
             {
-              title: "แผนกวิชาช่างไฟฟ้ากำลัง",
+              title: currentLang === "th" ? "แผนกวิชาช่างไฟฟ้ากำลัง" : "Electrical Power Department",
               enTitle: "Electrical Power",
-              desc: "เรียนรู้ระบบติดตั้งไฟฟ้าภายในและภายนอกอาคาร การเขียนโปรแกรม PLC ควบคุมมอเตอร์เครื่องจักร ตลอดจนเทคโนโลยีระบบพลังงานแสงอาทิตย์ (Solar Cell)",
+              desc: currentLang === "th" ? "เรียนรู้ระบบติดตั้งไฟฟ้าภายในและภายนอกอาคาร การเขียนโปรแกรม PLC ควบคุมมอเตอร์เครื่องจักร ตลอดจนเทคโนโลยีระบบพลังงานแสงอาทิตย์ (Solar Cell)" : "Learn indoor and outdoor electrical system installation, PLC programming for motor control, and solar power (Solar Cell) systems.",
               icon: Zap,
               color: "bg-amber-50 text-amber-500 border-amber-100",
               accentColor: "border-l-4 border-l-amber-500",
-              badge: "ระบบสมาร์ทกริด",
-              highlight: "พร้อมเครื่องมือจำลองแล็บมาตรฐานสูง"
+              badge: currentLang === "th" ? "ระบบสมาร์ทกริด" : "Smart Grid",
+              highlight: currentLang === "th" ? "พร้อมเครื่องมือจำลองแล็บมาตรฐานสูง" : "Equipped with high-standard simulation labs"
             },
             {
-              title: "แผนกเทคโนโลยีสารสนเทศ",
+              title: currentLang === "th" ? "แผนกเทคโนโลยีสารสนเทศ" : "Information Technology Dept.",
               enTitle: "Information Technology",
-              desc: "สร้างอนาคตสู่การเป็นนักพัฒนา ซ่อมบำรุงระบบฮาร์ดแวร์ ดูแลจัดการเน็ตเวิร์กองค์กร และเทคนิคการเขียนเว็บโปรแกรมมิ่งยุคใหม่เต็มรูปแบบ",
+              desc: currentLang === "th" ? "สร้างอนาคตสู่การเป็นนักพัฒนา ซ่อมบำรุงระบบฮาร์ดแวร์ ดูแลจัดการเน็ตเวิร์กองค์กร และเทคนิคการเขียนเว็บโปรแกรมมิ่งยุคใหม่เต็มรูปแบบ" : "Become a web developer, systems administrator, network engineer, or hardware specialist in the modern tech era.",
               icon: Cpu,
               color: "bg-indigo-50 text-indigo-500 border-indigo-100",
               accentColor: "border-l-4 border-l-indigo-500",
-              badge: "ไอที & พัฒนาเว็บ",
-              highlight: "สอนโดยวิทยากรผู้เชี่ยวชาญจากบริษัทเทค"
+              badge: currentLang === "th" ? "ไอที & พัฒนาเว็บ" : "IT & Web Dev",
+              highlight: currentLang === "th" ? "สอนโดยวิทยากรผู้เชี่ยวชาญจากบริษัทเทค" : "Taught by leading tech company experts"
             },
             {
-              title: "แผนกวิชาการบัญชี",
+              title: currentLang === "th" ? "แผนกวิชาการบัญชี" : "Accounting Department",
               enTitle: "Accounting & Finance",
-              desc: "ปูพื้นฐานระบบบัญชีการเงินยุคใหม่ การคำนวณภาษี และฝึกปฏิบัติใช้ซอฟต์แวร์วิเคราะห์ข้อมูลการเงินทางธุรกิจเพื่อให้สำเร็จการศึกษาแบบพร้อมทำงานได้ทันที",
+              desc: currentLang === "th" ? "ปูพื้นฐานระบบบัญชีการเงินยุคใหม่ การคำนวณภาษี และฝึกปฏิบัติใช้ซอฟต์แวร์วิเคราะห์ข้อมูลการเงินทางธุรกิจเพื่อให้สำเร็จการศึกษาแบบพร้อมทำงานได้ทันที" : "Covers digital bookkeeping, tax calculations, and financial software to make you a job-ready professional accountant.",
               icon: TrendingUp,
               color: "bg-emerald-50 text-emerald-500 border-emerald-100",
               accentColor: "border-l-4 border-l-emerald-500",
-              badge: "นักบัญชีดิจิทัล",
-              highlight: "รับรองความต้องการงานสูงครอบคลุมทุกองค์กร"
+              badge: currentLang === "th" ? "นักบัญชีดิจิทัล" : "Digital Accountant",
+              highlight: currentLang === "th" ? "รับรองความต้องการงานสูงครอบคลุมทุกองค์กร" : "High industry demand across all organizations"
             }
           ].map((program, idx) => {
             const IconComp = program.icon;
@@ -462,7 +482,7 @@ export default function HomeView({ setActiveTab, setSelectedNews }) {
                 </div>
 
                 <div className="mt-6 pt-4 border-t border-slate-100">
-                  <span className="text-[10px] font-bold text-slate-400 block uppercase mb-1">จุดเด่นของแผนก:</span>
+                  <span className="text-[10px] font-bold text-slate-400 block uppercase mb-1">{t("จุดเด่นของแผนก:", "Key Highlight:")}</span>
                   <p className="text-[11px] font-semibold text-brand-secondary group-hover:text-brand-primary transition-colors line-clamp-1">
                     {program.highlight}
                   </p>
@@ -493,7 +513,7 @@ export default function HomeView({ setActiveTab, setSelectedNews }) {
               <div className="relative border-4 border-slate-100 rounded-2xl overflow-hidden shadow-md w-64 h-80">
                 <img
                   src={collegeInfo?.directorImage || "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=500&auto=format&fit=crop"}
-                  alt={collegeInfo?.directorName || "ดร. สมเกียรติ ปทุมสวัสดิ์"}
+                  alt={currentLang === "th" ? (collegeInfo?.directorName || "ดร. สมเกียรติ ปทุมสวัสดิ์") : "Dr. Somkiat Pathumsawat"}
                   className="w-full h-full object-cover"
                   referrerPolicy="no-referrer"
                 />
@@ -502,11 +522,13 @@ export default function HomeView({ setActiveTab, setSelectedNews }) {
                 /* Badge */
               }
               <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2 bg-brand-primary text-white font-bold text-xs px-4 py-1.5 rounded-full shadow-md whitespace-nowrap">
-                ผู้อำนวยการวิทยาลัย
+                {t("ผู้อำนวยการวิทยาลัย", "College Director")}
               </div>
             </div>
             <div className="text-center pt-2">
-              <h4 className="font-extrabold text-slate-900 font-display text-base">{collegeInfo?.directorName || "ดร. สมเกียรติ ปทุมสวัสดิ์"}</h4>
+              <h4 className="font-extrabold text-slate-900 font-display text-base">
+                {currentLang === "th" ? (collegeInfo?.directorName || "ดร. สมเกียรติ ปทุมสวัสดิ์") : "Dr. Somkiat Pathumsawat"}
+              </h4>
               <p className="text-xs text-slate-500">{collegeInfo?.directorDegree || "Ph.D. in Vocational Education Management"}</p>
             </div>
           </div>
@@ -517,27 +539,29 @@ export default function HomeView({ setActiveTab, setSelectedNews }) {
           <div className="lg:col-span-8 space-y-6">
             <div className="space-y-2">
               <span className="text-amber-600 font-extrabold text-xs uppercase tracking-widest bg-amber-50 px-3 py-1 rounded-full border border-amber-200">
-                สาส์นจากผู้อำนวยการ
+                {t("สาส์นจากผู้อำนวยการ", "Director's Message")}
               </span>
               <h2 className="text-2xl md:text-3xl font-extrabold text-brand-secondary tracking-tight">
-                {collegeInfo?.directorWelcome || "ยินดีต้อนรับสู่ รั้วเทคโนโลยีปทุมรัตต์ (PTC)"}
+                {currentLang === "th" ? (collegeInfo?.directorWelcome || "ยินดีต้อนรับสู่ รั้วเทคโนโลยีปทุมรัตต์ (PTC)") : "Welcome to Pathumrat Technology College (PTC)"}
               </h2>
             </div>
             <div className="relative">
               <span className="absolute -top-4 -left-3 text-7xl text-slate-100 font-serif select-none pointer-events-none">“</span>
               <p className="text-slate-600 text-sm md:text-base leading-relaxed relative z-10 pl-2">
-                {collegeInfo?.directorMessage || "วิทยาลัยเทคโนโลยีปทุมรัตต์ มุ่งมั่นยกระดับคุณภาพการศึกษาทางวิชาชีพให้มีคุณภาพได้มาตรฐานสากล..."}
+                {currentLang === "th" ? (collegeInfo?.directorMessage || "วิทยาลัยเทคโนโลยีปทุมรัตต์ มุ่งมั่นยกระดับคุณภาพการศึกษาทางวิชาชีพให้มีคุณภาพได้มาตรฐานสากล เพื่อตอบสนองความต้องการของสังคมและผู้เรียน") : "Pathumrat Technology College is committed to elevating the quality of vocational education to meet international standards. We cultivate modern, practical skills alongside ethics to prepare our students to become outstanding citizens and professionals."}
               </p>
             </div>
             <div className="flex justify-between items-center pt-4 border-t border-slate-100">
               <div className="space-y-1">
-                <p className="text-xs text-slate-400">วิสัยทัศน์ผู้บริหาร:</p>
-                <p className="text-brand-primary font-bold text-xs italic">"เรียนจริง ปฏิบัติจริง มีงานทำมั่นคง 100%"</p>
+                <p className="text-xs text-slate-400">{t("วิสัยทัศน์ผู้บริหาร:", "Director's Vision:")}</p>
+                <p className="text-brand-primary font-bold text-xs italic">"{t("เรียนจริง ปฏิบัติจริง มีงานทำมั่นคง 100%", "Real learning, actual practice, 100% stable job prospects")}"</p>
               </div>
               <div className="text-right">
-                <p className="text-xs text-slate-400">ลงชื่อ</p>
-                <p className="font-bold text-slate-800 text-sm italic font-display mt-1">{collegeInfo?.directorName || "ดร. สมเกียรติ ปทุมสวัสดิ์"}</p>
-                <p className="text-[10px] text-slate-500">ผู้อำนวยการวิทยาลัยเทคโนโลยีปทุมรัตต์</p>
+                <p className="text-xs text-slate-400">{t("ลงชื่อ", "Signed")}</p>
+                <p className="font-bold text-slate-800 text-sm italic font-display mt-1">
+                  {currentLang === "th" ? (collegeInfo?.directorName || "ดร. สมเกียรติ ปทุมสวัสดิ์") : "Dr. Somkiat Pathumsawat"}
+                </p>
+                <p className="text-[10px] text-slate-500">{t("ผู้อำนวยการวิทยาลัยเทคโนโลยีปทุมรัตต์", "Director of Pathumrat Technology College")}</p>
               </div>
             </div>
           </div>
@@ -615,7 +639,10 @@ export default function HomeView({ setActiveTab, setSelectedNews }) {
       badge: "\u0E2D\u0E31\u0E1B\u0E40\u0E14\u0E15\u0E25\u0E48\u0E32\u0E2A\u0E38\u0E14",
       color: "from-purple-600 to-indigo-800",
       icon: "Calendar",
-      action: () => alert("\u0E44\u0E1F\u0E25\u0E4C\u0E1B\u0E0F\u0E34\u0E17\u0E34\u0E19\u0E01\u0E32\u0E23\u0E28\u0E36\u0E01\u0E29\u0E32\u0E09\u0E1A\u0E31\u0E1A\u0E2D\u0E31\u0E1B\u0E40\u0E14\u0E15\u0E1B\u0E35 2570 \u0E16\u0E39\u0E01\u0E42\u0E2B\u0E25\u0E14\u0E40\u0E23\u0E35\u0E22\u0E1A\u0E23\u0E49\u0E2D\u0E22\u0E41\u0E25\u0E49\u0E27")
+      action: () => {
+        setActiveTab("calendar");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
     },
     {
       title: "\u0E04\u0E25\u0E31\u0E07\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25\u0E40\u0E2D\u0E01\u0E2A\u0E32\u0E23\u0E41\u0E25\u0E30\u0E15\u0E33\u0E23\u0E32\u0E40\u0E23\u0E35\u0E22\u0E19 (E-Learning Hub)",
@@ -965,9 +992,6 @@ export default function HomeView({ setActiveTab, setSelectedNews }) {
           </div>
         </div>
       </section>
-
-      {/* Academic Calendar Component */}
-      <AcademicCalendar />
 
       {
     /* Online Registration CTA Section */

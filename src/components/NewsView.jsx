@@ -15,22 +15,67 @@ import {
   AlertCircle
 } from "lucide-react";
 import { useData } from "../context/DataContext";
+
 export default function NewsView({ selectedNews, setSelectedNews }) {
-  const { newsData, dbSettings, isLoading } = useData();
+  const { newsData, dbSettings, isLoading, t, currentLang } = useData();
   const [activeCategoryFilter, setActiveCategoryFilter] = useState("ทั้งหมด");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("newest");
   const [localNewsList, setLocalNewsList] = useState(newsData);
+
   useEffect(() => {
     setLocalNewsList(newsData);
   }, [newsData]);
+
+  // Helper mappings for English content
+  const getNewsTranslated = (news) => {
+    if (!news) return { title: "", excerpt: "", content: "" };
+    if (currentLang === "th") return { title: news.title, excerpt: news.excerpt, content: news.content };
+    
+    if (news.title.includes("โควตาพิเศษ") || news.title.includes("รับสมัคร")) {
+      return {
+        title: "Special Academic Quota Registration Open for Term 1/2027",
+        excerpt: "Pathumrat Technology College is opening quota seat applications for school graduates to register across our engineering and business tracks.",
+        content: "Pathumrat Technology College announces the official commencement of special quota applications for the 1/2027 academic term.\n\nCandidates completing Lower Secondary (M.3) can apply for Vocational Certificates (Voc. Cert.) while Upper Secondary (M.6) and Voc. Cert. graduates are eligible for High Vocational Diplomas (High Voc. Cert.). Eligible students receive significant tuition waivers, free textbooks, and physical education uniforms upon reporting on time.\n\nRequired Application Papers:\n1. 3 Copies of a 1-inch portrait photo.\n2. 2 Copies of educational transcript.\n3. 1 Copy of Student and Parent Home Registration.\n\nHow to Apply:\nSimply click on the 'Apply Online' menu above, fill in your profile, select your desired major, and print your registration ticket."
+      };
+    }
+    if (news.title.includes("เทคโนโลยีการขับเคลื่อน") || news.title.includes("สัมมนา")) {
+      return {
+        title: "Seminar: Next-Gen Electric Vehicle Drive Technologies & Automation",
+        excerpt: "Faculty of Automotive Mechanics hosts a collaborative technical workshop with regional EV industries.",
+        content: "The Department of Automotive Mechanics at Pathumrat Technology College hosted an academic seminar on next-generation electric vehicle powertrains, high-voltage battery safety, and electronic diagnostics.\n\nOver 200 automotive students participated in hands-on workshops featuring modern diagnostic scanners and EV test platforms sponsored by cooperative regional auto industries.\n\nOur college director noted, 'Integrating modern electric propulsion and diagnostic labs ensures our students graduate with industry-level competencies.'"
+      };
+    }
+    if (news.title.includes("ต้อนรับผู้ประเมิน") || news.title.includes("ประกันคุณภาพ")) {
+      return {
+        title: "Successful External Quality Assurance Assessment Visit",
+        excerpt: "The academic standards committee praises PTC's laboratory safety and practical curricula.",
+        content: "On June 25th, the External Quality Assurance Assessment Committee conducted an official inspection visit of Pathumrat Technology College.\n\nThe committee audited academic documentation, evaluated classroom methodologies, and inspected lab environments across our electronics, automotive, and IT workshops.\n\nFeedback highlights praised PTC's adherence to practical-first training models, high instructor-to-student support ratios, and pristine machinery maintenance, certifying PTC with exemplary standards."
+      };
+    }
+    return { title: news.title, excerpt: news.excerpt, content: news.content };
+  };
+
+  const getCategoryLabel = (cat) => {
+    if (currentLang === "th") return cat;
+    switch (cat) {
+      case "ทั้งหมด": return "All News";
+      case "ข่าวประชาสัมพันธ์": return "Public Relations";
+      case "ข่าววิชาการ": return "Academics";
+      case "ข่าวกิจกรรม": return "Activities";
+      case "ข่าวจัดซื้อจัดจ้าง": return "Procurements";
+      default: return cat;
+    }
+  };
+
   const filteredNews = useMemo(() => {
     const list = (localNewsList || []).filter((news) => {
       if (!news) return false;
-      const matchesCategory = activeCategoryFilter === "\u0E17\u0E31\u0E49\u0E07\u0E2B\u0E21\u0E14" || news.category === activeCategoryFilter;
-      const titleText = String(news.title || "").toLowerCase();
-      const excerptText = String(news.excerpt || "").toLowerCase();
-      const contentText = String(news.content || "").toLowerCase();
+      const matchesCategory = activeCategoryFilter === "ทั้งหมด" || news.category === activeCategoryFilter;
+      const translated = getNewsTranslated(news);
+      const titleText = String(translated.title || "").toLowerCase();
+      const excerptText = String(translated.excerpt || "").toLowerCase();
+      const contentText = String(translated.content || "").toLowerCase();
       const query = String(searchQuery || "").toLowerCase();
       const matchesSearch = titleText.includes(query) || excerptText.includes(query) || contentText.includes(query);
       return matchesCategory && matchesSearch;
@@ -50,7 +95,8 @@ export default function NewsView({ selectedNews, setSelectedNews }) {
       }
       return 0;
     });
-  }, [activeCategoryFilter, searchQuery, localNewsList, sortBy]);
+  }, [activeCategoryFilter, searchQuery, localNewsList, sortBy, currentLang]);
+
   const handleReadNews = (news) => {
     setLocalNewsList(
       (prevList) => prevList.map(
@@ -60,188 +106,173 @@ export default function NewsView({ selectedNews, setSelectedNews }) {
     setSelectedNews({ ...news, views: news.views + 1 });
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
+
   const handleShare = (news) => {
+    const translated = getNewsTranslated(news);
     if (navigator.share) {
       navigator.share({
-        title: news.title,
-        text: news.excerpt,
+        title: translated.title,
+        text: translated.excerpt,
         url: window.location.href
       }).catch(console.error);
     } else {
-      alert(`\u0E04\u0E31\u0E14\u0E25\u0E2D\u0E01\u0E25\u0E34\u0E07\u0E01\u0E4C\u0E02\u0E48\u0E32\u0E27\u0E2A\u0E32\u0E23\u0E40\u0E23\u0E35\u0E22\u0E1A\u0E23\u0E49\u0E2D\u0E22: ${news.title}`);
+      alert(`${t("คัดลอกลิงก์ข่าวสารเรียบร้อย: ", "Copied link to: ")} ${translated.title}`);
     }
   };
+
   const categories = [
-    "\u0E17\u0E31\u0E49\u0E07\u0E2B\u0E21\u0E14",
-    "\u0E02\u0E48\u0E32\u0E27\u0E1B\u0E23\u0E30\u0E0A\u0E32\u0E2A\u0E31\u0E21\u0E1E\u0E31\u0E19\u0E18\u0E4C",
-    "\u0E02\u0E48\u0E32\u0E27\u0E27\u0E34\u0E0A\u0E32\u0E01\u0E32\u0E23",
-    "\u0E02\u0E48\u0E32\u0E27\u0E01\u0E34\u0E08\u0E01\u0E23\u0E23\u0E21",
-    "\u0E02\u0E48\u0E32\u0E27\u0E08\u0E31\u0E14\u0E0B\u0E37\u0E49\u0E2D\u0E08\u0E31\u0E14\u0E08\u0E49\u0E32\u0E07"
+    "ทั้งหมด",
+    "ข่าวประชาสัมพันธ์",
+    "ข่าววิชาการ",
+    "ข่าวกิจกรรม",
+    "ข่าวจัดซื้อจัดจ้าง"
   ];
-  return <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10" id="news-view">
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 font-sans" id="news-view">
       <AnimatePresenceAndWrapper>
         {selectedNews ? (
-    /* NEWS DETAIL VIEW */
-    <motion.div
-      key="news-detail"
-      initial={{ opacity: 0, y: 15 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0 }}
-      className="max-w-4xl mx-auto space-y-8"
-      id="news-detail-container"
-    >
-            {
-      /* Back button */
-    }
+          /* NEWS DETAIL VIEW */
+          <motion.div
+            key="news-detail"
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            className="max-w-4xl mx-auto space-y-8"
+            id="news-detail-container"
+          >
+            {/* Back button */}
             <button
-      onClick={() => setSelectedNews(null)}
-      className="inline-flex items-center space-x-2 text-sm font-semibold text-slate-600 hover:text-brand-primary transition-colors"
-      id="back-to-news-list"
-    >
+              onClick={() => setSelectedNews(null)}
+              className="inline-flex items-center space-x-2 text-sm font-semibold text-slate-600 hover:text-brand-primary transition-colors cursor-pointer"
+              id="back-to-news-list"
+            >
               <ArrowLeft className="w-4 h-4" />
-              <span>ย้อนกลับไปรายการข่าว</span>
+              <span>{t("ย้อนกลับไปรายการข่าว", "Back to News Archive")}</span>
             </button>
 
-            {
-      /* Main content article */
-    }
+            {/* Main content article */}
             <article className="bg-white rounded-3xl overflow-hidden border border-slate-200 shadow-sm p-6 md:p-10 space-y-8">
-              {
-      /* Category, Date, View count */
-    }
+              {/* Category, Date, View count */}
               <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 pb-6">
                 <div className="flex items-center space-x-3">
                   <span className="bg-brand-primary text-white text-xs font-bold px-3 py-1.5 rounded-full">
-                    {selectedNews.category}
+                    {getCategoryLabel(selectedNews.category)}
                   </span>
                   <span className="text-slate-400 text-xs flex items-center space-x-1">
                     <Calendar className="w-3.5 h-3.5" />
-                    <span>เผยแพร่เมื่อ: {selectedNews.date}</span>
+                    <span>{t("เผยแพร่เมื่อ:", "Published:")} {selectedNews.date}</span>
                   </span>
                 </div>
                 <div className="flex items-center space-x-4">
                   <span className="text-slate-400 text-xs flex items-center space-x-1">
                     <Eye className="w-3.5 h-3.5" />
-                    <span>ผู้เข้าชม: {selectedNews.views} ครั้ง</span>
+                    <span>{t("ผู้เข้าชม:", "Views:")} {selectedNews.views} {t("ครั้ง", "times")}</span>
                   </span>
                   <button
-      onClick={() => handleShare(selectedNews)}
-      className="p-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-500 hover:text-brand-primary transition-colors"
-      title="แชร์ลิงก์ข่าว"
-    >
+                    onClick={() => handleShare(selectedNews)}
+                    className="p-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-500 hover:text-brand-primary transition-colors cursor-pointer"
+                    title="Share link"
+                  >
                     <Share2 className="w-4 h-4" />
                   </button>
                 </div>
               </div>
 
-              {
-      /* Title */
-    }
+              {/* Title */}
               <h1 className="text-xl md:text-3xl font-extrabold text-slate-900 leading-snug">
-                {selectedNews.title}
+                {getNewsTranslated(selectedNews).title}
               </h1>
 
-              {
-      /* Hero Image */
-    }
+              {/* Hero Image */}
               <div className="relative rounded-2xl overflow-hidden bg-slate-50 h-[320px] md:h-[420px]">
                 <img
-      src={selectedNews.imageUrl}
-      alt={selectedNews.title}
-      className="w-full h-full object-cover"
-      referrerPolicy="no-referrer"
-    />
+                  src={selectedNews.imageUrl}
+                  alt={getNewsTranslated(selectedNews).title}
+                  className="w-full h-full object-cover"
+                  referrerPolicy="no-referrer"
+                />
               </div>
 
-              {
-      /* Rich contents rendering */
-    }
+              {/* Rich contents rendering */}
               <div className="text-xs md:text-sm text-slate-700 leading-relaxed space-y-4 whitespace-pre-line font-normal" id="news-body-content">
-                {selectedNews.content}
+                {getNewsTranslated(selectedNews).content}
               </div>
 
-              {
-      /* Admin comment box sign */
-    }
+              {/* Admin comment box sign */}
               <div className="bg-slate-50 rounded-2xl p-5 border border-slate-200 flex items-start space-x-3.5">
                 <AlertCircle className="w-5 h-5 text-brand-primary shrink-0 mt-0.5" />
                 <div className="text-xs text-slate-500 space-y-1">
-                  <p className="font-bold text-slate-700">ประกาศจากศูนย์ข่าวสารวิทยาลัยเทคโนโลยีปทุมรัตต์</p>
-                  <p>ข้อมูลข่าวสารฉบับนี้เป็นข้อมูลจริงที่เผยแพร่โดยกองสารสนเทศและประชาสัมพันธ์ หากนักเรียน นักศึกษา หรือผู้ปกครองต้องการติดต่อเพื่อสอบถามข้อมูลทางวิชาการ หรือการแนะแนวเพิ่มเติม สามารถโทรศัพท์เข้ามาที่กองงานประชาสัมพันธ์วิทยาลัยได้ในวันทำการ</p>
+                  <p className="font-bold text-slate-700">{t("ประกาศจากศูนย์ข่าวสารวิทยาลัยเทคโนโลยีปทุมรัตต์", "Official Notice from PTC Information Desk")}</p>
+                  <p>{t("ข้อมูลข่าวสารฉบับนี้เป็นข้อมูลจริงที่เผยแพร่โดยกองสารสนเทศและประชาสัมพันธ์ หากนักเรียน นักศึกษา หรือผู้ปกครองต้องการติดต่อเพื่อสอบถามข้อมูลทางวิชาการ หรือการแนะแนวเพิ่มเติม สามารถโทรศัพท์เข้ามาที่กองงานประชาสัมพันธ์วิทยาลัยได้ในวันทำการ", "This news release represents verified information published by the Information and Public Relations Division of Pathumrat Technology College. For academic advisement, admissions criteria, or direct inquiries, please call the public relations office during working hours.")}</p>
                 </div>
               </div>
             </article>
           </motion.div>
-  ) : (
-    /* NEWS INDEX GRID */
-    <motion.div
-      key="news-list"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="space-y-8"
-    >
-            {
-      /* Header description */
-    }
+        ) : (
+          /* NEWS INDEX GRID */
+          <motion.div
+            key="news-list"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="space-y-8"
+          >
+            {/* Header description */}
             <div className="text-center max-w-3xl mx-auto space-y-3 flex flex-col items-center">
               <div className="flex flex-wrap gap-2 justify-center items-center">
                 <span className="text-brand-primary font-bold text-xs uppercase tracking-widest bg-blue-50 px-3 py-1 rounded-full">
-                  ข่าวสารและประกาศสำคัญ
+                  {t("ข่าวสารและประกาศสำคัญ", "News & Bulletins")}
                 </span>
                 {dbSettings?.type === "firestore" ? (
-                  <div className="inline-flex items-center space-x-1.5 bg-emerald-50 text-emerald-700 text-[11px] font-bold px-3 py-1 rounded-full border border-emerald-100 shadow-sm animate-pulse-subtle">
+                  <div className="inline-flex items-center space-x-1.5 bg-emerald-50 text-emerald-700 text-[11px] font-bold px-3 py-1 rounded-full border border-emerald-100 shadow-sm">
                     <span className="relative flex h-2 w-2">
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                       <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                     </span>
-                    <span>เชื่อมต่อกับ Cloud Firestore (เรียลไทม์)</span>
+                    <span>{t("เชื่อมต่อกับ Cloud Firestore (เรียลไทม์)", "Connected to Cloud Firestore (Real-time)")}</span>
                   </div>
                 ) : (
                   <div className="inline-flex items-center space-x-1.5 bg-amber-50 text-amber-700 text-[11px] font-bold px-3 py-1 rounded-full border border-amber-100 shadow-sm">
-                    <span>ข้อมูลจำลองแบบ Local</span>
+                    <span>{t("ข้อมูลจำลองแบบ Local", "Mock Data (Local)")}</span>
                   </div>
                 )}
               </div>
-              <h2 className="text-2xl md:text-4xl font-extrabold text-brand-secondary tracking-tight w-full">
-                ศูนย์ข่าวสารและกิจกรรม วิทยาลัยเทคโนโลยีปทุมรัตต์
+              <h2 className="text-2xl md:text-4xl font-extrabold text-brand-secondary tracking-tight w-full font-display">
+                {t("ศูนย์ข่าวสารและกิจกรรม วิทยาลัยเทคโนโลยีปทุมรัตต์", "Pathumrat Technology College Information & News Center")}
               </h2>
-              <p className="text-slate-500 text-sm">
-                เกาะติดข่าวรับสมัครงาน ทุนการศึกษา กิจกรรมเด่นรอบสัปดาห์ และเอกสารประกาศจัดซื้อจัดจ้างได้ตลอด 24 ชั่วโมง
+              <p className="text-slate-500 text-sm md:text-base leading-relaxed">
+                {t("เกาะติดข่าวรับสมัครงาน ทุนการศึกษา กิจกรรมเด่นรอบสัปดาห์ และเอกสารประกาศจัดซื้อจัดจ้างได้ตลอด 24 ชั่วโมง", "Stay updated 24/7 with our recruitment notices, scholarship packages, weekly activities, and procurement listings.")}
               </p>
             </div>
 
-            {
-      /* Filters Row */
-    }
+            {/* Filters Row */}
             <div className="flex flex-col space-y-4">
-              {
-      /* Scrollable Categories List */
-    }
+              {/* Scrollable Categories List */}
               <div className="flex items-center space-x-2 overflow-x-auto pb-2 scrollbar-none border-b border-slate-200">
-                {categories.map((cat) => <button
-      key={cat}
-      onClick={() => setActiveCategoryFilter(cat)}
-      className={`px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap shrink-0 transition-all ${activeCategoryFilter === cat ? "bg-brand-primary text-white" : "bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-800"}`}
-    >
-                    {cat}
-                  </button>)}
+                {categories.map((cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => setActiveCategoryFilter(cat)}
+                    className={`px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap shrink-0 transition-all cursor-pointer ${activeCategoryFilter === cat ? "bg-brand-primary text-white" : "bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-800"}`}
+                  >
+                    {getCategoryLabel(cat)}
+                  </button>
+                ))}
               </div>
 
-              {
-      /* Search and Sort box row */
-    }
+              {/* Search and Sort box row */}
               <div className="flex flex-col md:flex-row justify-between items-center gap-4">
                 <div className="flex items-center space-x-2.5 w-full md:w-auto">
-                  <span className="text-xs font-bold text-slate-500 shrink-0">จัดเรียงตาม:</span>
+                  <span className="text-xs font-bold text-slate-500 shrink-0">{t("จัดเรียงตาม:", "Sort by:")}</span>
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value)}
                     className="p-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-primary cursor-pointer font-semibold text-slate-700 shadow-xs"
                   >
-                    <option value="newest">ข่าวล่าสุด (Newest)</option>
-                    <option value="oldest">ข่าวเก่าที่สุด (Oldest)</option>
-                    <option value="popular">ยอดเข้าชมสูงสุด (Most Popular)</option>
+                    <option value="newest">{t("ข่าวล่าสุด (Newest)", "Newest Articles")}</option>
+                    <option value="oldest">{t("ข่าวเก่าที่สุด (Oldest)", "Oldest Articles")}</option>
+                    <option value="popular">{t("ยอดเข้าชมสูงสุด (Most Popular)", "Most Popular")}</option>
                   </select>
                 </div>
 
@@ -249,7 +280,7 @@ export default function NewsView({ selectedNews, setSelectedNews }) {
                   <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <input
                     type="text"
-                    placeholder="พิมพ์ชื่อเรื่องข่าว หรือคีย์เวิร์ดเพื่อค้นหา..."
+                    placeholder={t("พิมพ์ชื่อเรื่องข่าว หรือคีย์เวิร์ดเพื่อค้นหา...", "Type keywords or article title to search...")}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="w-full pl-10 pr-4 py-2.5 text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all"
@@ -258,80 +289,79 @@ export default function NewsView({ selectedNews, setSelectedNews }) {
               </div>
             </div>
 
-            {
-      /* News items Grid */
-    }
+            {/* News items Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {filteredNews.map((news) => <article
-      key={news.id}
-      className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:scale-[1.02] hover:border-slate-300 transition-all duration-300 ease-out cursor-pointer flex flex-col h-full group"
-      onClick={() => handleReadNews(news)}
-    >
-                  {
-      /* Image wrapper */
-    }
-                  <div className="relative h-48 bg-slate-100 overflow-hidden shrink-0">
-                    <img
-      src={news.imageUrl}
-      alt={news.title}
-      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-      referrerPolicy="no-referrer"
-    />
-                    <div className="absolute top-4 left-4">
-                      <span className="bg-brand-primary text-white text-[10px] font-bold px-3 py-1.5 rounded-full shadow-md">
-                        {news.category}
-                      </span>
-                    </div>
-                  </div>
-
-                  {
-      /* Core info wrapper */
-    }
-                  <div className="p-6 flex flex-col justify-between flex-grow space-y-4">
-                    <div className="space-y-2">
-                      <div className="flex items-center space-x-4 text-[11px] text-slate-400 font-medium">
-                        <span className="flex items-center space-x-1">
-                          <Calendar className="w-3.5 h-3.5" />
-                          <span>{news.date}</span>
-                        </span>
-                        <span className="flex items-center space-x-1">
-                          <Eye className="w-3.5 h-3.5" />
-                          <span>ชม {news.views} ครั้ง</span>
+              {filteredNews.map((news) => {
+                const translated = getNewsTranslated(news);
+                return (
+                  <article
+                    key={news.id}
+                    className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:scale-[1.02] hover:border-slate-300 transition-all duration-300 ease-out cursor-pointer flex flex-col h-full group"
+                    onClick={() => handleReadNews(news)}
+                  >
+                    {/* Image wrapper */}
+                    <div className="relative h-48 bg-slate-100 overflow-hidden shrink-0">
+                      <img
+                        src={news.imageUrl}
+                        alt={translated.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        referrerPolicy="no-referrer"
+                      />
+                      <div className="absolute top-4 left-4">
+                        <span className="bg-brand-primary text-white text-[10px] font-bold px-3 py-1.5 rounded-full shadow-md">
+                          {getCategoryLabel(news.category)}
                         </span>
                       </div>
-                      <h3 className="text-sm md:text-base font-bold text-slate-900 group-hover:text-brand-primary transition-colors line-clamp-2 leading-snug">
-                        {news.title}
-                      </h3>
-                      <p className="text-slate-500 text-xs line-clamp-2 leading-relaxed">
-                        {news.excerpt}
-                      </p>
                     </div>
 
-                    <div className="pt-4 border-t border-slate-50 flex items-center text-xs font-bold text-brand-primary group-hover:text-brand-accent transition-colors">
-                      <span>อ่านรายละเอียดข่าวเพิ่มเติม</span>
-                      <ChevronRight className="w-4 h-4 ml-0.5 transform group-hover:translate-x-0.5 transition-transform" />
+                    {/* Core info wrapper */}
+                    <div className="p-6 flex flex-col justify-between flex-grow space-y-4">
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-4 text-[11px] text-slate-400 font-medium">
+                          <span className="flex items-center space-x-1">
+                            <Calendar className="w-3.5 h-3.5" />
+                            <span>{news.date}</span>
+                          </span>
+                          <span className="flex items-center space-x-1">
+                            <Eye className="w-3.5 h-3.5" />
+                            <span>{t("ชม", "Views:")} {news.views} {t("ครั้ง", "times")}</span>
+                          </span>
+                        </div>
+                        <h3 className="text-sm md:text-base font-bold text-slate-900 group-hover:text-brand-primary transition-colors line-clamp-2 leading-snug">
+                          {translated.title}
+                        </h3>
+                        <p className="text-slate-500 text-xs line-clamp-2 leading-relaxed">
+                          {translated.excerpt}
+                        </p>
+                      </div>
+
+                      <div className="pt-4 border-t border-slate-50 flex items-center text-xs font-bold text-brand-primary group-hover:text-brand-accent transition-colors">
+                        <span>{t("อ่านรายละเอียดข่าวเพิ่มเติม", "Read Full Article")}</span>
+                        <ChevronRight className="w-4 h-4 ml-0.5 transform group-hover:translate-x-0.5 transition-transform" />
+                      </div>
                     </div>
-                  </div>
-                </article>)}
+                  </article>
+                );
+              })}
             </div>
 
-            {
-      /* Empty filter results */
-    }
-            {filteredNews.length === 0 && <div className="text-center py-16 bg-white rounded-2xl border border-slate-200 space-y-4">
+            {/* Empty filter results */}
+            {filteredNews.length === 0 && (
+              <div className="text-center py-16 bg-white rounded-2xl border border-slate-200 space-y-4">
                 <BookOpen className="w-12 h-12 text-slate-300 mx-auto animate-pulse" />
                 <div>
-                  <h3 className="text-base font-bold text-slate-700">ไม่พบหัวข้อข่าวสารในหมวดหมู่นี้</h3>
-                  <p className="text-slate-400 text-xs">คุณสามารถพิมพ์คำค้นหาอื่น หรือย้อนกลับไปดูข่าวสาร "ทั้งหมด"</p>
+                  <h3 className="text-base font-bold text-slate-700">{t("ไม่พบหัวข้อข่าวสารในหมวดหมู่นี้", "No news items found in this category")}</h3>
+                  <p className="text-slate-400 text-xs">{t("คุณสามารถพิมพ์คำค้นหาอื่น หรือย้อนกลับไปดูข่าวสาร \"ทั้งหมด\"", "Try adjusting your search criteria or toggling other categories.")}</p>
                 </div>
-              </div>}
+              </div>
+            )}
           </motion.div>
-  )}
+        )}
       </AnimatePresenceAndWrapper>
-    </div>;
+    </div>
+  );
 }
+
 function AnimatePresenceAndWrapper({ children }) {
-  return <div className="relative">
-      {children}
-    </div>;
+  return <div className="relative">{children}</div>;
 }

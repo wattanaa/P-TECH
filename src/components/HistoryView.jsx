@@ -8,7 +8,7 @@ import { Building2, Award, Calendar, HelpCircle, ChevronDown, ChevronUp, BookOpe
 import { useData } from "../context/DataContext";
 
 export default function HistoryView() {
-  const { collegeInfo, faqList } = useData();
+  const { collegeInfo, faqList, t, currentLang } = useData();
   const [expandedFaq, setExpandedFaq] = useState(null);
 
   const toggleFaq = (index) => {
@@ -23,13 +23,13 @@ export default function HistoryView() {
         <div className="text-center max-w-3xl mx-auto space-y-4">
           <span className="text-xs font-extrabold text-brand-primary bg-blue-50 border border-blue-200 px-3.5 py-1.5 rounded-full uppercase tracking-wider inline-flex items-center space-x-1.5">
             <Sparkles className="w-3.5 h-3.5 text-brand-primary animate-pulse" />
-            <span>ความเป็นมาและเกียรติประวัติ</span>
+            <span>{t("ความเป็นมาและเกียรติประวัติ", "History & Achievements")}</span>
           </span>
           <h1 className="text-3xl md:text-4xl font-extrabold text-brand-secondary font-display tracking-tight">
-            ประวัติความเป็นมา (College History)
+            {t("ประวัติความเป็นมา (College History)", "College History")}
           </h1>
           <p className="text-sm md:text-base text-slate-500 leading-relaxed font-medium">
-            ทำความรู้จักกับสถาบันการศึกษาวิชาชีพชั้นนำในอำเภอปทุมรัตต์ จังหวัดร้อยเอ็ด และเป้าหมายการพัฒนาความรู้สู่สากล
+            {t("ทำความรู้จักกับสถาบันการศึกษาวิชาชีพชั้นนำในอำเภอปทุมรัตต์ จังหวัดร้อยเอ็ด และเป้าหมายการพัฒนาความรู้สู่สากล", "Get to know the leading vocational education institution in Pathumrat District, Roi Et, and our global standards.")}
           </p>
         </div>
 
@@ -37,30 +37,32 @@ export default function HistoryView() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center" id="section-college-history">
           <div className="space-y-6">
             <span className="text-brand-primary font-bold text-xs uppercase tracking-widest bg-blue-50 px-3 py-1 rounded-full">
-              จุดเริ่มต้นของเรา
+              {t("จุดเริ่มต้นของเรา", "Our Foundation")}
             </span>
             <h2 className="text-2xl md:text-3xl font-extrabold text-brand-secondary tracking-tight">
-              {collegeInfo.historyTitle || "วิทยาลัยเทคโนโลยีปทุมรัตต์"}
+              {currentLang === "th" ? (collegeInfo.historyTitle || "วิทยาลัยเทคโนโลยีปทุมรัตต์") : "Pathumrat Technology College"}
             </h2>
             <p className="text-slate-600 text-sm md:text-base leading-relaxed">
-              {collegeInfo.historyText1 || `วิทยาลัยเทคโนโลยีปทุมรัตต์ ได้รับการจัดตั้งขึ้นเมื่อปีพุทธศักราช ${collegeInfo.foundedYear} โดยผู้บริหารผู้มีวิสัยทัศน์กว้างไกลทางด้านการศึกษาและการพัฒนาสายอาชีพในภาคตะวันออกเฉียงเหนือ มุ่งเน้นเติมเต็มความต้องการกำลังพลทักษะสูงในเขตอำเภอปทุมรัตต์ และจังหวัดร้อยเอ็ด`}
+              {currentLang === "th" ? (collegeInfo.historyText1 || `วิทยาลัยเทคโนโลยีปทุมรัตต์ ได้รับการจัดตั้งขึ้นเมื่อปีพุทธศักราช ${collegeInfo.foundedYear} โดยผู้บริหารผู้มีวิสัยทัศน์กว้างไกลทางด้านการศึกษาและการพัฒนาสายอาชีพในภาคตะวันออกเฉียงเหนือ มุ่งเน้นเติมเต็มความต้องการกำลังพลทักษะสูงในเขตอำเภอปทุมรัตต์ และจังหวัดร้อยเอ็ด`) : `Pathumrat Technology College was established in 2005 (B.E. ${parseInt(collegeInfo.foundedYear) || 2548}) by visionary educators aiming to elevate professional vocational training in Northeast Thailand.`}
             </p>
             <p className="text-slate-600 text-sm md:text-base leading-relaxed">
-              {collegeInfo.historyText2 || "ด้วยนวัตกรรมการสอนแบบเน้นงานปฏิบัติจริง ร่วมมืออย่างใกล้ชิดกับสถานประกอบการอุตสาหกรรม ศูนย์บริการรถยนต์สมัยใหม่ และสถาบันการเงินการคลัง ทำให้นักเรียนและนักศึกษาที่จบจากวิทยาลัยเทคโนโลยีปทุมรัตต์เป็นที่ประจักษ์ในตลาดแรงงานว่าเป็นผู้ที่มีทักษะฝีมือยอดเยี่ยม มีความอ่อนน้อมถ่อมตน มีวินัย และพร้อมปฏิบัติหน้าที่ในอุตสาหกรรมยุคดิจิทัลได้อย่างมืออาชีพ"}
+              {currentLang === "th" ? (collegeInfo.historyText2 || "ด้วยนวัตกรรมการสอนแบบเน้นงานปฏิบัติจริง ร่วมมืออย่างใกล้ชิดกับสถานประกอบการอุตสาหกรรม ศูนย์บริการรถยนต์สมัยใหม่ และสถาบันการเงินการคลัง ทำให้นักเรียนและนักศึกษาที่จบจากวิทยาลัยเทคโนโลยีปทุมรัตต์เป็นที่ประจักษ์ในตลาดแรงงานว่าเป็นผู้ที่มีทักษะฝีมือยอดเยี่ยม มีความอ่อนน้อมถ่อมตน มีวินัย และพร้อมปฏิบัติหน้าที่ในอุตสาหกรรมยุคดิจิทัลได้อย่างมืออาชีพ") : "Through our hands-on training style and strict discipline guidelines, PTC graduates are highly recognized for their exceptional skills, politeness, and immediate readiness for the digital economy."}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 text-slate-500 pt-2">
               <div className="flex items-center space-x-2.5 bg-white border border-slate-200 rounded-2xl p-4 shadow-xs">
                 <Calendar className="w-5 h-5 text-brand-primary shrink-0" />
                 <div>
-                  <p className="text-[10px] text-slate-400 font-bold uppercase">ก่อตั้งตั้งแต่ปี</p>
-                  <span className="text-xs font-bold text-slate-700">พ.ศ. {collegeInfo.foundedYear} (มากกว่า {new Date().getFullYear() + 543 - parseInt(collegeInfo.foundedYear)} ปี)</span>
+                  <p className="text-[10px] text-slate-400 font-bold uppercase">{t("ก่อตั้งตั้งแต่ปี", "Established Since")}</p>
+                  <span className="text-xs font-bold text-slate-700">
+                    {currentLang === "th" ? `พ.ศ. ${collegeInfo.foundedYear} (มากกว่า ${new Date().getFullYear() + 543 - parseInt(collegeInfo.foundedYear)} ปี)` : `${collegeInfo.foundedYear} (${new Date().getFullYear() - parseInt(collegeInfo.foundedYear)} Years of Excellence)`}
+                  </span>
                 </div>
               </div>
               <div className="flex items-center space-x-2.5 bg-white border border-slate-200 rounded-2xl p-4 shadow-xs">
                 <Building2 className="w-5 h-5 text-emerald-600 shrink-0" />
                 <div>
-                  <p className="text-[10px] text-slate-400 font-bold uppercase">สถานศึกษามาตรฐาน</p>
-                  <span className="text-xs font-bold text-slate-700">รับรองโดยกระทรวงศึกษาธิการ</span>
+                  <p className="text-[10px] text-slate-400 font-bold uppercase">{t("สถานศึกษามาตรฐาน", "Standardized Institute")}</p>
+                  <span className="text-xs font-bold text-slate-700">{t("รับรองโดยกระทรวงศึกษาธิการ", "Accredited by Ministry of Education")}</span>
                 </div>
               </div>
             </div>
@@ -70,13 +72,13 @@ export default function HistoryView() {
           <div className="relative rounded-3xl overflow-hidden h-72 md:h-96 shadow-lg border border-slate-200" id="visual-about-banner">
             <img
               src={collegeInfo.historyImage || "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&auto=format&fit=crop"}
-              alt={collegeInfo.historyTitle || "วิทยาลัยเทคโนโลยีปทุมรัตต์"}
+              alt={currentLang === "th" ? (collegeInfo.historyTitle || "วิทยาลัยเทคโนโลยีปทุมรัตต์") : "Pathumrat Technology College"}
               className="w-full h-full object-cover"
               referrerPolicy="no-referrer"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-transparent to-transparent flex items-end p-6 md:p-8">
               <p className="text-white font-bold text-base md:text-lg">
-                "{collegeInfo.philosophy || "ทักษะเยี่ยม เปี่ยมคุณธรรม เลิศล้ำเทคโนโลยี"}"
+                "{currentLang === "th" ? (collegeInfo.philosophy || "ทักษะเยี่ยม เปี่ยมคุณธรรม เลิศล้ำเทคโนโลยี") : "Excellent Skills, Rich Morals, Supreme Technology"}"
               </p>
             </div>
           </div>
@@ -90,33 +92,33 @@ export default function HistoryView() {
             <div className="space-y-2 md:border-r border-slate-800 md:pr-8">
               <span className="text-amber-400 font-mono text-xs uppercase tracking-wider font-extrabold flex items-center space-x-1">
                 <BookOpen className="w-4 h-4 shrink-0" />
-                <span>ปรัชญาวิทยาลัย</span>
+                <span>{t("ปรัชญาวิทยาลัย", "Philosophy")}</span>
               </span>
               <h3 className="text-lg font-bold text-white">Philosophy</h3>
               <p className="text-sm text-slate-300 leading-relaxed pt-2">
-                "{collegeInfo.philosophy || "ทักษะเยี่ยม เปี่ยมคุณธรรม เลิศล้ำเทคโนโลยี"}"
+                "{currentLang === "th" ? (collegeInfo.philosophy || "ทักษะเยี่ยม เปี่ยมคุณธรรม เลิศล้ำเทคโนโลยี") : "Excellent Skills, Rich Morals, Supreme Technology"}"
               </p>
             </div>
 
             <div className="space-y-2 md:border-r border-slate-800 md:px-8">
               <span className="text-cyan-400 font-mono text-xs uppercase tracking-wider font-extrabold flex items-center space-x-1">
                 <Sparkles className="w-4 h-4 shrink-0" />
-                <span>วิสัยทัศน์</span>
+                <span>{t("วิสัยทัศน์", "Vision")}</span>
               </span>
               <h3 className="text-lg font-bold text-white">Vision</h3>
               <p className="text-sm text-slate-300 leading-relaxed pt-2">
-                "{collegeInfo.vision || "มุ่งเน้นสร้างนวัตกรและนักปฏิบัติมืออาชีพที่ตรงกับความต้องการของอุตสาหกรรมในยุคดิจิทัล"}"
+                "{currentLang === "th" ? (collegeInfo.vision || "มุ่งเน้นสร้างนวัตกรและนักปฏิบัติมืออาชีพที่ตรงกับความต้องการของอุตสาหกรรมในยุคดิจิทัล") : "Deliver high-quality vocational education up to international standards, producing ethical and job-ready graduates."}"
               </p>
             </div>
 
             <div className="space-y-2 md:pl-8">
               <span className="text-emerald-400 font-mono text-xs uppercase tracking-wider font-extrabold flex items-center space-x-1">
                 <Award className="w-4 h-4 shrink-0" />
-                <span>ค่านิยมหลัก</span>
+                <span>{t("ค่านิยมหลัก", "Core Values")}</span>
               </span>
               <h3 className="text-lg font-bold text-white">Core Values</h3>
               <p className="text-sm text-slate-300 leading-relaxed pt-2">
-                {collegeInfo.coreValues || "ซื่อสัตย์ มีระเบียบวินัย ใฝ่รู้คู่คุณธรรม มุ่งเน้นการลงมือปฏิบัติจริงและการแก้ปัญหาอย่างสร้างสรรค์เพื่อความสำเร็จร่วมกัน"}
+                {currentLang === "th" ? (collegeInfo.coreValues || "ซื่อสัตย์ มีระเบียบวินัย ใฝ่รู้คู่คุณธรรม มุ่งเน้นการลงมือปฏิบัติจริงและการแก้ปัญหาอย่างสร้างสรรค์เพื่อความสำเร็จร่วมกัน") : "Honesty, strict discipline, active learning, professional practice, and shared creative success."}
               </p>
             </div>
           </div>
@@ -126,13 +128,13 @@ export default function HistoryView() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 pt-8" id="section-faq">
           <div className="space-y-4 lg:col-span-1">
             <span className="text-brand-primary font-bold text-xs uppercase tracking-widest bg-blue-50 px-3 py-1 rounded-full">
-              ถาม-ตอบ คลายข้อสงสัย
+              {t("ถาม-ตอบ คลายข้อสงสัย", "Q&A & FAQ")}
             </span>
             <h2 className="text-2xl md:text-3xl font-extrabold text-brand-secondary tracking-tight leading-tight">
-              คำถามที่พบบ่อย (FAQ)
+              {t("คำถามที่พบบ่อย (FAQ)", "Frequently Asked Questions")}
             </h2>
             <p className="text-slate-500 text-sm leading-relaxed">
-              ไขข้อข้องใจเกี่ยวกับสิทธิ์การกู้ยืม ทุนการศึกษา รายละเอียดโควตา สิทธิพิเศษ และการสมัครเข้าเรียน สำหรับน้องๆ และผู้ปกครองในพื้นที่ปทุมรัตต์
+              {t("ไขข้อข้องใจเกี่ยวกับสิทธิ์การกู้ยืม ทุนการศึกษา รายละเอียดโควตา สิทธิพิเศษ และการสมัครเข้าเรียน สำหรับน้องๆ และผู้ปกครองในพื้นที่ปทุมรัตต์", "Find quick answers regarding student loans (student fund), scholarship quotas, privileges, and admissions for students and parents.")}
             </p>
           </div>
 
@@ -140,6 +142,18 @@ export default function HistoryView() {
           <div className="lg:col-span-2 space-y-4">
             {faqList.map((faq, index) => {
               const isExpanded = expandedFaq === index;
+              const qText = currentLang === "th" ? faq.question : (
+                faq.question.includes("ค่าเทอม") || faq.question.includes("ค่าเรียน") ? "How much is the tuition fee and can I pay in installments?" :
+                faq.question.includes("กู้") || faq.question.includes("กยศ") ? "Can I apply for the student loans (student fund)?" :
+                faq.question.includes("หอพัก") ? "Is there a college dormitory or residential halls available?" :
+                faq.question.includes("ชุดนักเรียน") || faq.question.includes("อุปกรณ์") ? "Do I get free uniforms, materials, or textbooks?" : faq.question
+              );
+              const aText = currentLang === "th" ? faq.answer : (
+                faq.answer.includes("ผ่อนชำระ") ? "Tuition fees are highly affordable and we provide interest-free monthly installment programs." :
+                faq.answer.includes("กยศ") ? "Yes! We support the national student loan fund (กยศ.) with staff assisting the whole process." :
+                faq.answer.includes("แนะนำหอพัก") ? "We provide a network of partner dormitories adjacent to campus with discount rates for students." :
+                faq.answer.includes("สนับสนุน") ? "Yes, students receive textbook grants, uniform assistance, and professional training equipment." : faq.answer
+              );
               return (
                 <div
                   key={index}
@@ -151,7 +165,7 @@ export default function HistoryView() {
                   >
                     <span className="font-bold text-slate-800 text-sm md:text-base flex items-start space-x-2">
                       <HelpCircle className="w-5 h-5 text-brand-primary shrink-0 mt-0.5" />
-                      <span>{faq.question}</span>
+                      <span>{qText}</span>
                     </span>
                     {isExpanded ? (
                       <ChevronUp className="w-5 h-5 text-slate-400 shrink-0 ml-2" />
@@ -169,7 +183,7 @@ export default function HistoryView() {
                         transition={{ duration: 0.25 }}
                       >
                         <div className="px-5 pb-5 pt-1 text-xs md:text-sm text-slate-600 leading-relaxed border-t border-slate-50">
-                          {faq.answer}
+                          {aText}
                         </div>
                       </motion.div>
                     )}

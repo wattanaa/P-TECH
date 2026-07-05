@@ -6,8 +6,9 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { useData } from "../context/DataContext";
 import { Mail, Phone, MapPin, Clock, Send, CheckCircle2, AlertCircle } from "lucide-react";
+
 export default function ContactView() {
-  const { collegeInfo, addContactMessage } = useData();
+  const { collegeInfo, addContactMessage, t, currentLang } = useData();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -16,43 +17,44 @@ export default function ContactView() {
   });
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+
   const handleSubmit = (e) => {
     e.preventDefault();
     setErrorMsg("");
     if (!formData.name || !formData.email || !formData.subject || !formData.message) {
-      setErrorMsg("\u0E01\u0E23\u0E38\u0E13\u0E32\u0E01\u0E23\u0E2D\u0E01\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25\u0E43\u0E2B\u0E49\u0E04\u0E23\u0E1A\u0E16\u0E49\u0E27\u0E19\u0E17\u0E38\u0E01\u0E0A\u0E48\u0E2D\u0E07");
+      setErrorMsg(t("กรุณากรอกข้อมูลให้ครบถ้วนทุกช่อง", "Please fill in all the fields in the form"));
       return;
     }
     addContactMessage(formData);
     setIsSubmitted(true);
     setFormData({ name: "", email: "", subject: "", message: "" });
   };
-  return <div className="bg-slate-50/50 min-h-screen py-12 md:py-20 font-sans" id="contact-view-page">
+
+  return (
+    <div className="bg-slate-50/50 min-h-screen py-12 md:py-20 font-sans" id="contact-view-page">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-        {
-    /* Intro Header */
-  }
+        {/* Intro Header */}
         <div className="text-center max-w-3xl mx-auto space-y-4">
           <span className="text-xs font-extrabold text-brand-primary bg-blue-50 border border-blue-200 px-3.5 py-1.5 rounded-full uppercase tracking-wider">
-            ติดต่อสอบถามประสานงาน
+            {t("ติดต่อสอบถามประสานงาน", "Enquiries & Admissions Support")}
           </span>
           <h1 className="text-3xl md:text-4xl font-extrabold text-brand-secondary font-display tracking-tight">
-            ติดต่อเรา (Contact Us)
+            {t("ติดต่อเรา (Contact Us)", "Contact Us")}
           </h1>
           <p className="text-sm md:text-base text-slate-500 leading-relaxed font-medium">
-            หากคุณมีข้อสงสัยเกี่ยวกับหลักสูตรการเรียน การสมัครเรียนออนไลน์ ทุนการศึกษา 
-            หรือติดต่อขอความอนุเคราะห์จากวิทยาลัย สามารถส่งข้อความหาเราได้ตลอดเวลา
+            {t(
+              "หากคุณมีข้อสงสัยเกี่ยวกับหลักสูตรการเรียน การสมัครเรียนออนไลน์ ทุนการศึกษา หรือติดต่อขอความอนุเคราะห์จากวิทยาลัย สามารถส่งข้อความหาเราได้ตลอดเวลา",
+              "Have questions regarding our academic curricula, digital application processes, special quota grants, or scholarships? Reach out to our registrars anytime."
+            )}
           </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {
-    /* Left Side: Contact Information Cards */
-  }
+          {/* Left Side: Contact Information Cards */}
           <div className="lg:col-span-5 space-y-6">
             <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200 shadow-sm space-y-6">
               <h2 className="text-base font-extrabold text-slate-800 border-b border-slate-100 pb-3">
-                ข้อมูลการติดต่ออย่างเป็นทางการ
+                {t("ข้อมูลการติดต่ออย่างเป็นทางการ", "Official Contact Channels")}
               </h2>
 
               <div className="space-y-5">
@@ -61,8 +63,10 @@ export default function ContactView() {
                     <MapPin className="w-5 h-5" />
                   </div>
                   <div>
-                    <p className="font-extrabold text-slate-800">ที่ตั้งวิทยาลัย</p>
-                    <p className="mt-1 leading-relaxed">{collegeInfo.address}</p>
+                    <p className="font-extrabold text-slate-800">{t("ที่ตั้งวิทยาลัย", "Campus Location")}</p>
+                    <p className="mt-1 leading-relaxed">
+                      {currentLang === "th" ? collegeInfo.address : "Pathumrat District, Roi Et Province, Thailand 45190"}
+                    </p>
                   </div>
                 </div>
 
@@ -71,9 +75,9 @@ export default function ContactView() {
                     <Phone className="w-5 h-5" />
                   </div>
                   <div>
-                    <p className="font-extrabold text-slate-800">เบอร์โทรศัพท์ติดต่อหลัก</p>
-                    <p className="mt-1 font-semibold">{collegeInfo.phone} (สำนักงาน)</p>
-                    <p className="text-slate-500">{collegeInfo.mobile} (ฝ่ายรับสมัครนักเรียนใหม่)</p>
+                    <p className="font-extrabold text-slate-800">{t("เบอร์โทรศัพท์ติดต่อหลัก", "Direct Hotlines")}</p>
+                    <p className="mt-1 font-semibold">{collegeInfo.phone} {t("(สำนักงาน)", "(Office)")}</p>
+                    <p className="text-slate-500">{collegeInfo.mobile} {t("(ฝ่ายรับสมัครนักเรียนใหม่)", "(Admissions & Quota Registration Office)")}</p>
                   </div>
                 </div>
 
@@ -82,7 +86,7 @@ export default function ContactView() {
                     <Mail className="w-5 h-5" />
                   </div>
                   <div>
-                    <p className="font-extrabold text-slate-800">อีเมลทางการ</p>
+                    <p className="font-extrabold text-slate-800">{t("อีเมลทางการ", "Official Academic Email")}</p>
                     <p className="mt-1 underline">{collegeInfo.email}</p>
                   </div>
                 </div>
@@ -92,22 +96,20 @@ export default function ContactView() {
                     <Clock className="w-5 h-5" />
                   </div>
                   <div>
-                    <p className="font-extrabold text-slate-800">เวลาทำการของวิทยาลัย</p>
-                    <p className="mt-1">วันจันทร์ – วันศุกร์: 08:30 น. – 16:30 น.</p>
-                    <p className="text-slate-400">หยุดวันเสาร์-อาทิตย์ และวันหยุดนักขัตฤกษ์</p>
+                    <p className="font-extrabold text-slate-800">{t("เวลาทำการของวิทยาลัย", "Office Business Hours")}</p>
+                    <p className="mt-1">{t("วันจันทร์ – วันศุกร์: 08:30 น. – 16:30 น.", "Monday – Friday: 08:30 AM – 04:30 PM")}</p>
+                    <p className="text-slate-400">{t("หยุดวันเสาร์-อาทิตย์ และวันหยุดนักขัตฤกษ์", "Closed on Saturdays, Sundays, and public holidays.")}</p>
                   </div>
                 </div>
               </div>
             </div>
 
-            {
-    /* Immersive Mock Google Maps card element */
-  }
+            {/* GPS Map Card */}
             <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-4 relative overflow-hidden font-sans" id="gps-map-card">
               <div className="flex justify-between items-center border-b border-slate-100 pb-3">
                 <div className="space-y-1">
-                  <h3 className="text-sm font-extrabold text-slate-800">แผนที่การเดินทาง (GPS Map)</h3>
-                  <p className="text-[11px] text-slate-400">ค้นหาพิกัดและนำทางมายังวิทยาลัยได้โดยสะดวก</p>
+                  <h3 className="text-sm font-extrabold text-slate-800">{t("แผนที่การเดินทาง (GPS Map)", "Location Coordinates (GPS Map)")}</h3>
+                  <p className="text-[11px] text-slate-400">{t("ค้นหาพิกัดและนำทางมายังวิทยาลัยได้โดยสะดวก", "Find and navigate to the campus campus with Google Maps easily.")}</p>
                 </div>
                 <div className="w-9 h-9 rounded-xl bg-amber-50 flex items-center justify-center text-amber-500 shrink-0">
                   <MapPin className="w-5 h-5 animate-bounce" />
@@ -139,7 +141,7 @@ export default function ContactView() {
                     <div className="w-4 h-4 bg-brand-primary rounded-full border-2 border-white flex items-center justify-center shadow-lg animate-ping absolute" />
                     <div className="w-4 h-4 bg-brand-primary rounded-full border-2 border-white flex items-center justify-center shadow-lg relative z-10" />
                     <span className="bg-slate-900 border border-slate-700 text-[9px] font-bold text-white px-1.5 py-0.5 rounded-md mt-1 shadow-lg shrink-0 whitespace-nowrap">
-                      {collegeInfo.name}
+                      {t(collegeInfo.name, "Pathumrat Technology College")}
                     </span>
                   </div>
                 </div>
@@ -153,117 +155,124 @@ export default function ContactView() {
                   className="w-full text-center bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-bold py-2.5 px-4 rounded-xl border border-slate-200 transition-all flex items-center justify-center space-x-2"
                 >
                   <MapPin className="w-4 h-4 text-slate-500 shrink-0" />
-                  <span>เปิดแผนที่นำทาง (Google Maps App)</span>
+                  <span>{t("เปิดแผนที่นำทาง (Google Maps App)", "Open in Google Maps App")}</span>
                 </a>
               </div>
             </div>
           </div>
 
-          {
-    /* Right Side: High Fidelity Form */
-  }
+          {/* Right Side: High Fidelity Form */}
           <div className="lg:col-span-7">
             <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200 shadow-sm space-y-6">
               <div className="space-y-1">
                 <h2 className="text-base font-extrabold text-slate-800">
-                  แบบฟอร์มส่งข้อความติดต่อกลับ
+                  {t("แบบฟอร์มส่งข้อความติดต่อกลับ", "Inquiry Form")}
                 </h2>
                 <p className="text-xs text-slate-400">
-                  กรอกรายละเอียดของคุณเพื่อให้นายทะเบียนของวิทยาลัยตอบข้อสงสัยกลับไปยังคุณ
+                  {t("กรอกรายละเอียดของคุณเพื่อให้นายทะเบียนของวิทยาลัยตอบข้อสงสัยกลับไปยังคุณ", "Fill out the fields below so our registrar desk can respond to you.")}
                 </p>
               </div>
 
               <AnimatePresence mode="wait">
-                {isSubmitted ? <motion.div
-    initial={{ scale: 0.95, opacity: 0 }}
-    animate={{ scale: 1, opacity: 1 }}
-    exit={{ scale: 0.95, opacity: 0 }}
-    className="bg-emerald-50 border border-emerald-200 p-6 rounded-2xl text-center space-y-4"
-  >
+                {isSubmitted ? (
+                  <motion.div
+                    initial={{ scale: 0.95, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.95, opacity: 0 }}
+                    className="bg-emerald-50 border border-emerald-200 p-6 rounded-2xl text-center space-y-4"
+                  >
                     <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto" />
                     <div className="space-y-1.5">
                       <h3 className="text-sm font-extrabold text-emerald-900">
-                        ส่งข้อความติดต่อกลับสำเร็จแล้ว!
+                        {t("ส่งข้อความติดต่อกลับสำเร็จแล้ว!", "Message Sent Successfully!")}
                       </h3>
                       <p className="text-xs text-emerald-700 leading-relaxed max-w-md mx-auto">
-                        ขอบคุณที่ส่งข้อความหาเรา เจ้าหน้าที่กลุ่มงานทะเบียนและประชาสัมพันธ์ของ
-                        {collegeInfo.name} จะตรวจสอบข้อร้องเรียน/ข้อมูลของคุณ และติดต่อกลับทางอีเมลในทันที
+                        {t(
+                          `ขอบคุณที่ส่งข้อความหาเรา เจ้าหน้าที่กลุ่มงานทะเบียนและประชาสัมพันธ์ของ ${collegeInfo.name} จะตรวจสอบข้อร้องเรียน/ข้อมูลของคุณ และติดต่อกลับทางอีเมลในทันที`,
+                          `Thank you for contacting us. The registrar office of Pathumrat Technology College will review your message and reach back to you via your email shortly.`
+                        )}
                       </p>
                     </div>
                     <button
-    onClick={() => setIsSubmitted(false)}
-    className="text-xs font-bold text-brand-primary border border-blue-200 bg-white hover:bg-blue-50 px-5 py-2 rounded-xl transition-all shadow-sm"
-  >
-                      ส่งข้อความใหม่อีกครั้ง
+                      onClick={() => setIsSubmitted(false)}
+                      className="text-xs font-bold text-brand-primary border border-blue-200 bg-white hover:bg-blue-50 px-5 py-2 rounded-xl transition-all shadow-sm"
+                    >
+                      {t("ส่งข้อความใหม่อีกครั้ง", "Send Another Message")}
                     </button>
-                  </motion.div> : <form onSubmit={handleSubmit} className="space-y-4 text-xs">
-                    {errorMsg && <div className="bg-rose-50 border border-rose-200 text-rose-700 p-3 rounded-xl flex items-center space-x-2 font-bold">
+                  </motion.div>
+                ) : (
+                  <form onSubmit={handleSubmit} className="space-y-4 text-xs">
+                    {errorMsg && (
+                      <div className="bg-rose-50 border border-rose-200 text-rose-700 p-3 rounded-xl flex items-center space-x-2 font-bold">
                         <AlertCircle className="w-4 h-4 shrink-0" />
                         <span>{errorMsg}</span>
-                      </div>}
+                      </div>
+                    )}
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-1">
-                        <label className="font-bold text-slate-500">ชื่อ-นามสกุล ของคุณ</label>
+                        <label className="font-bold text-slate-500">{t("ชื่อ-นามสกุล ของคุณ", "Your Full Name")}</label>
                         <input
-    type="text"
-    required
-    value={formData.name}
-    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-    className="w-full p-3 border border-slate-300 rounded-xl bg-slate-50 focus:outline-none focus:ring-1 focus:ring-blue-500"
-    placeholder="เช่น นายปัญญา ใจรักเรียน"
-  />
+                          type="text"
+                          required
+                          value={formData.name}
+                          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                          className="w-full p-3 border border-slate-300 rounded-xl bg-slate-50 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                          placeholder={t("เช่น นายปัญญา ใจรักเรียน", "e.g., John Doe")}
+                        />
                       </div>
 
                       <div className="space-y-1">
-                        <label className="font-bold text-slate-500">อีเมลติดต่อกลับ</label>
+                        <label className="font-bold text-slate-500">{t("อีเมลติดต่อกลับ", "Return Email Address")}</label>
                         <input
-    type="email"
-    required
-    value={formData.email}
-    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-    className="w-full p-3 border border-slate-300 rounded-xl bg-slate-50 focus:outline-none focus:ring-1 focus:ring-blue-500"
-    placeholder="เช่น panya.jai@gmail.com"
-  />
+                          type="email"
+                          required
+                          value={formData.email}
+                          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                          className="w-full p-3 border border-slate-300 rounded-xl bg-slate-50 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                          placeholder="e.g., john.doe@example.com"
+                        />
                       </div>
                     </div>
 
                     <div className="space-y-1">
-                      <label className="font-bold text-slate-500">เรื่องที่ต้องการสอบถาม</label>
+                      <label className="font-bold text-slate-500">{t("เรื่องที่ต้องการสอบถาม", "Message Topic / Subject")}</label>
                       <input
-    type="text"
-    required
-    value={formData.subject}
-    onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-    className="w-full p-3 border border-slate-300 rounded-xl bg-slate-50 focus:outline-none focus:ring-1 focus:ring-blue-500"
-    placeholder="เช่น สอบถามรายละเอียดเอกสารการขอทุนเรียนฟรี ปวช."
-  />
+                        type="text"
+                        required
+                        value={formData.subject}
+                        onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                        className="w-full p-3 border border-slate-300 rounded-xl bg-slate-50 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        placeholder={t("เช่น สอบถามรายละเอียดเอกสารการขอทุนเรียนฟรี ปวช.", "e.g., Questions about scholarship requirements")}
+                      />
                     </div>
 
                     <div className="space-y-1">
-                      <label className="font-bold text-slate-500">ข้อความรายละเอียดเพิ่มเติม</label>
+                      <label className="font-bold text-slate-500">{t("ข้อความรายละเอียดเพิ่มเติม", "Inquiry Message Description")}</label>
                       <textarea
-    required
-    rows={5}
-    value={formData.message}
-    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-    className="w-full p-3 border border-slate-300 rounded-xl bg-slate-50 focus:outline-none focus:ring-1 focus:ring-blue-500 leading-relaxed"
-    placeholder="พิมพ์ข้อคำถามหรือรายละเอียดที่คุณต้องการแจ้งให้วิทยาลัยรับทราบที่นี่..."
-  />
+                        required
+                        rows={5}
+                        value={formData.message}
+                        onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                        className="w-full p-3 border border-slate-300 rounded-xl bg-slate-50 focus:outline-none focus:ring-1 focus:ring-blue-500 leading-relaxed"
+                        placeholder={t("พิมพ์ข้อคำถามหรือรายละเอียดที่คุณต้องการแจ้งให้วิทยาลัยรับทราบที่นี่...", "Type your comments, queries or details you would like to submit to the college here...")}
+                      />
                     </div>
 
                     <button
-    type="submit"
-    className="w-full bg-brand-primary hover:bg-blue-700 text-white p-3.5 rounded-xl font-bold transition-all shadow-md flex items-center justify-center space-x-2"
-  >
+                      type="submit"
+                      className="w-full bg-brand-primary hover:bg-blue-700 text-white p-3.5 rounded-xl font-bold transition-all shadow-md flex items-center justify-center space-x-2"
+                    >
                       <Send className="w-4 h-4" />
-                      <span>ส่งข้อความหาวิทยาลัย</span>
+                      <span>{t("ส่งข้อความหาวิทยาลัย", "Send Inquiry")}</span>
                     </button>
-                  </form>}
+                  </form>
+                )}
               </AnimatePresence>
             </div>
           </div>
         </div>
       </div>
-    </div>;
+    </div>
+  );
 }

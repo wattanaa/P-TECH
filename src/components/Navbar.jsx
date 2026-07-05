@@ -9,16 +9,17 @@ import { useData } from "../context/DataContext";
 import CollegeLogo from "./CollegeLogo";
 
 export default function Navbar({ activeTab, setActiveTab }) {
-  const { collegeInfo } = useData();
+  const { collegeInfo, currentLang, changeLanguage, t } = useData();
   const [isOpen, setIsOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileAboutOpen, setIsMobileAboutOpen] = useState(false);
 
   const menuItems = [
-    { id: "home", label: "หน้าแรก", targetTab: "home" },
-    { id: "curriculum", label: "หลักสูตรที่เปิดสอน", targetTab: "curriculum" },
-    { id: "news", label: "ข่าวสารและกิจกรรม", targetTab: "news" },
-    { id: "contact", label: "ติดต่อเรา", targetTab: "contact" }
+    { id: "home", label: t("หน้าแรก", "Home"), targetTab: "home" },
+    { id: "curriculum", label: t("หลักสูตรที่เปิดสอน", "Curriculum"), targetTab: "curriculum" },
+    { id: "news", label: t("ข่าวสารและกิจกรรม", "News & Events"), targetTab: "news" },
+    { id: "calendar", label: t("ปฏิทินการศึกษา", "Academic Calendar"), targetTab: "calendar" },
+    { id: "contact", label: t("ติดต่อเรา", "Contact Us"), targetTab: "contact" }
   ];
 
   const handleNavClick = (tabId) => {
@@ -36,18 +37,18 @@ export default function Navbar({ activeTab, setActiveTab }) {
           <div className="flex items-center space-x-4">
             <span className="flex items-center space-x-1">
               <Phone className="w-3.5 h-3.5 text-cyan-400" />
-              <span>ติดต่อฝ่ายรับสมัคร: {collegeInfo.phone}</span>
+              <span>{t("ติดต่อฝ่ายรับสมัคร: ", "Admission Hotline: ")}{collegeInfo.phone}</span>
             </span>
             <span className="flex items-center space-x-1">
               <MapPin className="w-3.5 h-3.5 text-cyan-400" />
-              <span>อ.ปทุมรัตต์ จ.ร้อยเอ็ด</span>
+              <span>{t("อ.ปทุมรัตต์ จ.ร้อยเอ็ด", "Pathumrat, Roi Et")}</span>
             </span>
           </div>
           <div className="flex items-center space-x-2">
             <span className="bg-cyan-500/20 border border-cyan-400/30 text-cyan-300 px-2.5 py-0.5 rounded text-[10px] font-medium tracking-wide animate-pulse">
-              เปิดรับสมัครปี 2570
+              {t("เปิดรับสมัครปี 2570", "Admission 2027 Open")}
             </span>
-            <span className="text-slate-300">ปวช. - ปวส. เรียนต่อสายอาชีพอนาคตไกล</span>
+            <span className="text-slate-300">{t("ปวช. - ปวส. เรียนต่อสายอาชีพอนาคตไกล", "Vocational & High-Vocational Degrees")}</span>
           </div>
         </div>
       </div>
@@ -65,10 +66,10 @@ export default function Navbar({ activeTab, setActiveTab }) {
             <CollegeLogo size={48} className="group-hover:scale-105 transition-transform duration-200 shrink-0" />
             <div>
               <h1 className="text-base md:text-lg font-bold tracking-tight text-brand-secondary leading-tight">
-                {collegeInfo.name}
+                {t(collegeInfo.name, collegeInfo.englishName)}
               </h1>
               <p className="text-[9px] md:text-[10px] font-semibold text-brand-accent tracking-wide uppercase">
-                {collegeInfo.englishName}
+                {t("วิทยาลัยเทคโนโลยีปทุมรัตต์", "Pathumrat Technology College (PTC)")}
               </p>
             </div>
           </div>
@@ -87,7 +88,7 @@ export default function Navbar({ activeTab, setActiveTab }) {
               }`}
               id="nav-home"
             >
-              <span>หน้าแรก</span>
+              <span>{t("หน้าแรก", "Home")}</span>
               {activeTab === "home" && (
                 <motion.div
                   layoutId="activeTabIndicator"
@@ -138,7 +139,7 @@ export default function Navbar({ activeTab, setActiveTab }) {
                 }`}
                 id="nav-about-dropdown"
               >
-                <span>เกี่ยวกับเรา</span>
+                <span>{t("เกี่ยวกับเรา", "About Us")}</span>
                 <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isDropdownOpen ? "rotate-180" : ""}`} />
                 {(activeTab === "history" || activeTab === "personnel") && (
                   <motion.div
@@ -168,7 +169,7 @@ export default function Navbar({ activeTab, setActiveTab }) {
                       }`}
                     >
                       <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shrink-0" />
-                      <span>ประวัติความเป็นมา</span>
+                      <span>{t("ประวัติความเป็นมา", "History")}</span>
                     </button>
                     <button
                       onClick={() => {
@@ -180,11 +181,35 @@ export default function Navbar({ activeTab, setActiveTab }) {
                       }`}
                     >
                       <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shrink-0" />
-                      <span>บุคลากรสถานศึกษา</span>
+                      <span>{t("บุคลากรสถานศึกษา", "Our Personnel")}</span>
                     </button>
                   </motion.div>
                 )}
               </AnimatePresence>
+            </div>
+
+            {/* Language Switcher */}
+            <div className="flex items-center bg-slate-100 rounded-full p-0.5 border border-slate-200 ml-4 h-8 select-none">
+              <button
+                onClick={() => changeLanguage("th")}
+                className={`px-2.5 py-1 rounded-full text-[10px] font-bold transition-all h-full flex items-center cursor-pointer ${
+                  currentLang === "th"
+                    ? "bg-brand-primary text-white shadow-sm"
+                    : "text-slate-500 hover:text-slate-800"
+                }`}
+              >
+                TH
+              </button>
+              <button
+                onClick={() => changeLanguage("en")}
+                className={`px-2.5 py-1 rounded-full text-[10px] font-bold transition-all h-full flex items-center cursor-pointer ${
+                  currentLang === "en"
+                    ? "bg-brand-primary text-white shadow-sm"
+                    : "text-slate-500 hover:text-slate-800"
+                }`}
+              >
+                EN
+              </button>
             </div>
 
             <button
@@ -192,14 +217,39 @@ export default function Navbar({ activeTab, setActiveTab }) {
               className="ml-4 bg-brand-primary hover:bg-blue-700 text-white px-5 py-2 rounded-full text-xs font-bold shadow-md shadow-blue-500/10 hover:shadow-lg transition-all duration-200 cursor-pointer"
               id="cta-admission"
             >
-              สมัครเรียนออนไลน์
+              {t("สมัครเรียนออนไลน์", "Apply Online")}
             </button>
           </div>
 
           {
     /* Mobile Menu Button */
   }
-          <div className="lg:hidden">
+          {/* Mobile Menu & Switcher Area */}
+          <div className="lg:hidden flex items-center space-x-2">
+            {/* Mobile Language Switcher */}
+            <div className="flex items-center bg-slate-100 rounded-full p-0.5 border border-slate-200 h-7 select-none">
+              <button
+                onClick={() => changeLanguage("th")}
+                className={`px-2 py-0.5 rounded-full text-[9px] font-bold transition-all h-full flex items-center cursor-pointer ${
+                  currentLang === "th"
+                    ? "bg-brand-primary text-white shadow-sm"
+                    : "text-slate-500 hover:text-slate-800"
+                }`}
+              >
+                TH
+              </button>
+              <button
+                onClick={() => changeLanguage("en")}
+                className={`px-2 py-0.5 rounded-full text-[9px] font-bold transition-all h-full flex items-center cursor-pointer ${
+                  currentLang === "en"
+                    ? "bg-brand-primary text-white shadow-sm"
+                    : "text-slate-500 hover:text-slate-800"
+                }`}
+              >
+                EN
+              </button>
+            </div>
+
             <button
               onClick={() => setIsOpen(!isOpen)}
               className="p-2 rounded-lg text-slate-600 hover:text-brand-primary hover:bg-slate-50 focus:outline-none"
@@ -234,7 +284,7 @@ export default function Navbar({ activeTab, setActiveTab }) {
                   : "text-slate-600 hover:bg-slate-50 hover:text-brand-primary"
               }`}
             >
-              <span>หน้าแรก</span>
+              <span>{t("หน้าแรก", "Home")}</span>
             </button>
 
             {/* Other Mobile menu items */}
@@ -265,7 +315,7 @@ export default function Navbar({ activeTab, setActiveTab }) {
                     : "text-slate-600 hover:bg-slate-50 hover:text-brand-primary"
                 }`}
               >
-                <span>เกี่ยวกับเรา</span>
+                <span>{t("เกี่ยวกับเรา", "About Us")}</span>
                 <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isMobileAboutOpen ? "rotate-180" : ""}`} />
               </button>
 
@@ -283,7 +333,7 @@ export default function Navbar({ activeTab, setActiveTab }) {
                         activeTab === "history" ? "text-brand-primary bg-slate-50" : "text-slate-500 hover:text-brand-primary hover:bg-slate-50"
                       }`}
                     >
-                      • ประวัติความเป็นมา
+                      • {t("ประวัติความเป็นมา", "History")}
                     </button>
                     <button
                       onClick={() => handleNavClick("personnel")}
@@ -291,7 +341,7 @@ export default function Navbar({ activeTab, setActiveTab }) {
                         activeTab === "personnel" ? "text-brand-primary bg-slate-50" : "text-slate-500 hover:text-brand-primary hover:bg-slate-50"
                       }`}
                     >
-                      • บุคลากรสถานศึกษา
+                      • {t("บุคลากรสถานศึกษา", "Our Personnel")}
                     </button>
                   </motion.div>
                 )}
@@ -303,7 +353,7 @@ export default function Navbar({ activeTab, setActiveTab }) {
                 onClick={() => handleNavClick("admission")}
                 className="w-full bg-brand-primary hover:bg-blue-800 text-white text-center py-3 rounded-lg font-bold shadow-md transition-colors cursor-pointer"
               >
-                สมัครเรียนออนไลน์ทันที
+                {t("สมัครเรียนออนไลน์ทันที", "Apply Online Now")}
               </button>
             </div>
           </div>

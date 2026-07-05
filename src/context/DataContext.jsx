@@ -158,6 +158,19 @@ const getLocalOrSetDefault = (key, defaultValue) => {
 
 export const DataProvider = ({ children }) => {
   const [collegeInfo, setCollegeInfo] = useState(defaultCollegeInfo);
+  const [currentLang, setCurrentLang] = useState(() => {
+    return localStorage.getItem("ptc_lang") || "th";
+  });
+
+  const changeLanguage = (lang) => {
+    setCurrentLang(lang);
+    localStorage.setItem("ptc_lang", lang);
+  };
+
+  const t = (th, en) => {
+    return currentLang === "th" ? th : (en || th);
+  };
+
   const [majors, setMajors] = useState([]);
   const [newsData, setNewsData] = useState([]);
   const [enrolledStudents, setEnrolledStudents] = useState([]);
@@ -987,6 +1000,9 @@ export const DataProvider = ({ children }) => {
     <DataContext.Provider
       value={{
         collegeInfo,
+        currentLang,
+        changeLanguage,
+        t,
         majors,
         newsData,
         enrolledStudents,
